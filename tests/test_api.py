@@ -43,3 +43,21 @@ def test_launch_demo_run():
     data = res.json()
     assert "project_id" in data
     assert "run_id" in data
+
+
+def test_metrics_endpoint():
+    res = client.get("/api/metrics")
+    assert res.status_code == 200
+    data = res.json()
+    assert "uptime_seconds" in data
+    assert "total_requests" in data
+    assert "active_runs" in data
+    assert data["database_status"] == "online"
+
+
+def test_trace_id_propagation():
+    custom_trace = "test-custom-trace-id-12345"
+    res = client.get("/api/health", headers={"X-Trace-ID": custom_trace})
+    assert res.status_code == 200
+    assert res.headers.get("X-Trace-ID") == custom_trace
+

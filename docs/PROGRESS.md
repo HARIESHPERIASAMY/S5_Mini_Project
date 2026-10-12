@@ -49,11 +49,19 @@
 
 ---
 
+### Phase 6: Observability - **COMPLETED**
+- `/api/health`: Database connection liveness & millisecond ping measurement.
+- `/api/metrics`: Live server uptime, request counters, active/completed/interrupted run statistics, average latency percentiles, and SQLite status.
+- Structured logging in `telemetry_middleware` capturing request methods, routes, status codes, execution duration, and unique `X-Trace-ID` correlation IDs across all inbound/outbound calls.
+- Verified with `tests/test_api.py` (5/5 passed).
+
+---
+
 ## What Is Next
-- **Phase 6**: Observability:
-  - Verify `/api/health` and `/api/metrics`.
-  - Verify structured logging with trace IDs.
 - **Phase 7**: Comprehensive test suite & coverage (target >= 85%).
+  - Concurrency tests (multiple simultaneous runs).
+  - Coverage verification (`pytest --cov=backend --cov=agents --cov=sandbox`).
+  - Final audit verification.
 
 ## Open Problems
-- None. All 25 tests pass.
+- None. All 27 tests pass.

@@ -91,10 +91,17 @@ app.add_middleware(
 
 
 # ---------------------------------------------------------------------------
-# Global Telemetry & Trace ID Middleware
+# Global Telemetry, Structured Logging & Rate Limiting Middleware
 # ---------------------------------------------------------------------------
-# Global Telemetry & Rate Limiting Middleware
-# ---------------------------------------------------------------------------
+
+import logging
+
+logger = logging.getLogger("sentinelmesh")
+if not logger.handlers:
+    _log_handler = logging.StreamHandler()
+    _log_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] [%(name)s] %(message)s"))
+    logger.addHandler(_log_handler)
+    logger.setLevel(logging.INFO)
 
 RATE_LIMIT_STORE: Dict[str, List[float]] = {}
 RATE_LIMIT_MAX_PER_MINUTE = 600
@@ -109,6 +116,7 @@ async def telemetry_middleware(request: Request, call_next):
     now = time.time()
     req_history = [t for t in RATE_LIMIT_STORE.get(client_ip, []) if now - t < 60.0]
     if len(req_history) >= RATE_LIMIT_MAX_PER_MINUTE:
+        logger.warning(f"[{trace_id}] 429 RateLimitExceeded for client {client_ip} on {request.url.path}")
         return create_error_response("RateLimitExceeded", "Too many requests. Rate limit exceeded (max 600 req/min).", 429, trace_id)
     req_history.append(now)
     RATE_LIMIT_STORE[client_ip] = req_history
@@ -124,6 +132,7 @@ async def telemetry_middleware(request: Request, call_next):
         METRICS["latencies"] = METRICS["latencies"][-1000:]
 
     response.headers["X-Trace-ID"] = trace_id
+    logger.info(f"[{trace_id}] {request.method} {request.url.path} -> {response.status_code} ({latency_ms:.2f}ms)")
 
     # If an /api/ route returned 404 (e.g. from static handler), format as standard JSON
     if response.status_code == 404 and request.url.path.startswith("/api/"):
