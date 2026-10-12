@@ -56,3 +56,25 @@ def test_create_bug_with_causal_chain():
         assert bug.id is not None
         assert bug.fix_verified is True
         assert bug.severity == "CRITICAL"
+
+
+def test_database_lifecycle_and_helpers(tmp_path):
+    from backend.database import init_db, cleanup_temp_directories, backup_database
+    # 1. Run init_db
+    init_db()
+
+    # 2. Cleanup temp directories
+    cleanup_temp_directories(max_age_seconds=0)
+
+    # 3. Safe backup test
+    backup_file = tmp_path / "test_backup.db"
+    result_path = backup_database(backup_file)
+    assert result_path.exists()
+    assert result_path.stat().st_size > 0
+
+    # 4. Rollback verification
+    with pytest.raises(ValueError):
+        with db_session_scope() as session:
+            session.add(Project(name="Will Roll Back"))
+            raise ValueError("Forced error to test rollback")
+

@@ -44,6 +44,13 @@ class EventBus:
                     except Exception:
                         break
 
+    def get_history_since(self, run_id: str, since_seq: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Returns buffered event sequence history for reconnecting clients."""
+        events = self._history.get(run_id, [])
+        if since_seq is not None:
+            return [e for e in events if e.get("seq", 0) > since_seq]
+        return events[-50:]
+
     async def disconnect(self, run_id: str, websocket: WebSocket):
         async with self._lock:
             if run_id in self._subscribers and websocket in self._subscribers[run_id]:
