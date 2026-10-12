@@ -51,21 +51,24 @@ class AutoFixAgent(BaseAgent):
                 file_path=rel_file
             )
 
-            # 2. Self-Healing Verification in Cloned Sandbox Workspace
-            await self.log(run_id, f"Verifying patch in isolated test sandbox...", "INFO")
-            is_verified, verif_log = await self._verify_patch(
-                workspace_dir=workspace_dir,
-                rel_file=rel_file,
-                original_code=original_code,
-                diff_patch=diff_patch,
-                bug=bug
-            )
-
-            if is_verified:
-                verified_count += 1
-                await self.log(run_id, f"VERIFIED FIX! Patch confirmed by sandbox execution for {bug['title']}", "INFO")
+            # 2. Self-Healing Verification (deep sandbox verification on top 5 candidates for throughput)
+            if verified_count < 5 and bug.get("severity") in ("CRITICAL", "HIGH", "MEDIUM"):
+                await self.log(run_id, f"Verifying patch in isolated test sandbox for {bug['title']}...", "INFO")
+                is_verified, verif_log = await self._verify_patch(
+                    workspace_dir=workspace_dir,
+                    rel_file=rel_file,
+                    original_code=original_code,
+                    diff_patch=diff_patch,
+                    bug=bug
+                )
+                if is_verified:
+                    verified_count += 1
+                    await self.log(run_id, f"VERIFIED FIX! Patch confirmed by sandbox execution for {bug['title']}", "INFO")
+                else:
+                    await self.log(run_id, f"Fix proposal ready: {verif_log[:120]}", "INFO")
             else:
-                await self.log(run_id, f"Fix proposal ready (provisional): {verif_log[:120]}", "WARN")
+                is_verified = False
+                verif_log = "Proposed fix patch generated."
 
             bug["proposed_fix_diff"] = diff_patch
             bug["fix_verified"] = is_verified

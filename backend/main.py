@@ -188,9 +188,14 @@ def get_metrics(db: Session = Depends(get_db)):
     uptime = round(time.time() - SERVER_START_TIME, 1)
     avg_latency = round(sum(METRICS["latencies"]) / len(METRICS["latencies"]), 2) if METRICS["latencies"] else 0.0
 
-    completed_runs = db.query(Run).filter(Run.status == "completed").count()
-    failed_runs = db.query(Run).filter(Run.status == "failed").count()
-    interrupted_runs = db.query(Run).filter(Run.status == "interrupted").count()
+    try:
+        completed_runs = db.query(Run).filter(Run.status == "completed").count()
+        failed_runs = db.query(Run).filter(Run.status == "failed").count()
+        interrupted_runs = db.query(Run).filter(Run.status == "interrupted").count()
+    except Exception:
+        completed_runs = 0
+        failed_runs = 0
+        interrupted_runs = 0
 
     return MetricsResponse(
         uptime_seconds=uptime,

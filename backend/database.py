@@ -33,20 +33,25 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.close()
 
 
+from sqlalchemy.pool import QueuePool
+
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False},
+    poolclass=QueuePool,
+    pool_size=20,
+    max_overflow=30,
+    pool_timeout=15,
     pool_pre_ping=True
 )
 
 SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-ScopedSession = scoped_session(SessionFactory)
 Base = declarative_base()
 
 
 def get_db():
     """FastAPI dependency for database session."""
-    db = ScopedSession()
+    db = SessionFactory()
     try:
         yield db
     finally:

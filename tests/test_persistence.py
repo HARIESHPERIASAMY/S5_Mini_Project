@@ -65,8 +65,16 @@ def test_crash_recovery_marks_interrupted():
 
 def test_event_sourcing_sequence_and_replay():
     """Verify sequential numbering and since_seq replay behavior in EventBus."""
+    import uuid
+    run_id = f"event-test-{uuid.uuid4()}"
+    with db_session_scope() as session:
+        proj = Project(name=f"Event Proj {uuid.uuid4().hex[:6]}", source_type="snippet")
+        session.add(proj)
+        session.flush()
+        run = Run(id=run_id, project_id=proj.id, status="running")
+        session.add(run)
+
     bus = EventBus()
-    run_id = "event-test-run"
 
     class FakeWebSocket:
         def __init__(self):

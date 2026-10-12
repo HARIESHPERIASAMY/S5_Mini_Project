@@ -35,70 +35,100 @@ class TestExecutionAgent(BaseAgent):
         failed_count = 0
         flaky_count = 0
 
-        # Execute tests per file or as a batch with verbose json/junit output
-        for test_meta in generated_tests:
-            test_rel = test_meta["test_file"]
-            target_rel = test_meta["target_file"]
-
-            await self.log(run_id, f"Running pytest on {test_rel}...", "INFO")
-
-            # 1. First run with coverage
+        # Execute tests: batch mode for large suites (>3 test files) to scale under 60s
+        tests_dir = os.path.join(workspace_dir, "sentinel_tests")
+        if len(generated_tests) > 3 and os.path.isdir(tests_dir):
+            await self.log(run_id, f"Executing {len(generated_tests)} test suites in high-performance batch mode...", "INFO")
             cmd = [
                 sys.executable, "-m", "coverage", "run",
-                "--source=.", "-m", "pytest", test_rel, "-v", "--tb=short"
+                "--source=.", "-m", "pytest", "sentinel_tests", "-v", "--tb=short"
             ]
-            run_res = await self.runner.run_command(cmd, cwd=workspace_dir, timeout=20.0)
-
-            # Parse pytest individual test outputs
-            parsed_tests = self._parse_pytest_verbose(run_res.stdout, run_res.stderr, test_rel)
-
+            run_res = await self.runner.run_command(cmd, cwd=workspace_dir, timeout=45.0)
+            parsed_tests = self._parse_pytest_verbose(run_res.stdout, run_res.stderr, "sentinel_tests")
             for t in parsed_tests:
-                is_failed = t["status"] == "FAILED"
-                is_flaky = False
-                reruns = 0
-
-                # 2. Innovative Flaky Test Detector: Rerun failed tests N times
-                if is_failed:
-                    await self.log(run_id, f"Checking potential flakiness on {t['name']}...", "INFO")
-                    sub_cmd = [sys.executable, "-m", "pytest", f"{test_rel}::{t['name']}", "-q"]
-                    rerun_passes = 0
-                    for _ in range(3):
-                        rerun_res = await self.runner.run_command(sub_cmd, cwd=workspace_dir, timeout=8.0)
-                        reruns += 1
-                        if rerun_res.success:
-                            rerun_passes += 1
-
-                    if rerun_passes > 0 and rerun_passes < 3:
-                        is_flaky = True
-                        t["status"] = "FLAKY"
-                        flaky_count += 1
-                        await self.log(run_id, f"FLAKY TEST DETECTED: {t['name']} succeeded {rerun_passes}/3 times!", "WARN")
-                    else:
-                        failed_count += 1
+                if t["status"] == "FAILED":
+                    failed_count += 1
                 else:
                     passed_count += 1
+                t["is_flaky"] = False
+                t["flake_rerun_count"] = 0
+                t["target_file"] = "sentinel_tests"
 
-                t["is_flaky"] = is_flaky
-                t["flake_rerun_count"] = reruns
-                t["target_file"] = target_rel
-
-                # Persist to DB
                 with db_session_scope() as session:
                     db_tr = TestResult(
                         run_id=run_id,
                         test_name=t["name"],
-                        test_file=test_rel,
+                        test_file=t.get("test_file", "sentinel_tests"),
                         target_function=t.get("func_name"),
                         status=t["status"],
                         duration_ms=t.get("duration_ms", 10.0),
                         error_message=t.get("error_message"),
                         stack_trace=t.get("stack_trace"),
-                        is_flaky=is_flaky,
-                        flake_rerun_count=reruns
+                        is_flaky=False,
+                        flake_rerun_count=0
                     )
                     session.add(db_tr)
-
                 all_results.append(t)
+        else:
+            for test_meta in generated_tests:
+                test_rel = test_meta["test_file"]
+                target_rel = test_meta["target_file"]
+
+                await self.log(run_id, f"Running pytest on {test_rel}...", "INFO")
+
+                cmd = [
+                    sys.executable, "-m", "coverage", "run",
+                    "--source=.", "-m", "pytest", test_rel, "-v", "--tb=short"
+                ]
+                run_res = await self.runner.run_command(cmd, cwd=workspace_dir, timeout=20.0)
+
+                parsed_tests = self._parse_pytest_verbose(run_res.stdout, run_res.stderr, test_rel)
+
+                for t in parsed_tests:
+                    is_failed = t["status"] == "FAILED"
+                    is_flaky = False
+                    reruns = 0
+
+                    if is_failed:
+                        await self.log(run_id, f"Checking potential flakiness on {t['name']}...", "INFO")
+                        sub_cmd = [sys.executable, "-m", "pytest", f"{test_rel}::{t['name']}", "-q"]
+                        rerun_passes = 0
+                        for _ in range(3):
+                            rerun_res = await self.runner.run_command(sub_cmd, cwd=workspace_dir, timeout=8.0)
+                            reruns += 1
+                            if rerun_res.success:
+                                rerun_passes += 1
+
+                        if rerun_passes > 0 and rerun_passes < 3:
+                            is_flaky = True
+                            t["status"] = "FLAKY"
+                            flaky_count += 1
+                            await self.log(run_id, f"FLAKY TEST DETECTED: {t['name']} succeeded {rerun_passes}/3 times!", "WARN")
+                        else:
+                            failed_count += 1
+                    else:
+                        passed_count += 1
+
+                    t["is_flaky"] = is_flaky
+                    t["flake_rerun_count"] = reruns
+                    t["target_file"] = target_rel
+
+                    with db_session_scope() as session:
+                        db_tr = TestResult(
+                            run_id=run_id,
+                            test_name=t["name"],
+                            test_file=test_rel,
+                            target_function=t.get("func_name"),
+                            status=t["status"],
+                            duration_ms=t.get("duration_ms", 10.0),
+                            error_message=t.get("error_message"),
+                            stack_trace=t.get("stack_trace"),
+                            is_flaky=is_flaky,
+                            flake_rerun_count=reruns
+                        )
+                        session.add(db_tr)
+
+                    all_results.append(t)
 
         # 3. Calculate coverage percentage
         cov_pct = await self._calculate_coverage(workspace_dir)
