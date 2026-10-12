@@ -23,7 +23,7 @@
 - [x] Crash recovery: detect runs left in `running` state on startup, mark `interrupted`, enable resume/retry
 - [x] Paginated run history (`GET /api/runs?page=1&page_size=20`)
 - [x] Database backup endpoint (`GET /api/backup`)
-- [ ] Integration verification tests for persistence & crash recovery
+- [x] Integration verification tests for persistence & crash recovery (`tests/test_persistence.py` - 5/5 passed)
 
 ## Phase 4: Performance & Benchmarking
 - [ ] Create `scripts/benchmark.py` measuring real p50/p95/p99 latency

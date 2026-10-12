@@ -11,32 +11,30 @@
   - `scripts/audit.py`: Automated audit test suite testing valid, invalid, empty, oversized, malformed payloads and method enforcement.
   - `docs/audit-report.md`: Real test results showing **20/20 test cases passed (100.0%)** on live backend.
 
-### Phase 2: Correctness & Error Handling - **COMPLETED**
+### Phase 3: Persistence & Recovery - **COMPLETED**
 - **Implemented & Verified:**
-  - Global FastAPI exception handlers return standard JSON envelope `{"error", "detail", "trace_id", "timestamp"}` for 400, 404, 405, 422, and 500 errors. No plain-text or HTML leaks.
-  - Strict Pydantic v2 validation:
-    - Code snippet AST syntax parsing (returns clear line and column number on syntax errors).
-    - Windows and Linux path safety: path traversal (`..`, `\`, `/`) and illegal characters `<>:"/\|?*` rejected.
-    - Safe size constraints on snippets (250k char cap).
-  - Fixed Windows process tree termination in `sandbox/runner.py`: awaits `proc.wait()` and uses `psutil.wait_procs()` to prevent locked file handles on Windows.
-  - Fixed frontend error handling in `frontend/src/App.jsx` for pasted snippets and zip uploads: catches HTTP error envelopes, presents clear error notifications, and resets loading state. Frontend rebuilt (`npm run build`).
-  - Unit test suite: **15/15 tests passing**.
+  - SQLite WAL mode (`PRAGMA journal_mode = WAL`), `busy_timeout = 5000`, `foreign_keys = ON` enforced on every engine connection.
+  - Automatic dynamic schema migration (`auto_migrate()`) on startup.
+  - Crash recovery (`recover_interrupted_runs()`): automatically discovers runs left in `running` or `pending` states on server restart and transitions them to `interrupted` with an actionable retry message.
+  - Event-sourced run logs with sequence numbering (`seq`) in `EventBus` and `AgentLog`. Reconnects support `since_seq` replay to restore dashboard state without data loss.
+  - Online database backup endpoint `GET /api/backup` producing an authenticated, valid SQLite binary snapshot.
+  - Paginated runs history endpoint `GET /api/runs?limit=X&offset=Y` returning count, items, and bounds.
+  - Retry endpoint `POST /api/runs/{run_id}/retry`.
+  - Comprehensive unit test suite in `tests/test_persistence.py`: **5/5 passed**, **20/20 overall test suite passed**.
 
 ---
 
 ## What Is Next
-- **Phase 3**: Persistence & Recovery verification:
-  - Add and run tests validating SQLite WAL mode, foreign keys, busy timeout, and interrupted run recovery (`recover_interrupted_runs`).
-  - Verify WebSocket event-sourcing with sequence replay (`since_seq`).
-  - Verify SQLite backup endpoint (`GET /api/backup`).
 - **Phase 4**: Performance & Benchmarking:
-  - Create `scripts/benchmark.py` for p50/p95/p99 latency and throughput.
-  - Run real benchmark for demo project, 50-file, and 100-file project.
-  - Produce `docs/performance-report.md`.
+  - Create `scripts/benchmark.py` testing p50/p95/p99 latency for every endpoint.
+  - Measure end-to-end execution time for the demo project (target: <15s).
+  - Generate synthetic 50-file (target: <60s) and 100-file projects and benchmark them.
+  - Profile with cProfile and report bottlenecks.
+  - Document all real measurements in `docs/performance-report.md`.
 - **Phase 5**: Sandbox & Security:
-  - Test upload limits (zip bomb ratio, zip slip).
+  - Verify limits, zip-bomb checks, rate limiting, and agent failure circuit breakers.
   - Produce `docs/resilience-report.md`.
-- **Phase 6 & 7**: Observability, Fault injection, and test coverage to >= 85%.
+- **Phase 6 & 7**: Final observability validation, fault injection, and coverage report (target >= 85%).
 
 ## Open Problems
 - None currently blocking. All 15 unit tests pass, and all 20 audit smoke tests pass.
