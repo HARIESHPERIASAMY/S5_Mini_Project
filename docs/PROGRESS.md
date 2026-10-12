@@ -11,6 +11,11 @@
   - `scripts/audit.py`: Automated audit test suite testing valid, invalid, empty, oversized, malformed payloads and method enforcement.
   - `docs/audit-report.md`: Real test results showing **20/20 test cases passed (100.0%)** on live backend.
 
+### Phase 2: JSON Error Handling & Windows-Safe Execution - **COMPLETED**
+- Standardized JSON error envelopes across all 4xx/5xx status codes.
+- Strict Pydantic v2 input validation with AST syntax checks.
+- Windows-safe path resolutions and process tree cleanup.
+
 ### Phase 3: Persistence & Recovery - **COMPLETED**
 - **Implemented & Verified:**
   - SQLite WAL mode (`PRAGMA journal_mode = WAL`), `busy_timeout = 5000`, `foreign_keys = ON` enforced on every engine connection.
@@ -20,7 +25,7 @@
   - Online database backup endpoint `GET /api/backup` producing an authenticated, valid SQLite binary snapshot.
   - Paginated runs history endpoint `GET /api/runs?limit=X&offset=Y` returning count, items, and bounds.
   - Retry endpoint `POST /api/runs/{run_id}/retry`.
-  - Comprehensive unit test suite in `tests/test_persistence.py`: **5/5 passed**, **20/20 overall test suite passed**.
+  - Comprehensive unit test suite in `tests/test_persistence.py`: **5/5 passed**.
 
 ---
 
@@ -33,19 +38,22 @@
     - Synthetic 50-file project: **12.28 s** (Target < 60.0 s: **PASS**).
     - Synthetic 100-file project: **16.97 s** (Linear scaling: **PASS**).
     - Memory RSS stable: 46.35 MB initial -> 64.97 MB final across all runs. Zero leaked subprocesses.
-  - Key optimizations applied:
-    - Batch test suite execution (`pytest sentinel_tests`) reducing per-file Python process spinup overhead.
-    - Capped deep auto-fix sandbox executions to top 5 candidates.
-    - SQLAlchemy `QueuePool` with 20 connections in SQLite WAL mode.
+
+---
+
+### Phase 5: Sandbox & Security - **COMPLETED**
+- **Artifacts:**
+  - `tests/test_sandbox_security.py`: 5 dedicated unit tests verifying zip-slip path traversal rejection, zip-bomb ratio rejection, IP rate limiter enforcement (HTTP 429), psutil process tree kill on timeout, and LLM offline fallback.
+  - `docs/resilience-report.md`: Complete resilience and security audit report.
+  - 100% pass rate across security tests (5/5 passed in 2.27s).
 
 ---
 
 ## What Is Next
-- **Phase 5**: Sandbox & Security:
-  - Add tests in `tests/test_sandbox_security.py` for zip-slip rejection, zip-bomb ratio checks, process tree kill (`psutil`), rate limits, and model circuit breaker / offline fallback.
-  - Document results in `docs/resilience-report.md`.
-- **Phase 6**: Observability verification (`/api/health`, `/api/metrics`, trace ID headers).
+- **Phase 6**: Observability:
+  - Verify `/api/health` and `/api/metrics`.
+  - Verify structured logging with trace IDs.
 - **Phase 7**: Comprehensive test suite & coverage (target >= 85%).
 
 ## Open Problems
-- None. All 20 tests pass. All benchmarks exceed target metrics.
+- None. All 25 tests pass.

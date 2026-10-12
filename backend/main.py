@@ -93,11 +93,25 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 # Global Telemetry & Trace ID Middleware
 # ---------------------------------------------------------------------------
+# Global Telemetry & Rate Limiting Middleware
+# ---------------------------------------------------------------------------
+
+RATE_LIMIT_STORE: Dict[str, List[float]] = {}
+RATE_LIMIT_MAX_PER_MINUTE = 600
 
 @app.middleware("http")
 async def telemetry_middleware(request: Request, call_next):
     trace_id = request.headers.get("X-Trace-ID") or str(uuid.uuid4())
     request.state.trace_id = trace_id
+
+    # Rate Limiting Guard
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    now = time.time()
+    req_history = [t for t in RATE_LIMIT_STORE.get(client_ip, []) if now - t < 60.0]
+    if len(req_history) >= RATE_LIMIT_MAX_PER_MINUTE:
+        return create_error_response("RateLimitExceeded", "Too many requests. Rate limit exceeded (max 600 req/min).", 429, trace_id)
+    req_history.append(now)
+    RATE_LIMIT_STORE[client_ip] = req_history
 
     start = time.perf_counter()
     METRICS["total_requests"] += 1
@@ -261,13 +275,25 @@ async def upload_project_zip(
                 if file_count > 500:
                     raise HTTPException(status_code=400, detail="Archive contains too many files (max 500 allowed).")
 
+                # Reject symlinks (bitmask 0o120000)
+                if (info.external_attr >> 16) & 0o120000 == 0o120000:
+                    raise HTTPException(status_code=400, detail="Archive contains unsafe symlinks.")
+
                 total_uncompressed += info.file_size
                 if total_uncompressed > 50 * 1024 * 1024:  # 50 MB uncompressed limit
                     raise HTTPException(status_code=413, detail="Extracted archive size exceeds safe limits (max 50MB).")
 
+                # Zip-bomb compression ratio check (>100:1)
+                if len(content) > 0 and (total_uncompressed / max(len(content), 1)) > 100:
+                    raise HTTPException(status_code=400, detail="Zip-bomb detected: compression ratio exceeds 100:1.")
+
                 # Zip-Slip Guard
                 target_path = (proj_dir / info.filename).resolve()
-                if not str(target_path).startswith(str(proj_dir.resolve())):
+                try:
+                    target_path.relative_to(proj_dir.resolve())
+                except ValueError:
+                    raise HTTPException(status_code=400, detail="Zip-slip path traversal attempt detected.")
+                if not str(target_path).startswith(str(proj_dir.resolve())) or ".." in Path(info.filename).parts:
                     raise HTTPException(status_code=400, detail="Zip-slip path traversal attempt detected.")
 
             # Safe extraction
