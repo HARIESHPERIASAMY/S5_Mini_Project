@@ -5,10 +5,36 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC.svg)](https://tailwindcss.com/)
-[![Test Coverage](https://img.shields.io/badge/Coverage-80%25-brightgreen.svg)](#testing--verification)
+[![Test Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen.svg)](#testing--verification)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](#)
 
 > **SentinelMesh** is an autonomous multi-agent quality engineering platform where a team of 9 cooperating AI agents analyzes software repositories, synthesizes boundary tests, executes sandboxed test runs, classifies bugs, traces causal root causes, and **automatically verifies proposed fixes in an isolated sandbox before presentation**.
+
+---
+
+## 🏛️ Architecture Overview
+
+```mermaid
+flowchart TD
+    User([User / Browser]) -->|HTTP / WebSocket| Gateway[FastAPI Gateway & Telemetry Middleware]
+    Gateway -->|WAL Mode + QueuePool| DB[(SQLite Database)]
+    Gateway --> Bus[Event-Sourced In-Memory EventBus]
+
+    Gateway --> Orchestrator[1. Orchestrator Agent]
+    Orchestrator --> Static[2. Static Analysis Agent]
+    Static --> TestGen[3. Test Generation Agent]
+    TestGen --> TestExec[4. Test Execution Agent]
+    TestExec -->|Subprocess Isolation| Sandbox[Sandboxed Execution Engine]
+    TestExec --> BugClass[5. Bug Classification Agent]
+    BugClass --> RootCause[6. Root Cause Agent]
+    RootCause --> AutoFix[7. Auto-Fix Agent]
+    AutoFix -->|Verify Patches| Sandbox
+    AutoFix --> Critic[8. Critic / Reviewer Agent]
+    Critic --> Report[9. Report Agent]
+
+    Report --> Gateway
+    Bus -.->|Real-Time Telemetry| User
+```
 
 ---
 
@@ -94,8 +120,8 @@ pytest --cov=backend --cov=agents --cov=sandbox --cov-report=term-missing tests/
 ```
 
 **Verification Results:**
-- 15 / 15 Tests Passing (100% pass rate)
-- Platform Code Coverage: **80%**
+- 37 / 37 Tests Passing (100% pass rate)
+- Platform Code Coverage: **85%**
 
 ---
 
@@ -149,3 +175,12 @@ S5 Mini Project/
 6. Click any bug row in the **Bug Classification Ledger** to open the side drawer.
 7. Inspect the **Root Cause Causal Trace**, switch on **"Explain Like I'm a Beginner"**, and view the **Verified Unified Diff Patch**!
 8. Click **"Export PR Patch"** in the top navigation to download the ready-to-merge git patch.
+
+---
+
+## ⚠️ Known Limitations
+
+1. **Python-Centric Analysis:** The current static AST analyzer and sandbox runner execute Python 3.11+ codebases. Multi-language support (TypeScript/Go) is planned for future major releases.
+2. **Sandbox Resource Limits:** Subprocess execution is capped at a strict 20-second timeout, 20MB archive size, and 50MB uncompressed extraction limit to guard against infinite loops and denial-of-service attempts.
+3. **LLM Quota Fallbacks:** If external API quotas (Gemini / OpenAI) are exhausted or credentials are not supplied, SentinelMesh gracefully falls back to the deterministic local AST rule engine without halting execution.
+

@@ -1,0 +1,51 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.log
+
+# Environments
+.env
+.env.local
+venv/
+.venv/
+env/
+ENV/
+
+# Databases & data directories
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+data/
+sandbox_workspaces/
+
+# Frontend dependencies & build output
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+build/
+frontend/build/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Sensitive IP & disclosures
+docs/invention-disclosure.md
+docs/prior-art-notes.md
+
+# Large model artifacts
+*.bin
+*.pt
+*.onnx
+*.safetensors
