@@ -1,0 +1,54 @@
+graph TD
+    User["Developer / QA Engineer"] -->|Uploads Code / Launches Run| WebUI["Frontend Dashboard (React + Vite)"]
+    WebUI -->|HTTP REST / WebSocket| Gateway["FastAPI API Gateway (backend/main.py)"]
+    
+    subgraph Control_Layer ["Control & Orchestration Layer"]
+        Gateway --> Orchestrator["OrchestratorAgent (orchestrator_agent.py)"]
+        EventBus["EventBus (event_bus.py)"] <--> Gateway
+        Orchestrator -->|Publishes Events| EventBus
+        Orchestrator -->|Checks State / Logs| DB[(SQLite Database - WAL Mode)]
+    end
+
+    subgraph Agent_Mesh ["SentinelMesh Agent Mesh"]
+        StaticAgent["1. StaticAnalysisAgent\n(AST & Heuristic Linting)"]
+        TestGenAgent["2. TestGenerationAgent\n(AST Analysis & Test Synthesis)"]
+        TestExecAgent["3. TestExecutionAgent\n(Pytest Runner & Coverage Engine)"]
+        BugClassAgent["4. BugClassificationAgent\n(Deduplication & Categorization)"]
+        RCAgent["5. RootCauseAgent\n(AST Context Slicing & Chain Analysis)"]
+        AutoFixAgent["6. AutoFixAgent\n(Pattern & LLM Patch Synthesis)"]
+        CriticAgent["7. CriticAgent\n(Dual-Agent Peer Review & Consensus)"]
+        MutationAgent["8. MutationEngine\n(AST Operator Replacement)"]
+        ReportAgent["9. ReportAgent\n(Markdown & Executive Summarization)"]
+    end
+
+    Orchestrator --> StaticAgent
+    StaticAgent --> TestGenAgent
+    TestGenAgent --> TestExecAgent
+    TestExecAgent --> BugClassAgent
+    BugClassAgent --> RCAgent
+    RCAgent --> AutoFixAgent
+    AutoFixAgent --> CriticAgent
+    CriticAgent --> MutationAgent
+    MutationAgent --> ReportAgent
+
+    subgraph Execution_Layer ["Execution & Safety Boundary"]
+        Sandbox["SandboxRunner (runner.py)\nSubprocess Isolation & psutil Guard"]
+        TempWS["Isolated Temp Workspaces (tempfile)"]
+        TestExecAgent --> Sandbox
+        AutoFixAgent -->|Pre-flight Patch Verification| Sandbox
+        MutationAgent --> Sandbox
+        Sandbox --> TempWS
+    end
+
+    subgraph Intelligence_Layer ["Intelligence & Inference Engine"]
+        LLMBase["LLMProvider Interface (base.py)"]
+        OfflineLLM["OfflineLLMProvider (Rule-based Fallback)"]
+        GeminiLLM["GeminiProvider (Google Gemini API)"]
+        OpenAILLM["OpenAIProvider (OpenAI API)"]
+        LLMBase --- OfflineLLM
+        LLMBase --- GeminiLLM
+        LLMBase --- OpenAILLM
+        TestGenAgent -.-> LLMBase
+        RCAgent -.-> LLMBase
+        AutoFixAgent -.-> LLMBase
+    end

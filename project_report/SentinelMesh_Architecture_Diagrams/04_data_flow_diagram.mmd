@@ -1,0 +1,39 @@
+graph LR
+    subgraph DFD_Level_0 ["Level 0: Context Data Flow"]
+        Dev[User / Software Developer] -->|1. Python Workspace / Source Archive| SM[SentinelMesh Framework]
+        SM -->|2. Health Metrics, Bug Reports, Patch Diffs| Dev
+    end
+
+    subgraph DFD_Level_1 ["Level 1: Subsystem Data Flow"]
+        Src[(Source Files)] --> Parse[AST Parser & Lint Engine]
+        Parse --> FileRisk[(file_risks)]
+        
+        Src --> Synth[Test Generator Engine]
+        Synth --> Tests[(sentinel_tests/)]
+        
+        Tests --> Exec[Sandbox Pytest Runner]
+        Src --> Exec
+        Exec --> CovJson[coverage.json & Pytest XML]
+        
+        CovJson --> BugClass[Bug Classifier]
+        FileRisk --> BugClass
+        BugClass --> BugTable[(bugs DB Table)]
+        
+        BugTable --> RCA[Root Cause Analyzer]
+        Src --> RCA
+        RCA --> Slices[AST Code Slices & Chains]
+        
+        Slices --> Fixer[Auto-Fix Engine]
+        Fixer --> SandboxVerify[Isolated Pre-flight Sandbox]
+        SandboxVerify --> Patches[(Verified Patches)]
+        
+        Patches --> Critic[Critic Agent Consensus]
+        Critic --> ConsensusScore[Debate Records]
+        
+        ConsensusScore --> MutEngine[AST Mutation Tester]
+        MutEngine --> MutScore[(mutation_records)]
+        
+        MutScore --> RepAgent[Report Generator Agent]
+        BugTable --> RepAgent
+        RepAgent --> FinalRep[Markdown & Exec Summary]
+    end

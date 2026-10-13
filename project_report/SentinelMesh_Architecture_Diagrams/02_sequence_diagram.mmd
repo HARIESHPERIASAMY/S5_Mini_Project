@@ -1,0 +1,60 @@
+sequenceDiagram
+    autonumber
+    actor User as Developer / QA
+    participant WebUI as React Frontend
+    participant API as FastAPI Gateway
+    participant Orchestrator as OrchestratorAgent
+    participant Agents as Specialized Agents
+    participant Sandbox as SandboxRunner
+    participant DB as SQLite DB
+    participant WS as WebSocket Clients
+
+    User->>WebUI: Click "Start Analysis" (or ZIP Upload)
+    WebUI->>API: POST /api/runs (project_id, provider, mode)
+    API->>DB: Create Run Record (Status: pending)
+    API-->>WebUI: Return Run Object (run_id)
+    WebUI->>API: Establish WebSocket (/ws/runs/{run_id})
+    API->>Orchestrator: execute_run(run_id, workspace_path)
+    
+    rect rgb(240, 248, 255)
+        Note over Orchestrator, Agents: Pipeline Execution Stages
+        Orchestrator->>DB: Check is_cancelled(run_id)
+        Orchestrator->>Agents: 1. StaticAnalysisAgent.run()
+        Agents-->>DB: Save file_risks, complexity metrics
+        Orchestrator->>WS: Broadcast event: static_analysis_complete
+        
+        Orchestrator->>Agents: 2. TestGenerationAgent.run()
+        Agents-->>Sandbox: Write generated pytest suites
+        Orchestrator->>WS: Broadcast event: tests_generated
+
+        Orchestrator->>Agents: 3. TestExecutionAgent.run()
+        Agents->>Sandbox: Execute pytest & coverage in temp isolated workspace
+        Sandbox-->>Agents: Test report (passed, failed, flaky, coverage)
+        Agents-->>DB: Store test_results
+        Orchestrator->>WS: Broadcast event: tests_executed
+
+        Orchestrator->>Agents: 4. BugClassificationAgent.run()
+        Agents-->>DB: Deduplicate and store bugs (MD5 signatures)
+
+        Orchestrator->>Agents: 5. RootCauseAgent.run()
+        Agents-->>DB: Update bug with root cause & AST code slice
+
+        Orchestrator->>Agents: 6. AutoFixAgent.run()
+        Agents->>Sandbox: Test proposed patch in temp sandbox (Pre-flight verify)
+        Sandbox-->>Agents: Patch passes regression tests
+        Agents-->>DB: Save patch diff & mark verified=True
+
+        Orchestrator->>Agents: 7. CriticAgent.run()
+        Agents-->>DB: Record agent debate messages & consensus score
+
+        Orchestrator->>Agents: 8. MutationEngine.run()
+        Agents->>Sandbox: Run mutated AST tests & compute mutation score
+        Agents-->>DB: Save mutation_records
+
+        Orchestrator->>Agents: 9. ReportAgent.run()
+        Agents-->>DB: Save executive summary & technical report (Markdown)
+        Orchestrator->>DB: Update Run (Status: completed)
+        Orchestrator->>WS: Broadcast event: run_completed
+    end
+
+    WebUI->>User: Display KPIs, Graphs, Bug Explorer, and Download Report

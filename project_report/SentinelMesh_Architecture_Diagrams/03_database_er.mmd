@@ -1,0 +1,103 @@
+erDiagram
+    PROJECTS ||--o{ RUNS : "has"
+    RUNS ||--o{ BUGS : "discovers"
+    RUNS ||--o{ FILE_RISKS : "evaluates"
+    RUNS ||--o{ TEST_RESULTS : "executes"
+    RUNS ||--o{ MUTATION_RECORDS : "evaluates"
+    RUNS ||--o{ AGENT_LOGS : "generates"
+    RUNS ||--o{ DEBATE_MESSAGES : "contains"
+
+    PROJECTS {
+        string id PK
+        string name
+        string path
+        datetime created_at
+        datetime updated_at
+    }
+
+    RUNS {
+        string id PK
+        string project_id FK
+        string status "pending | running | completed | failed | cancelled | interrupted"
+        float health_score
+        float coverage_pct
+        float mutation_score
+        int total_tests
+        int passed_tests
+        int failed_tests
+        int flaky_tests
+        string llm_provider
+        text executive_summary
+        text technical_report
+        datetime started_at
+        datetime completed_at
+    }
+
+    BUGS {
+        string id PK
+        string run_id FK
+        string title
+        string category "RuntimeError | Security | TypeError | etc."
+        string severity "CRITICAL | HIGH | MEDIUM | LOW"
+        string file_path
+        int line_number
+        text description
+        text root_cause
+        text patch_diff
+        boolean patch_verified
+        string deduplication_hash
+        datetime created_at
+    }
+
+    FILE_RISKS {
+        string id PK
+        string run_id FK
+        string file_path
+        int lines_of_code
+        int cyclomatic_complexity
+        float risk_score
+        string risk_level "CRITICAL | HIGH | MEDIUM | LOW"
+        json smells
+        datetime created_at
+    }
+
+    TEST_RESULTS {
+        string id PK
+        string run_id FK
+        string test_name
+        string file_path
+        string status "passed | failed | flaky | skipped"
+        float duration_sec
+        text error_message
+        datetime created_at
+    }
+
+    MUTATION_RECORDS {
+        string id PK
+        string run_id FK
+        string file_path
+        int line_number
+        string original_op
+        string mutated_op
+        string status "killed | survived"
+        datetime created_at
+    }
+
+    AGENT_LOGS {
+        string id PK
+        string run_id FK
+        string agent_name
+        string level "INFO | WARNING | ERROR"
+        text message
+        datetime timestamp
+    }
+
+    DEBATE_MESSAGES {
+        string id PK
+        string run_id FK
+        string agent_from
+        string agent_to
+        string topic
+        text content
+        datetime timestamp
+    }
