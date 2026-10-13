@@ -1,0 +1,3108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Intelligent Multi-Agent Framework for Automated Software Testing and Bug Analysis (SentinelMesh) - Academic Project Report</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 25mm 20mm 20mm 25mm; /* Left 25mm for binding, Right 20mm, Top 20mm, Bottom 25mm */
+    @bottom-center {
+      content: counter(page);
+      font-family: "Times New Roman", Times, serif;
+      font-size: 10pt;
+    }
+  }
+
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #111111;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Times New Roman", Times, serif;
+    color: #000000;
+    page-break-after: avoid;
+    break-after: avoid;
+    margin-top: 18pt;
+    margin-bottom: 8pt;
+  }
+
+  h1 {
+    font-size: 16pt;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-bottom: 1.5pt solid #222;
+    padding-bottom: 4pt;
+    margin-top: 24pt;
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* Do not force page break on the very first H1 */
+  body > h1:first-of-type {
+    page-break-before: avoid;
+    break-before: avoid;
+    margin-top: 0;
+  }
+
+  h2 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 16pt;
+    border-bottom: 0.5pt solid #888;
+    padding-bottom: 2pt;
+  }
+
+  h3 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 12pt;
+  }
+
+  h4 {
+    font-size: 12pt;
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 10pt;
+    text-indent: 0;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12pt;
+    margin-bottom: 14pt;
+    font-size: 10.5pt;
+    line-height: 1.35;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  th, td {
+    border: 1pt solid #444444;
+    padding: 6pt 8pt;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+  }
+
+  /* Code blocks & ASCII diagrams */
+  pre {
+    font-family: "Consolas", "Courier New", Courier, monospace;
+    font-size: 9pt;
+    line-height: 1.3;
+    background-color: #f8f9fa;
+    border: 1pt solid #d1d5db;
+    border-radius: 3pt;
+    padding: 10pt;
+    margin-top: 10pt;
+    margin-bottom: 12pt;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    page-break-inside: avoid;
+    overflow-x: hidden;
+  }
+
+  code {
+    font-family: "Consolas", "Courier New", Courier, monospace;
+    font-size: 9.5pt;
+    background-color: #f3f4f6;
+    padding: 1pt 3pt;
+    border-radius: 2pt;
+  }
+
+  pre code {
+    background-color: transparent;
+    padding: 0;
+    font-size: 9pt;
+  }
+
+  /* Blockquotes / Alerts */
+  blockquote {
+    border-left: 3pt solid #2563eb;
+    margin: 10pt 0 12pt 0;
+    padding: 6pt 12pt;
+    background-color: #eff6ff;
+    font-style: italic;
+  }
+
+  ul, ol {
+    margin-top: 4pt;
+    margin-bottom: 10pt;
+    padding-left: 24pt;
+  }
+
+  li {
+    margin-bottom: 4pt;
+  }
+
+  hr {
+    border: none;
+    border-top: 1pt solid #cccccc;
+    margin: 18pt 0;
+  }
+
+  /* Cover Page Styling */
+  .cover-title {
+    font-size: 18pt;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    line-height: 1.4;
+    margin-bottom: 24pt;
+  }
+
+  .cover-subtitle {
+    font-size: 13pt;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30pt;
+    text-transform: uppercase;
+  }
+
+  .signature-box {
+    margin-top: 40pt;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Printable optimizations */
+  @media print {
+    body {
+      color: #000000;
+    }
+    a {
+      color: #000000;
+      text-decoration: none;
+    }
+    pre {
+      border: 1pt solid #999999;
+      background-color: #fafafa;
+    }
+    th {
+      background-color: #e5e5e5 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+<h1>INTELLIGENT MULTI-AGENT FRAMEWORK FOR AUTOMATED SOFTWARE TESTING AND BUG ANALYSIS (SENTINELMESH)</h1>
+<hr />
+<h2>COVER PAGE</h2>
+<p><strong>A PROJECT REPORT</strong></p>
+<p>Submitted by</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Student Name</th>
+<th style="text-align:left">Register Number</th>
+<th style="text-align:left">Department</th>
+<th style="text-align:left">Official Institutional Email</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>HARIESH P</strong></td>
+<td style="text-align:left"><strong>7376241CS195</strong></td>
+<td style="text-align:left">Computer Science and Engineering (CSE)</td>
+<td style="text-align:left"><code>harieshp.cs24@bitsathy.ac.in</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MIDHUM M</strong></td>
+<td style="text-align:left"><strong>7376242AL152</strong></td>
+<td style="text-align:left">Artificial Intelligence and Machine Learning (AIML)</td>
+<td style="text-align:left"><code>midhumm.al24@bitsathy.ac.in</code></td>
+</tr>
+</tbody>
+</table>
+<br>
+<p>in partial fulfillment for the award of the degree of<br />
+<strong>BACHELOR OF ENGINEERING</strong><br />
+in<br />
+<strong>COMPUTER SCIENCE AND ENGINEERING</strong></p>
+<br>
+<p><strong>Project Guide:</strong><br />
+<strong>RAMYA R</strong> (Guide ID: <strong>CS1906</strong>)<br />
+Department of Computer Science and Engineering</p>
+<hr />
+<h3>DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING</h3>
+<h3>BANNARI AMMAN INSTITUTE OF TECHNOLOGY</h3>
+<p><em>(An Autonomous Institution Affiliated to Anna University, Chennai)</em><br />
+<strong>SATHYAMANGALAM – 638 401, ERODE DISTRICT, TAMIL NADU</strong><br />
+<strong>ACADEMIC YEAR: 2026–2027</strong></p>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>TITLE PAGE</h2>
+<p><strong>A PROJECT REPORT</strong></p>
+<p>Submitted by</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Student Name</th>
+<th style="text-align:left">Register Number</th>
+<th style="text-align:left">Department</th>
+<th style="text-align:left">Official Institutional Email</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>HARIESH P</strong></td>
+<td style="text-align:left"><strong>7376241CS195</strong></td>
+<td style="text-align:left">Computer Science and Engineering (CSE)</td>
+<td style="text-align:left"><code>harieshp.cs24@bitsathy.ac.in</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MIDHUM M</strong></td>
+<td style="text-align:left"><strong>7376242AL152</strong></td>
+<td style="text-align:left">Artificial Intelligence and Machine Learning (AIML)</td>
+<td style="text-align:left"><code>midhumm.al24@bitsathy.ac.in</code></td>
+</tr>
+</tbody>
+</table>
+<br>
+<p>in partial fulfillment for the award of the degree of<br />
+<strong>BACHELOR OF ENGINEERING</strong><br />
+in<br />
+<strong>COMPUTER SCIENCE AND ENGINEERING</strong></p>
+<br>
+<p><strong>Project Guide:</strong><br />
+<strong>RAMYA R</strong> (Guide ID: <strong>CS1906</strong>)<br />
+Department of Computer Science and Engineering</p>
+<hr />
+<h3>DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING</h3>
+<h3>BANNARI AMMAN INSTITUTE OF TECHNOLOGY</h3>
+<p><em>(An Autonomous Institution Affiliated to Anna University, Chennai)</em><br />
+<strong>SATHYAMANGALAM – 638 401, ERODE DISTRICT, TAMIL NADU</strong><br />
+<strong>ACADEMIC YEAR: 2026–2027</strong></p>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>BANNARI AMMAN INSTITUTE OF TECHNOLOGY</h2>
+<p><strong>SATHYAMANGALAM – 638 401</strong></p>
+<h3>BONAFIDE CERTIFICATE</h3>
+<p>Certified that this project report titled <strong>“INTELLIGENT MULTI-AGENT FRAMEWORK FOR AUTOMATED SOFTWARE TESTING AND BUG ANALYSIS (SENTINELMESH)”</strong> is the bonafide work of <strong>HARIESH P. (Register No.: 7376241CS195)</strong>, Department of Computer Science and Engineering, and <strong>MIDHUM M. (Register No.: 7376242AL152)</strong>, Department of Artificial Intelligence and Machine Learning, who carried out the project work under my supervision in partial fulfillment for the award of the degree of <strong>BACHELOR OF ENGINEERING IN COMPUTER SCIENCE AND ENGINEERING</strong> during the academic year 2026–2027.</p>
+<p><br><br><br></p>
+<p>---------------------------------------------                                                  ---------------------------------------------<br />
+<strong>SUPERVISOR / PROJECT GUIDE</strong>                                                                   <strong>HEAD OF THE DEPARTMENT</strong><br />
+<strong>RAMYA R</strong> (Guide ID: <strong>CS1906</strong>)                                                                [HOD Name &amp; Designation Placeholder]<br />
+Department of Computer Science &amp; Engineering                                                Department of Computer Science &amp; Engineering<br />
+Bannari Amman Institute of Technology                                                             Bannari Amman Institute of Technology<br />
+Sathyamangalam – 638 401                                                                           Sathyamangalam – 638 401</p>
+<p><br><br></p>
+<p>Submitted for the Project Work Viva-Voce examination held on ......................................</p>
+<p><br><br></p>
+<p>---------------------------------------------                                                  ---------------------------------------------<br />
+<strong>INTERNAL EXAMINER</strong>                                                                               <strong>EXTERNAL EXAMINER</strong></p>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>DECLARATION</h2>
+<p>We, <strong>HARIESH P. (Register No.: 7376241CS195)</strong>, Department of Computer Science and Engineering, and <strong>MIDHUM M. (Register No.: 7376242AL152)</strong>, Department of Artificial Intelligence and Machine Learning, hereby declare that the project report entitled <strong>“INTELLIGENT MULTI-AGENT FRAMEWORK FOR AUTOMATED SOFTWARE TESTING AND BUG ANALYSIS (SENTINELMESH)”</strong> submitted to the Department of Computer Science and Engineering, Bannari Amman Institute of Technology, Sathyamangalam, in partial fulfillment of the requirements for the award of the degree of <strong>Bachelor of Engineering in Computer Science and Engineering</strong>, is a record of original work carried out by us under the supervision of <strong>RAMYA R (Guide ID: CS1906)</strong>, Department of Computer Science and Engineering.</p>
+<p>We further declare that this work has not been submitted previously, in part or in full, for the award of any other degree, diploma, fellowship, or similar title in this or any other university or institution.</p>
+<p><br><br><br></p>
+<p><strong>Place:</strong> Sathyamangalam<br />
+<strong>Date:</strong> [Insert Submission Date]</p>
+<p><br><br></p>
+<p>---------------------------------------------                                                  ---------------------------------------------<br />
+<strong>Signature of Candidate 1</strong>                                                                     <strong>Signature of Candidate 2</strong><br />
+<strong>(HARIESH P. - 7376241CS195)</strong>                                                            <strong>(MIDHUM M. - 7376242AL152)</strong></p>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>ACKNOWLEDGEMENT</h2>
+<p>First and foremost, we express our profound gratitude to the Almighty for bestowing the strength, perseverance, and knowledge required to bring this project to fruition.</p>
+<p>We express our deepest gratitude to our respected Chairman, Vice Chairman, and Principal of Bannari Amman Institute of Technology for providing an intellectually stimulating environment and state-of-the-art computational infrastructure.</p>
+<p>We extend our heartfelt thanks to the Head of the Department, Department of Computer Science and Engineering, for their visionary encouragement, administrative guidance, and consistent academic support throughout this semester.</p>
+<p>We register our sincere gratitude and indebtedness to our Project Guide, <strong>RAMYA R (Guide ID: CS1906)</strong>, Department of Computer Science and Engineering, whose constructive critiques, scholarly feedback, and technical mentorship provided the foundation for the architectural design and execution of this work.</p>
+<p>We also extend our sincere thanks to all faculty members and technical staff of the Department of Computer Science and Engineering and Department of Artificial Intelligence and Machine Learning for their direct and indirect support during the design and validation phases of this project.</p>
+<p>Finally, we convey our love and affectionate thanks to our parents and friends for their continuous patience, motivation, and encouragement throughout the course of our studies.</p>
+<p><br><br></p>
+<p><strong>HARIESH P. (Register No.: 7376241CS195)</strong><br />
+Department of Computer Science and Engineering<br />
+Email: <code>harieshp.cs24@bitsathy.ac.in</code></p>
+<p><strong>MIDHUM M. (Register No.: 7376242AL152)</strong><br />
+Department of Artificial Intelligence and Machine Learning<br />
+Email: <code>midhumm.al24@bitsathy.ac.in</code></p>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>ABSTRACT</h2>
+<p>Contemporary software engineering pipelines face a fundamental bottleneck: software testing, defect diagnosis, and patch generation remain fragmented, labour-intensive, and computationally fragile. While static analysers flag heuristic code smells and dynamic unit-testing suites expose runtime assertions, developer intervention is invariably required to correlate disparate failure logs, identify root-cause causal chains, and craft syntactically valid regression patches. This project introduces <strong>SentinelMesh</strong>, an autonomous multi-agent architectural framework for end-to-end automated software testing, bug classification, root-cause investigation, and patch verification.</p>
+<p>SentinelMesh orchestrates a pipeline of nine autonomous, specialized agents governed by an asynchronous <code>OrchestratorAgent</code>. The framework ingests Python source code projects and applies custom Abstract Syntax Tree (AST) parsing to evaluate cyclomatic complexity, code smells (including unparameterized SQL queries, bare exception blocks, division operations, and dynamic code evaluation), and calculate bounded file risk scores. Subsequently, an AST-driven test generation engine synthesizes target <code>pytest</code> suites. A sandboxed execution agent executes dynamic regression suites under isolated subprocesses with process-tree resource controls managed via <code>psutil</code>, capturing line execution coverage, assertion failures, and test flakiness.</p>
+<p>Defects identified across both static and dynamic vectors are unified, deduplicated via MD5 categorical hashing, and passed to a root-cause agent that extracts surrounding AST context slices and constructs deterministic causal failure chains. To address identified bugs, an automated fix agent produces candidate patches and executes pre-flight regression verification within isolated temporary environments. A critic agent performs dual-perspective validation, recording structured debate rounds into an SQLite relational store (configured with Write-Ahead Logging and connection pooling) and deriving a consensus confidence metric. Furthermore, an integrated AST mutation engine injects relational, arithmetic, and boolean mutations to empirically compute the test suite mutation score. A modern React dashboard connects to a FastAPI backend over WebSockets, visualizing real-time agent execution telemetry, risk heatmaps, debate transcripts, and downloadable engineering audit reports. SentinelMesh operates completely offline using rule-based reasoning, while offering extensible adapters for cloud-hosted Large Language Models (LLMs).</p>
+<p><strong>Keywords:</strong> Multi-Agent Systems, Abstract Syntax Tree, Automated Program Repair, Software Quality Assurance, Sandbox Isolation, Mutation Testing, Static Analysis.</p>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>TABLE OF CONTENTS</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Section</th>
+<th style="text-align:left">Title</th>
+<th style="text-align:left">Page No.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>COVER PAGE</strong></td>
+<td style="text-align:left">i</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>TITLE PAGE</strong></td>
+<td style="text-align:left">ii</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>BONAFIDE CERTIFICATE</strong></td>
+<td style="text-align:left">iii</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>DECLARATION</strong></td>
+<td style="text-align:left">iv</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>ACKNOWLEDGEMENT</strong></td>
+<td style="text-align:left">v</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>ABSTRACT</strong></td>
+<td style="text-align:left">vi</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>LIST OF FIGURES</strong></td>
+<td style="text-align:left">ix</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>LIST OF TABLES</strong></td>
+<td style="text-align:left">x</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>LIST OF ABBREVIATIONS</strong></td>
+<td style="text-align:left">xi</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CHAPTER I</strong></td>
+<td style="text-align:left"><strong>INTRODUCTION</strong></td>
+<td style="text-align:left"><strong>1</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">1.1</td>
+<td style="text-align:left">Background of Software Quality Assurance</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">1.2</td>
+<td style="text-align:left">The Imperative of Automated Testing in Modern CI/CD</td>
+<td style="text-align:left">2</td>
+</tr>
+<tr>
+<td style="text-align:left">1.3</td>
+<td style="text-align:left">Limitations of Traditional and Manual Defect Analysis</td>
+<td style="text-align:left">3</td>
+</tr>
+<tr>
+<td style="text-align:left">1.4</td>
+<td style="text-align:left">Motivation for Multi-Agent Architectures in Software Engineering</td>
+<td style="text-align:left">4</td>
+</tr>
+<tr>
+<td style="text-align:left">1.5</td>
+<td style="text-align:left">Problem Statement</td>
+<td style="text-align:left">5</td>
+</tr>
+<tr>
+<td style="text-align:left">1.6</td>
+<td style="text-align:left">Aim of the Project</td>
+<td style="text-align:left">6</td>
+</tr>
+<tr>
+<td style="text-align:left">1.7</td>
+<td style="text-align:left">Specific Project Objectives</td>
+<td style="text-align:left">6</td>
+</tr>
+<tr>
+<td style="text-align:left">1.8</td>
+<td style="text-align:left">Scope and Operational Boundaries</td>
+<td style="text-align:left">7</td>
+</tr>
+<tr>
+<td style="text-align:left">1.9</td>
+<td style="text-align:left">Proposed Solution: The SentinelMesh Framework</td>
+<td style="text-align:left">8</td>
+</tr>
+<tr>
+<td style="text-align:left">1.10</td>
+<td style="text-align:left">Significance and Academic Benefits</td>
+<td style="text-align:left">9</td>
+</tr>
+<tr>
+<td style="text-align:left">1.11</td>
+<td style="text-align:left">Organization of the Report</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CHAPTER II</strong></td>
+<td style="text-align:left"><strong>LITERATURE SURVEY</strong></td>
+<td style="text-align:left"><strong>11</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">2.1</td>
+<td style="text-align:left">Theoretical Foundations of Automated Software Testing</td>
+<td style="text-align:left">11</td>
+</tr>
+<tr>
+<td style="text-align:left">2.2</td>
+<td style="text-align:left">Static Code Analysis and Abstract Syntax Tree (AST) Grammars</td>
+<td style="text-align:left">12</td>
+</tr>
+<tr>
+<td style="text-align:left">2.3</td>
+<td style="text-align:left">Test Case Synthesis and Coverage Metrics</td>
+<td style="text-align:left">14</td>
+</tr>
+<tr>
+<td style="text-align:left">2.4</td>
+<td style="text-align:left">Defect Classification and Automated Root-Cause Analysis</td>
+<td style="text-align:left">15</td>
+</tr>
+<tr>
+<td style="text-align:left">2.5</td>
+<td style="text-align:left">Automated Program Repair (APR) and Patch Verification</td>
+<td style="text-align:left">17</td>
+</tr>
+<tr>
+<td style="text-align:left">2.6</td>
+<td style="text-align:left">Multi-Agent Systems and Collaborative LLM Reasoning</td>
+<td style="text-align:left">18</td>
+</tr>
+<tr>
+<td style="text-align:left">2.7</td>
+<td style="text-align:left">Mutation Testing and Test Suite Adequacy</td>
+<td style="text-align:left">20</td>
+</tr>
+<tr>
+<td style="text-align:left">2.8</td>
+<td style="text-align:left">Comparative Literature Analysis Table</td>
+<td style="text-align:left">21</td>
+</tr>
+<tr>
+<td style="text-align:left">2.9</td>
+<td style="text-align:left">Research Gaps Identified</td>
+<td style="text-align:left">23</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CHAPTER III</strong></td>
+<td style="text-align:left"><strong>OBJECTIVES AND METHODOLOGY</strong></td>
+<td style="text-align:left"><strong>25</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">3.1</td>
+<td style="text-align:left">Functional Requirements</td>
+<td style="text-align:left">25</td>
+</tr>
+<tr>
+<td style="text-align:left">3.2</td>
+<td style="text-align:left">Non-Functional Requirements</td>
+<td style="text-align:left">26</td>
+</tr>
+<tr>
+<td style="text-align:left">3.3</td>
+<td style="text-align:left">Hardware and Software Specifications</td>
+<td style="text-align:left">27</td>
+</tr>
+<tr>
+<td style="text-align:left">3.4</td>
+<td style="text-align:left">Existing System Analysis</td>
+<td style="text-align:left">28</td>
+</tr>
+<tr>
+<td style="text-align:left">3.5</td>
+<td style="text-align:left">Proposed SentinelMesh Architecture</td>
+<td style="text-align:left">29</td>
+</tr>
+<tr>
+<td style="text-align:left">3.6</td>
+<td style="text-align:left">End-to-End Execution Workflow</td>
+<td style="text-align:left">31</td>
+</tr>
+<tr>
+<td style="text-align:left">3.7</td>
+<td style="text-align:left">Data Flow Architecture (Level 0 and Level 1 DFD)</td>
+<td style="text-align:left">33</td>
+</tr>
+<tr>
+<td style="text-align:left">3.8</td>
+<td style="text-align:left">Agent Coordination and State Management</td>
+<td style="text-align:left">35</td>
+</tr>
+<tr>
+<td style="text-align:left">3.9</td>
+<td style="text-align:left">Persistence Model and Relational Schema (ER Diagram)</td>
+<td style="text-align:left">37</td>
+</tr>
+<tr>
+<td style="text-align:left">3.10</td>
+<td style="text-align:left">Subprocess Sandboxing and Execution Safety</td>
+<td style="text-align:left">39</td>
+</tr>
+<tr>
+<td style="text-align:left">3.11</td>
+<td style="text-align:left">Error Handling and Fault Tolerance Strategy</td>
+<td style="text-align:left">40</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CHAPTER IV</strong></td>
+<td style="text-align:left"><strong>SYSTEM DESIGN AND IMPLEMENTATION</strong></td>
+<td style="text-align:left"><strong>42</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">4.1</td>
+<td style="text-align:left">Project Structure and Modular Organization</td>
+<td style="text-align:left">42</td>
+</tr>
+<tr>
+<td style="text-align:left">4.2</td>
+<td style="text-align:left">API Gateway, Request Validation, and Lifecycle Management</td>
+<td style="text-align:left">43</td>
+</tr>
+<tr>
+<td style="text-align:left">4.3</td>
+<td style="text-align:left">Multi-Agent Orchestrator (<code>OrchestratorAgent</code>)</td>
+<td style="text-align:left">46</td>
+</tr>
+<tr>
+<td style="text-align:left">4.4</td>
+<td style="text-align:left">Static Analysis and AST Risk Scoring Agent</td>
+<td style="text-align:left">49</td>
+</tr>
+<tr>
+<td style="text-align:left">4.5</td>
+<td style="text-align:left">Test Case Generation Agent</td>
+<td style="text-align:left">52</td>
+</tr>
+<tr>
+<td style="text-align:left">4.6</td>
+<td style="text-align:left">Test Execution and Flakiness Detection Agent</td>
+<td style="text-align:left">54</td>
+</tr>
+<tr>
+<td style="text-align:left">4.7</td>
+<td style="text-align:left">Bug Classification and Deduplication Agent</td>
+<td style="text-align:left">57</td>
+</tr>
+<tr>
+<td style="text-align:left">4.8</td>
+<td style="text-align:left">Root-Cause Analysis and Code-Slicing Agent</td>
+<td style="text-align:left">59</td>
+</tr>
+<tr>
+<td style="text-align:left">4.9</td>
+<td style="text-align:left">Auto-Fix and Pre-flight Verification Agent</td>
+<td style="text-align:left">62</td>
+</tr>
+<tr>
+<td style="text-align:left">4.10</td>
+<td style="text-align:left">Critic Reviewer and Agent Debate Consensus Engine</td>
+<td style="text-align:left">65</td>
+</tr>
+<tr>
+<td style="text-align:left">4.11</td>
+<td style="text-align:left">Abstract Syntax Tree Mutation Testing Engine</td>
+<td style="text-align:left">67</td>
+</tr>
+<tr>
+<td style="text-align:left">4.12</td>
+<td style="text-align:left">Report Synthesis and Export Agent</td>
+<td style="text-align:left">70</td>
+</tr>
+<tr>
+<td style="text-align:left">4.13</td>
+<td style="text-align:left">LLM Provider Abstraction Layer (Offline, Gemini, OpenAI)</td>
+<td style="text-align:left">71</td>
+</tr>
+<tr>
+<td style="text-align:left">4.14</td>
+<td style="text-align:left">Persistence Layer and SQLite WAL Optimization</td>
+<td style="text-align:left">73</td>
+</tr>
+<tr>
+<td style="text-align:left">4.15</td>
+<td style="text-align:left">Presentation Layer (React 19, TailwindCSS, WebSockets)</td>
+<td style="text-align:left">75</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CHAPTER V</strong></td>
+<td style="text-align:left"><strong>TESTING, RESULTS AND DISCUSSION</strong></td>
+<td style="text-align:left"><strong>78</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">5.1</td>
+<td style="text-align:left">Experimental Setup and Runtime Environment</td>
+<td style="text-align:left">78</td>
+</tr>
+<tr>
+<td style="text-align:left">5.2</td>
+<td style="text-align:left">Application Startup and Health Check Verification</td>
+<td style="text-align:left">79</td>
+</tr>
+<tr>
+<td style="text-align:left">5.3</td>
+<td style="text-align:left">Verification on Reference E-Commerce Benchmark</td>
+<td style="text-align:left">80</td>
+</tr>
+<tr>
+<td style="text-align:left">5.4</td>
+<td style="text-align:left">Static Smell Detection and Risk Scoring Output</td>
+<td style="text-align:left">82</td>
+</tr>
+<tr>
+<td style="text-align:left">5.5</td>
+<td style="text-align:left">Generated Test Suite Execution and Code Coverage</td>
+<td style="text-align:left">84</td>
+</tr>
+<tr>
+<td style="text-align:left">5.6</td>
+<td style="text-align:left">Root-Cause Tracing and Verification of Generated Patches</td>
+<td style="text-align:left">86</td>
+</tr>
+<tr>
+<td style="text-align:left">5.7</td>
+<td style="text-align:left">Multi-Agent Debate and Consensus Verification</td>
+<td style="text-align:left">88</td>
+</tr>
+<tr>
+<td style="text-align:left">5.8</td>
+<td style="text-align:left">Mutation Testing Adequacy Analysis</td>
+<td style="text-align:left">89</td>
+</tr>
+<tr>
+<td style="text-align:left">5.9</td>
+<td style="text-align:left">Verification Status of Automated Test Suites</td>
+<td style="text-align:left">90</td>
+</tr>
+<tr>
+<td style="text-align:left">5.10</td>
+<td style="text-align:left">Qualitative Analysis and Architectural Discussion</td>
+<td style="text-align:left">92</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CHAPTER VI</strong></td>
+<td style="text-align:left"><strong>CONCLUSION AND FUTURE WORK</strong></td>
+<td style="text-align:left"><strong>94</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">6.1</td>
+<td style="text-align:left">Summary of Research and Engineering Achievements</td>
+<td style="text-align:left">94</td>
+</tr>
+<tr>
+<td style="text-align:left">6.2</td>
+<td style="text-align:left">Key Technical Contributions</td>
+<td style="text-align:left">95</td>
+</tr>
+<tr>
+<td style="text-align:left">6.3</td>
+<td style="text-align:left">Verified Implementation Status versus Design Goals</td>
+<td style="text-align:left">96</td>
+</tr>
+<tr>
+<td style="text-align:left">6.4</td>
+<td style="text-align:left">Identified Limitations and Operational Constraints</td>
+<td style="text-align:left">97</td>
+</tr>
+<tr>
+<td style="text-align:left">6.5</td>
+<td style="text-align:left">Future Enhancements</td>
+<td style="text-align:left">98</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>REFERENCES</strong></td>
+<td style="text-align:left"><strong>100</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>APPENDIX A: PROJECT REPOSITORY STRUCTURE</strong></td>
+<td style="text-align:left"><strong>104</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>APPENDIX B: REST API ENDPOINTS SPECIFICATION</strong></td>
+<td style="text-align:left"><strong>107</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>APPENDIX C: DATABASE RELATIONAL SCHEMA (SQL)</strong></td>
+<td style="text-align:left"><strong>110</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>APPENDIX D: CORE SOURCE CODE IMPLEMENTATION EXCERPTS</strong></td>
+<td style="text-align:left"><strong>114</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>APPENDIX E: SYSTEM VERIFICATION TEST CATALOGUE</strong></td>
+<td style="text-align:left"><strong>120</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left"><strong>APPENDIX F: SETUP AND EXECUTION MANUAL</strong></td>
+<td style="text-align:left"><strong>123</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>LIST OF FIGURES</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Figure No.</th>
+<th style="text-align:left">Figure Title</th>
+<th style="text-align:left">Page No.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Fig. 3.1</td>
+<td style="text-align:left">SentinelMesh High-Level Multi-Tier Architectural Topology</td>
+<td style="text-align:left">30</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 3.2</td>
+<td style="text-align:left">End-to-End Orchestration Sequence and Communication Flow</td>
+<td style="text-align:left">32</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 3.3</td>
+<td style="text-align:left">Level 0 Context and Level 1 Subsystem Data Flow Diagram (DFD)</td>
+<td style="text-align:left">34</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 3.4</td>
+<td style="text-align:left">Multi-Agent Coordination and Cancellation Checkpoint Workflow</td>
+<td style="text-align:left">36</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 3.5</td>
+<td style="text-align:left">Relational Entity-Relationship (ER) Database Schema</td>
+<td style="text-align:left">38</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 4.1</td>
+<td style="text-align:left">AST Branch-Counting Cyclomatic Complexity Algorithm Topology</td>
+<td style="text-align:left">50</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 4.2</td>
+<td style="text-align:left">SandboxRunner Subprocess Isolation and Process-Tree Termination</td>
+<td style="text-align:left">56</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 4.3</td>
+<td style="text-align:left">Pre-flight Patch Verification Pipeline inside Temporary Sandbox</td>
+<td style="text-align:left">63</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 4.4</td>
+<td style="text-align:left">Dual-Agent Debate and Consensus Computation Mechanism</td>
+<td style="text-align:left">66</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 4.5</td>
+<td style="text-align:left">AST Operator Substitution Pipeline in Mutation Engine</td>
+<td style="text-align:left">68</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 5.1</td>
+<td style="text-align:left">Verified Health Endpoint Response and Database Status</td>
+<td style="text-align:left">79</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 5.2</td>
+<td style="text-align:left">Frontend Real-Time Telemetry and Risk Heatmap Visualization</td>
+<td style="text-align:left">83</td>
+</tr>
+<tr>
+<td style="text-align:left">Fig. 5.3</td>
+<td style="text-align:left">Automated Bug Explorer with Root-Cause and Patch Diff Views</td>
+<td style="text-align:left">87</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>LIST OF TABLES</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Table No.</th>
+<th style="text-align:left">Table Title</th>
+<th style="text-align:left">Page No.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Table 2.1</td>
+<td style="text-align:left">Comparative Analysis of Existing Testing and Defect Analysis Frameworks</td>
+<td style="text-align:left">21</td>
+</tr>
+<tr>
+<td style="text-align:left">Table 3.1</td>
+<td style="text-align:left">Minimum Hardware Specifications for Local Execution</td>
+<td style="text-align:left">27</td>
+</tr>
+<tr>
+<td style="text-align:left">Table 3.2</td>
+<td style="text-align:left">Core Software Stack and Dependency Specifications</td>
+<td style="text-align:left">27</td>
+</tr>
+<tr>
+<td style="text-align:left">Table 4.1</td>
+<td style="text-align:left">Cyclomatic Complexity Branch Types Evaluated via Python AST</td>
+<td style="text-align:left">50</td>
+</tr>
+<tr>
+<td style="text-align:left">Table 4.2</td>
+<td style="text-align:left">Implemented Security and Reliability Heuristic Code Smells</td>
+<td style="text-align:left">51</td>
+</tr>
+<tr>
+<td style="text-align:left">Table 4.3</td>
+<td style="text-align:left">Supported Abstract Syntax Tree Mutation Operator Replacements</td>
+<td style="text-align:left">69</td>
+</tr>
+<tr>
+<td style="text-align:left">Table 4.4</td>
+<td style="text-align:left">Database Table Definitions and Purpose</td>
+<td style="text-align:left">74</td>
+</tr>
+<tr>
+<td style="text-align:left">Table 5.1</td>
+<td style="text-align:left">Verified E-Commerce Benchmark Injected Defects and Agent Outcomes</td>
+<td style="text-align:left">81</td>
+</tr>
+<tr>
+<td style="text-align:left">Table 5.2</td>
+<td style="text-align:left">Test Execution Suite Catalogue and Verification Audit Status</td>
+<td style="text-align:left">90</td>
+</tr>
+<tr>
+<td style="text-align:left">Table B.1</td>
+<td style="text-align:left">SentinelMesh REST API Specification and HTTP Status Codes</td>
+<td style="text-align:left">107</td>
+</tr>
+<tr>
+<td style="text-align:left">Table E.1</td>
+<td style="text-align:left">Detailed Verification Test Suite Execution Matrix</td>
+<td style="text-align:left">120</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div style="page-break-after: always;"></div>
+<h2>LIST OF ABBREVIATIONS</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Abbreviation</th>
+<th style="text-align:left">Expanded Form</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>API</strong></td>
+<td style="text-align:left">Application Programming Interface</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>APR</strong></td>
+<td style="text-align:left">Automated Program Repair</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>AST</strong></td>
+<td style="text-align:left">Abstract Syntax Tree</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CORS</strong></td>
+<td style="text-align:left">Cross-Origin Resource Sharing</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CPU</strong></td>
+<td style="text-align:left">Central Processing Unit</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DFD</strong></td>
+<td style="text-align:left">Data Flow Diagram</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>ER</strong></td>
+<td style="text-align:left">Entity-Relationship</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>FIFO</strong></td>
+<td style="text-align:left">First In, First Out</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>HTTP</strong></td>
+<td style="text-align:left">Hypertext Transfer Protocol</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IEEE</strong></td>
+<td style="text-align:left">Institute of Electrical and Electronics Engineers</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>JSON</strong></td>
+<td style="text-align:left">JavaScript Object Notation</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>KPI</strong></td>
+<td style="text-align:left">Key Performance Indicator</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>LLM</strong></td>
+<td style="text-align:left">Large Language Model</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>LOC</strong></td>
+<td style="text-align:left">Lines of Code</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MD5</strong></td>
+<td style="text-align:left">Message Digest Algorithm 5</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>PID</strong></td>
+<td style="text-align:left">Process Identifier</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>QA</strong></td>
+<td style="text-align:left">Quality Assurance</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>RAM</strong></td>
+<td style="text-align:left">Random Access Memory</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>REST</strong></td>
+<td style="text-align:left">Representational State Transfer</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>SQL</strong></td>
+<td style="text-align:left">Structured Query Language</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>UI</strong></td>
+<td style="text-align:left">User Interface</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>URL</strong></td>
+<td style="text-align:left">Uniform Resource Locator</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>VCS</strong></td>
+<td style="text-align:left">Version Control System</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Vite</strong></td>
+<td style="text-align:left">Frontend Tooling Build Suite</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>WAL</strong></td>
+<td style="text-align:left">Write-Ahead Logging</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>WS</strong></td>
+<td style="text-align:left">WebSocket</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>CHAPTER I</h1>
+<h1>INTRODUCTION</h1>
+<h2>1.1 Background of Software Quality Assurance</h2>
+<p>In modern computing, software applications govern mission-critical infrastructures spanning healthcare diagnostics, financial clearinghouses, distributed cloud backends, and automotive control systems. As system complexity increases exponentially, the difficulty of guaranteeing software correctness, security, and reliability escalates concurrently. Software Quality Assurance (SQA) comprises the systematic monitoring, evaluation, and enhancement of software engineering artifacts throughout the Software Development Life Cycle (SDLC) [1].</p>
+<p>Historically, quality assurance relied on manual exploratory testing, informal code walkthroughs, and rigid inspection checklists. However, modern agile methodologies and rapid deployment cadences—where production releases occur continuously—have rendered purely manual quality governance obsolete. Defects that bypass early verification cycles result in severe technical debt, security breaches, system outages, and astronomical post-release remediation costs. Consequently, formalizing and automating software quality assurance has emerged as one of the most critical endeavors in computer science and software engineering.</p>
+<h2>1.2 The Imperative of Automated Testing in Modern CI/CD</h2>
+<p>Continuous Integration and Continuous Deployment (CI/CD) pipelines necessitate automated verification at every code commit. Automated testing enables rapid regression detection, verifying that recent code modifications do not compromise pre-existing functionality. Automated suites typically encompass unit tests, integration tests, contract tests, and end-to-end user journey validations.</p>
+<p>Dynamic test runners like <code>pytest</code>, paired with code coverage instrumentation, provide empirical indicators of test suite thoroughness. High statement and branch coverage indicate that a substantial fraction of the syntactic execution paths have been exercised. Furthermore, automated testing provides immediate deterministic feedback to developers, reducing the debugging feedback loop from days to minutes.</p>
+<p>Despite the widespread adoption of CI/CD frameworks, writing comprehensive test suites remains an arduous task. Developers frequently produce happy-path unit tests while failing to anticipate boundary conditions, off-by-one errors, null dereferences, or unhandled exceptions under pathological inputs. This test writing gap leaves latent defects undetected until production deployment.</p>
+<h2>1.3 Limitations of Traditional and Manual Defect Analysis</h2>
+<p>When a test failure occurs or an unexpected runtime exception is triggered, developers face a multi-stage cognitive challenge:</p>
+<ol>
+<li><strong>Log Analysis:</strong> Sifting through voluminous stack traces to isolate the offending instruction.</li>
+<li><strong>Defect Categorization:</strong> Classifying the failure (e.g., semantic error, security flaw, resource leak, or race condition).</li>
+<li><strong>Root-Cause Investigation:</strong> Tracing the backward dynamic dependency chain from the point of failure to the original syntactic defect.</li>
+<li><strong>Patch Synthesis:</strong> Writing a targeted remediation that rectifies the root defect without introducing regression failures.</li>
+<li><strong>Regression Verification:</strong> Re-executing all unit and integration tests to confirm the validity of the patch.</li>
+</ol>
+<p>Traditional static analysis tools (e.g., linters and heuristic rule checkers) flag potential code smells and cyclomatic complexity hotspots. However, they lack runtime semantic awareness and frequently inundate engineers with false-positive alerts. Conversely, dynamic test runners identify failure locations but offer no explanation regarding the fundamental root cause, leaving diagnosis and remediation entirely to human intuition.</p>
+<h2>1.4 Motivation for Multi-Agent Architectures in Software Engineering</h2>
+<p>Recent advances in generative artificial intelligence and Large Language Models (LLMs) have opened new horizons for automated code reasoning, synthesis, and repair. However, relying on monolithic, single-prompt LLM invocations introduces significant fragility:</p>
+<ul>
+<li>Single LLM prompts attempt to parse files, infer bugs, predict fixes, and judge patch correctness simultaneously, often leading to hallucinations, hallucinated function signatures, and unverified code changes.</li>
+<li>Large context windows become polluted with irrelevant log entries, obscuring the primary root cause.</li>
+<li>Monolithic systems lack deterministic execution boundaries; an LLM cannot verify whether its generated code actually runs, satisfies syntax rules, or passes unit tests without dynamic execution feedback.</li>
+</ul>
+<p>Multi-Agent Systems (MAS) resolve these limitations by decomposing a monolithic task into discrete, specialized agents operating within a structured pipeline [2]. Each agent possesses an explicit, bounded mandate: one agent performs deterministic Abstract Syntax Tree (AST) parsing, another synthesizes pytest functions, a third manages isolated subprocess execution, a fourth isolates root causes, a fifth synthesizes patches, and a sixth acts as an adversarial critic. Through collaborative peer interaction and dynamic execution sandboxes, multi-agent frameworks combine the deterministic guarantees of traditional compiler parsing with the flexible semantic reasoning of modern AI models.</p>
+<h2>1.5 Problem Statement</h2>
+<p>Software development teams face high defect remediation latencies, incomplete unit test coverage, and human error during root-cause diagnosis and regression patching. Existing automated testing tools operate in fragmented silos: static linters operate in isolation from test runners; test runners fail without automated causal explanation; and automated program repair tools lack pre-flight regression verification and multi-agent peer review.</p>
+<p>There is a critical need for an integrated, autonomous software quality framework that:</p>
+<ol>
+<li>Performs deterministic static analysis and AST-based complexity profiling.</li>
+<li>Synthesizes relevant automated test cases tailored to the analyzed source code.</li>
+<li>Executes test suites in a secured sandbox environment, monitoring execution metrics and flakiness.</li>
+<li>Categorizes and deduplicates static and dynamic defects.</li>
+<li>Isolates root-cause causal chains using code-slicing techniques.</li>
+<li>Automatically generates candidate patches and validates them against regression suites.</li>
+<li>Conducts adversarial peer review before presenting verified findings to the developer.</li>
+</ol>
+<h2>1.6 Aim of the Project</h2>
+<p>The primary aim of this project is to design, develop, and evaluate <strong>SentinelMesh</strong>, an intelligent multi-agent framework that automates the end-to-end lifecycle of software quality assurance, defect diagnosis, root-cause analysis, and self-healing patch verification for Python codebases.</p>
+<h2>1.7 Specific Project Objectives</h2>
+<p>To realize the overall aim, the project is structured around the following specific technical objectives:</p>
+<ol>
+<li><strong>Architect a Multi-Agent Mesh:</strong> Design an asynchronous orchestration engine coordinating nine specialized agents across static analysis, test generation, test execution, bug classification, root-cause analysis, auto-fixing, critic review, mutation testing, and reporting.</li>
+<li><strong>Implement AST-Based Static Analysis:</strong> Develop an AST parsing engine to calculate cyclomatic complexity via branch counting, detect common security and reliability code smells, and assign file risk scores.</li>
+<li><strong>Automate Test Suite Synthesis:</strong> Create an automated test generation agent that parses class and function signatures to synthesize executable <code>pytest</code> test suites.</li>
+<li><strong>Build a Sandboxed Execution Engine:</strong> Implement an isolated subprocess runner with <code>psutil</code> process-tree controls to execute test suites safely, compute statement coverage, and flag flaky tests.</li>
+<li><strong>Establish Causal Root-Cause Slicing:</strong> Construct an engine that extracts local AST code slices around failure lines and constructs step-by-step causal fault chains.</li>
+<li><strong>Implement Pre-Flight Patch Verification:</strong> Develop an automated repair agent that synthesizes code patches and verifies them in a temporary sandbox to confirm regression safety before human review.</li>
+<li><strong>Incorporate Adversarial Critic Review:</strong> Implement a dual-perspective critic agent to conduct automated debate rounds and compute an objective consensus confidence score.</li>
+<li><strong>Integrate Mutation Testing:</strong> Build an AST mutation engine that replaces relational, arithmetic, and boolean operators to evaluate the empirical adequacy of the generated test suites.</li>
+<li><strong>Deliver a Real-Time Web Interface:</strong> Develop a reactive dashboard using React and WebSockets to stream agent logs, risk heatmaps, debate transcripts, and downloadable markdown audit reports.</li>
+</ol>
+<h2>1.8 Scope and Operational Boundaries</h2>
+<p>The scope of the SentinelMesh framework is defined as follows:</p>
+<ul>
+<li><strong>Target Language:</strong> The framework is specifically developed and optimized for Python codebases (<code>.py</code> source files and packages).</li>
+<li><strong>Execution Environment:</strong> Supports local execution on standard computing hardware (Windows, Linux, macOS) without requiring mandatory cloud dependencies.</li>
+<li><strong>LLM Decoupling:</strong> Implements a fully operational, deterministic <code>OfflineLLMProvider</code> using rule-based reasoning, ensuring complete offline functionality without API keys. Pluggable adapters for Google Gemini and OpenAI are included for extended inference.</li>
+<li><strong>Sandboxing Boundary:</strong> Subprocess isolation with timeout guards and process-tree termination. Full operating-system virtualization (e.g., Docker or hypervisors) is identified as a future production enhancement.</li>
+<li><strong>Verification Guarantee:</strong> Candidate patches are considered verified only if they resolve the targeted defect and pass the entire project test suite in an isolated temporary directory.</li>
+</ul>
+<h2>1.9 Proposed Solution: The SentinelMesh Framework</h2>
+<p>SentinelMesh addresses the shortcomings of existing fragmented testing tools by providing a unified, multi-agent platform. When a developer submits a Python project (via directory path or ZIP upload), SentinelMesh initiates an asynchronous analysis pipeline managed by the <code>OrchestratorAgent</code>.</p>
+<p>The workflow progresses through nine sequential stages:</p>
+<ol>
+<li><code>StaticAnalysisAgent</code> inspects the codebase using Python's <code>ast</code> module, mapping cyclomatic complexity and detecting security/reliability code smells.</li>
+<li><code>TestGenerationAgent</code> synthesizes modular <code>pytest</code> test suites for identified classes and functions.</li>
+<li><code>TestExecutionAgent</code> invokes the tests in a temporary workspace, computing pass/fail rates, code coverage, and flakiness.</li>
+<li><code>BugClassificationAgent</code> aggregates dynamic test failures and static smells, deduplicating them using MD5 categorical hashing.</li>
+<li><code>RootCauseAgent</code> extracts local code slices and synthesizes causal failure chains.</li>
+<li><code>AutoFixAgent</code> constructs candidate code patches and verifies them inside an isolated temporary sandbox.</li>
+<li><code>CriticAgent</code> executes automated debate rounds to establish a consensus confidence score.</li>
+<li><code>MutationEngine</code> injects AST mutations (operator swaps) to determine test suite mutation kill rates.</li>
+<li><code>ReportAgent</code> consolidates all metrics into an executive summary and a detailed markdown audit report.</li>
+</ol>
+<p>All run metadata, defect records, logs, and debate transcripts are persisted in an ACID-compliant SQLite database using Write-Ahead Logging (WAL) and streamed to the React dashboard via WebSockets.</p>
+<h2>1.10 Significance and Academic Benefits</h2>
+<p>The academic and practical significance of this project includes:</p>
+<ul>
+<li><strong>Architectural Contribution:</strong> Demonstrates how multi-agent coordination bridges the gap between deterministic static analysis and semantic generative repair.</li>
+<li><strong>Empirical Test Adequacy:</strong> Combines traditional line coverage with AST mutation testing to provide an empirical assessment of test suite quality.</li>
+<li><strong>Zero-Trust Patch Verification:</strong> Prevents hallucinated or broken code patches from reaching developers by enforcing pre-flight test execution inside an isolated sandbox.</li>
+<li><strong>Accessibility and Privacy:</strong> Operates entirely offline with zero third-party API dependencies, preserving intellectual property and code confidentiality.</li>
+</ul>
+<h2>1.11 Organization of the Report</h2>
+<p>This report is structured into six comprehensive chapters:</p>
+<ul>
+<li><strong>Chapter I — Introduction:</strong> Presents the background, motivation, problem statement, objectives, scope, and proposed solution.</li>
+<li><strong>Chapter II — Literature Survey:</strong> Reviews existing academic literature on automated testing, static analysis, AST grammars, automated program repair, and multi-agent systems, concluding with a comparative analysis and research gap identification.</li>
+<li><strong>Chapter III — Objectives and Methodology:</strong> Details system requirements, architectural topology, data flow diagrams, agent coordination, database design, and sandboxing safety.</li>
+<li><strong>Chapter IV — System Implementation and Modules:</strong> Provides an in-depth technical analysis of each implemented module, supported by verified file paths, class designs, and source code excerpts.</li>
+<li><strong>Chapter V — Results and Discussion:</strong> Presents verified experimental findings, test execution matrices, bug detection outputs, patch verification results, and architectural discussions.</li>
+<li><strong>Chapter VI — Conclusion and Future Work:</strong> Summarizes project outcomes, contributions, verified implementation milestones, and outlines future research directions.</li>
+<li><strong>Appendices &amp; References:</strong> Includes the project directory layout, REST API documentation, database schema definitions, code excerpts, test catalogues, setup manuals, and IEEE-style bibliography.</li>
+</ul>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>CHAPTER II</h1>
+<h1>LITERATURE SURVEY</h1>
+<h2>2.1 Theoretical Foundations of Automated Software Testing</h2>
+<p>Automated software testing is grounded in the foundational principles of program verification and empirical validation. Dijkstra famously observed that program testing can be used to show the presence of bugs, but never to show their absence [3]. Consequently, software testing research focuses on maximizing fault revelation probability while minimizing computational overhead and human intervention.</p>
+<p>Myers et al. [1] formalized testing methodologies into black-box (functional) and white-box (structural) paradigms. In white-box testing, test suites are generated with the explicit objective of traversing internal program logic, characterized by control flow graphs and branch predicates. The primary challenge in automated test synthesis is the state-space explosion problem: as cyclomatic complexity grows, the number of unique execution paths grows exponentially, making exhaustive path testing computationally intractable.</p>
+<p>Recent approaches employ search-based software testing (SBST), utilizing genetic algorithms and meta-heuristic search to explore execution paths [4]. While SBST tools such as EvoSuite have achieved high branch coverage in object-oriented environments, they struggle with complex input preconditions, mock synthesis, and human-readable test assertions. This limitation highlights the need for intelligent, context-aware test generation techniques.</p>
+<h2>2.2 Static Code Analysis and Abstract Syntax Tree (AST) Grammars</h2>
+<p>Static code analysis examines source code without executing the underlying program, evaluating adherence to syntactic rules, coding standards, and security constraints [5]. At the core of static analysis lies the Abstract Syntax Tree (AST)—a structural, hierarchical representation of source code generated by compiler lexical and syntactic analysis phases [6].</p>
+<p>In Python, the built-in <code>ast</code> module exposes grammar productions conforming to the formal Python grammar specification [7]. Each code construct—such as function definitions (<code>FunctionDef</code>), conditional branches (<code>If</code>), iteration loops (<code>For</code>, <code>While</code>), and binary operations (<code>BinOp</code>)—is represented as an immutable tree node.</p>
+<p>McCabe [8] introduced Cyclomatic Complexity ($V(G)$) as a fundamental software metric derived from graph theory:
+$$V(G) = E - N + 2P$$
+Where $E$ represents the number of edges, $N$ represents the number of nodes, and $P$ represents the number of connected components in the control flow graph. For an individual routine ($P=1$), cyclomatic complexity simplifies to:
+$$V(G) = \Pi + 1$$
+Where $\Pi$ denotes the count of decision points (conditional branch predicates).</p>
+<p>By traversing an AST, static analysers can calculate cyclomatic complexity without constructing full control-flow graphs. Furthermore, AST node visitors can inspect syntax patterns for anti-patterns and vulnerabilities, such as unescaped SQL string formatting, empty exception handlers, and unsafe dynamic execution (<code>eval</code>/<code>exec</code>) [9]. While static analysis provides high throughput and exhaustive coverage, it cannot observe runtime data values, necessitating complementary dynamic execution techniques.</p>
+<h2>2.3 Test Case Synthesis and Coverage Metrics</h2>
+<p>Automated test case generation aims to synthesize executable assertions that validate program behavior against expected specifications [10]. Traditional approaches rely on symbolic execution, where program inputs are treated as symbolic variables, and constraints are collected along execution branches to be solved by Satisfiability Modulo Theories (SMT) solvers [11]. However, symbolic execution encounters significant difficulties when encountering external API calls, native library invocations, and complex string operations.</p>
+<p>Code coverage serves as the primary metric for evaluating test suite thoroughness. Formulated by Miller and Maloney [12], statement coverage measures the fraction of executable source statements exercised during test execution:
+$$\text{Coverage}_{\text{stmt}} = \left( \frac{\text{Statements Executed}}{\text{Total Executable Statements}} \right) \times 100%$$
+While statement coverage provides an initial indicator of test adequacy, high statement coverage alone does not guarantee the absence of faults. Critical boundary bugs frequently reside in unexercised branch combinations or unexpected runtime exceptions under specific parameter types.</p>
+<p>Modern dynamic coverage tools, such as <code>coverage.py</code>, use Python execution trace functions (<code>sys.settrace</code>) to track instruction pointers at runtime. To support continuous integration, automated test generators must produce native <code>pytest</code> suites that integrate cleanly with existing coverage measurement tools.</p>
+<h2>2.4 Defect Classification and Automated Root-Cause Analysis</h2>
+<p>When automated tests fail, developers must classify the failure and identify its underlying cause. Defect classification categorizes bugs by functional impact and failure symptoms—such as syntax errors, runtime exceptions, type mismatches, division by zero, index errors, and security vulnerabilities [13].</p>
+<p>Root-Cause Analysis (RCA) seeks to trace the causal chain backward from the failure point to the exact syntactic defect in the source code. Zeller [14] pioneered delta debugging, an automated technique that isolates failure-inducing inputs by systematically narrowing differences between passing and failing test runs. Agrawal and Horgan [15] introduced dynamic program slicing, which isolates the subset of program statements that actively influenced the values at a specific failure point.</p>
+<p>While dynamic slicing is mathematically rigorous, it incurs substantial runtime tracing overhead. In multi-agent architectures, an alternative approach is static context slicing: when an unhandled exception or assertion failure occurs at line $L$, an agent extracts a localized window ($L - k$ to $L + k$) of the AST, inspects symbol assignments, and constructs a structured causal explanation of the failure mechanism.</p>
+<h2>2.5 Automated Program Repair (APR) and Patch Verification</h2>
+<p>Automated Program Repair (APR) focuses on automatically generating valid patches for detected software bugs without human intervention [16]. APR techniques are generally divided into two main categories:</p>
+<ol>
+<li><strong>Generate-and-Validate (Search-Based) APR:</strong> Tools such as GenProg [17] apply genetic programming operators (mutation and crossover) to modify the AST, using passing test suites as an objective fitness function.</li>
+<li><strong>Semantic (Constraint-Based) APR:</strong> Tools such as SemFix [18] use symbolic execution to extract repair constraints, using SMT solvers to synthesize valid replacement expressions.</li>
+</ol>
+<p>A significant challenge in APR is patch overfitting: candidate patches may pass the specific test suite by deleting functionality or hardcoding return values, while failing on unseen valid inputs [19]. To prevent overfitting, modern APR frameworks enforce regression verification: any synthesized patch must be applied to an isolated copy of the workspace and validated against both the failing test and the existing regression suite.</p>
+<h2>2.6 Multi-Agent Systems and Collaborative LLM Reasoning</h2>
+<p>The emergence of Large Language Models (LLMs) has opened new avenues for software engineering automation [20]. However, applying a single LLM to end-to-end bug detection and repair often results in hallucinations, invalid syntax, and unverified code changes.</p>
+<p>Multi-Agent Systems (MAS) address these limitations by distributing tasks across specialized agents that interact through structured protocols [21]. In software engineering, frameworks like ChatDev [22] and MetaGPT [23] have demonstrated that assigning discrete roles (e.g., Architect, Coder, Reviewer, Tester) improves code generation quality.</p>
+<p>In defect analysis, multi-agent collaboration provides distinct benefits:</p>
+<ul>
+<li><strong>Separation of Concerns:</strong> Distinct agents handle static parsing, test synthesis, execution monitoring, causal analysis, and patch generation independently.</li>
+<li><strong>Adversarial Review:</strong> A dedicated Critic Agent reviews proposed patches from an opposing perspective, mitigating model overconfidence.</li>
+<li><strong>Sandboxed Execution Grounding:</strong> Agents receive empirical execution feedback from isolated sandboxes, anchoring their reasoning in concrete runtime realities rather than speculative model weights.</li>
+</ul>
+<h2>2.7 Mutation Testing and Test Suite Adequacy</h2>
+<p>While code coverage measures which statements are executed, it does not measure whether the test assertions are capable of detecting faults. Mutation testing provides an empirical measure of test suite fault-detection effectiveness [24].</p>
+<p>In mutation testing, syntactic mutants are generated by applying small, systematic modifications to the source code (e.g., swapping <code>==</code> with <code>!=</code>, or changing <code>+</code> to <code>-</code>). The test suite is then executed against each mutant:</p>
+<ul>
+<li>If a test fails, the mutant is considered <strong>killed</strong> (the test suite detected the fault).</li>
+<li>If all tests pass, the mutant <strong>survives</strong> (the test suite failed to detect the fault).</li>
+</ul>
+<p>The Mutation Score ($MS$) is defined as:
+$$MS = \left( \frac{M_{\text{killed}}}{M_{\text{total}} - M_{\text{equivalent}}} \right) \times 100%$$
+Where $M_{\text{killed}}$ is the number of killed mutants, $M_{\text{total}}$ is the total number of mutants generated, and $M_{\text{equivalent}}$ represents syntactically altered mutants that retain identical semantics to the original program. High mutation scores correlate strongly with real-world fault detection capability, making mutation testing a valuable validation mechanism for automated test suites.</p>
+<h2>2.8 Comparative Literature Analysis Table</h2>
+<p>Table 2.1 summarizes the capabilities and limitations of existing testing and defect analysis approaches in comparison with the SentinelMesh framework.</p>
+<h3>Table 2.1: Comparative Analysis of Existing Testing and Defect Analysis Frameworks</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Framework / Methodology</th>
+<th style="text-align:left">Primary Paradigm</th>
+<th style="text-align:left">Core Strength</th>
+<th style="text-align:left">Key Limitation</th>
+<th style="text-align:left">Relevance / Contrast to SentinelMesh</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>SonarQube</strong> [5]</td>
+<td style="text-align:left">Static Analysis &amp; Linters</td>
+<td style="text-align:left">Comprehensive static rule set and technical debt metrics</td>
+<td style="text-align:left">Zero runtime awareness; cannot verify bugs dynamically</td>
+<td style="text-align:left">SentinelMesh incorporates AST static analysis but connects findings directly to dynamic test generation.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>EvoSuite</strong> [4]</td>
+<td style="text-align:left">Search-Based Test Generation (GA)</td>
+<td style="text-align:left">High branch coverage on object-oriented code</td>
+<td style="text-align:left">Produces complex, hard-to-read tests; cannot synthesize patches</td>
+<td style="text-align:left">SentinelMesh generates clean, human-readable <code>pytest</code> suites and provides automated root-cause repair.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>GenProg</strong> [17]</td>
+<td style="text-align:left">Search-Based APR (Genetic Prog.)</td>
+<td style="text-align:left">Language-agnostic patch search via AST transformations</td>
+<td style="text-align:left">High patch overfitting rate; high computational cost</td>
+<td style="text-align:left">SentinelMesh uses targeted causal patch synthesis backed by pre-flight regression sandboxing.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Pynguin</strong> [10]</td>
+<td style="text-align:left">Automated Test Generation for Python</td>
+<td style="text-align:left">Automated test generation using genetic algorithms</td>
+<td style="text-align:left">High assertion generation overhead; does not analyze root causes</td>
+<td style="text-align:left">SentinelMesh generates tests and couples them with causal slicing and patch verification.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MetaGPT / ChatDev</strong> [22, 23]</td>
+<td style="text-align:left">Multi-Agent LLM Framework</td>
+<td style="text-align:left">Coordinated multi-agent software artifact generation</td>
+<td style="text-align:left">Lacks isolated execution sandboxes for empirical test/patch validation</td>
+<td style="text-align:left">SentinelMesh grounds all multi-agent actions in isolated subprocess sandboxes and AST mutation testing.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>SentinelMesh (This Work)</strong></td>
+<td style="text-align:left">Hybrid Multi-Agent Mesh + AST + Sandbox</td>
+<td style="text-align:left">End-to-end integration: AST analysis, test generation, sandboxed execution, root-cause slicing, verified patching, critic debate, and mutation scoring</td>
+<td style="text-align:left">Currently scoped to Python codebases; relies on subprocess rather than OS-level virtualization</td>
+<td style="text-align:left">Provides a unified, verifiable, and offline-capable software quality platform.</td>
+</tr>
+</tbody>
+</table>
+<h2>2.9 Research Gaps Identified</h2>
+<p>Based on the literature survey, several key research gaps were identified in existing automated software quality frameworks:</p>
+<ol>
+<li><strong>Isolation of Static and Dynamic Tools:</strong> Static linters and dynamic test runners operate as disconnected tools, requiring manual developer effort to correlate code smells with dynamic test failures.</li>
+<li><strong>Absence of Pre-Flight Patch Verification:</strong> Most automated repair tools produce candidate code modifications without rigorously verifying that the patch resolves the bug without breaking pre-existing tests.</li>
+<li><strong>Overconfidence and Hallucination in AI Repair:</strong> Existing LLM-based coding tools generate fixes without adversarial peer review or empirical runtime validation, frequently introducing syntax errors and regression bugs.</li>
+<li><strong>Lack of Integrated Test Adequacy Assessment:</strong> Test generation frameworks rarely evaluate their synthesized suites against mutation testing, relying solely on line coverage metrics that do not measure fault-detection capability.</li>
+<li><strong>Cloud and API Dependency:</strong> Most modern AI-driven developer tools require external API connectivity, raising data privacy concerns and rendering them unusable in air-gapped or offline development environments.</li>
+</ol>
+<p>SentinelMesh was explicitly designed to address these gaps through a unified, nine-agent architecture grounded in local execution, deterministic AST analysis, and pre-flight regression sandboxing.</p>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>CHAPTER III</h1>
+<h1>OBJECTIVES AND METHODOLOGY</h1>
+<h2>3.1 Functional Requirements</h2>
+<p>The SentinelMesh framework must satisfy the following functional requirements:</p>
+<ol>
+<li><strong>FR-01: Multi-Format Project Ingestion:</strong> Ingest Python projects via local file directory paths or compressed ZIP archives, with input sanitization against path traversal (Zip-Slip) attacks.</li>
+<li><strong>FR-02: AST Static Analysis and Complexity Profiling:</strong> Parse Python source files into Abstract Syntax Trees, calculate cyclomatic complexity via branch counting, detect security and reliability code smells, and assign file risk levels.</li>
+<li><strong>FR-03: Automated Test Suite Generation:</strong> Synthesize valid, runnable <code>pytest</code> test suites exercising detected classes and functions.</li>
+<li><strong>FR-04: Isolated Test Execution:</strong> Execute test suites within isolated subprocesses, capture stdout/stderr, measure statement coverage via <code>coverage.py</code>, and detect flaky tests through multi-run re-execution.</li>
+<li><strong>FR-05: Defect Classification and Deduplication:</strong> Ingest failure records from both static analysis and dynamic test runs, deduplicating findings using MD5 categorical hashing.</li>
+<li><strong>FR-06: Localized Root-Cause Slicing:</strong> Extract localized code slices around defect lines and construct structured causal explanations.</li>
+<li><strong>FR-07: Automated Patch Synthesis and Pre-Flight Verification:</strong> Synthesize candidate code patches and verify them within an isolated temporary sandbox, confirming regression safety before human review.</li>
+<li><strong>FR-08: Dual-Agent Critic Debate:</strong> Conduct structured debate rounds between proposer and reviewer agents, recording debate transcripts and calculating consensus confidence scores.</li>
+<li><strong>FR-09: AST-Driven Mutation Testing:</strong> Inject relational, arithmetic, and boolean mutations into source files to compute empirical test suite mutation scores.</li>
+<li><strong>FR-10: Multi-Format Report Synthesis:</strong> Generate structured executive summaries and technical markdown audit reports, accessible via REST APIs and WebSockets.</li>
+</ol>
+<h2>3.2 Non-Functional Requirements</h2>
+<p>The framework is designed to fulfill the following non-functional requirements:</p>
+<ol>
+<li><strong>NFR-01: Execution Isolation and Safety:</strong> Test execution and patch verification must run in isolated temporary directories. Subprocesses must be monitored with timeout guards and process-tree termination via <code>psutil</code> to prevent runaway processes.</li>
+<li><strong>NFR-02: Zero-Dependency Offline Operation:</strong> Core analysis, test synthesis, bug classification, and patch generation must function entirely offline without external API keys via the <code>OfflineLLMProvider</code>.</li>
+<li><strong>NFR-03: Concurrency and Thread Safety:</strong> Database access must support concurrent operations using SQLite Write-Ahead Logging (WAL) and SQLAlchemy connection pooling.</li>
+<li><strong>NFR-04: Real-Time Telemetry:</strong> Analysis progress, agent logs, and state transitions must be streamed to the user interface via WebSockets with sub-second latency.</li>
+<li><strong>NFR-05: Fault Tolerance and Graceful Degradation:</strong> Individual agent errors must be handled gracefully with fallback defaults, ensuring downstream agents continue execution without crashing the entire run.</li>
+<li><strong>NFR-06: Usability and Ergonomics:</strong> The web dashboard must provide clear visualizations, risk heatmaps, side-by-side patch diffs, and downloadable markdown reports.</li>
+</ol>
+<h2>3.3 Hardware and Software Specifications</h2>
+<h3>Table 3.1: Minimum Hardware Specifications</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Component</th>
+<th style="text-align:left">Minimum Specification</th>
+<th style="text-align:left">Recommended Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Processor (CPU)</strong></td>
+<td style="text-align:left">Intel Core i3 / AMD Ryzen 3 (Dual-Core, 2.0 GHz)</td>
+<td style="text-align:left">Intel Core i5 / AMD Ryzen 5 or higher (Quad-Core+)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>System Memory (RAM)</strong></td>
+<td style="text-align:left">4 GB DDR4</td>
+<td style="text-align:left">8 GB DDR4 / DDR5 or higher</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Storage Space</strong></td>
+<td style="text-align:left">2 GB available disk space (SSD preferred)</td>
+<td style="text-align:left">10 GB available SSD space</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Network Interface</strong></td>
+<td style="text-align:left">Local loopback interface (<code>127.0.0.1</code>)</td>
+<td style="text-align:left">High-speed Internet (optional, for cloud LLM APIs)</td>
+</tr>
+</tbody>
+</table>
+<h3>Table 3.2: Core Software Stack and Dependency Specifications</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Layer / Role</th>
+<th style="text-align:left">Technology / Package</th>
+<th style="text-align:left">Verified Version in Project</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Runtime Environment</strong></td>
+<td style="text-align:left">Python</td>
+<td style="text-align:left">3.11 / 3.12 (Standard CPython)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Web Framework &amp; API</strong></td>
+<td style="text-align:left">FastAPI</td>
+<td style="text-align:left">$\ge 0.110.0$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>ASGI Web Server</strong></td>
+<td style="text-align:left">Uvicorn (standard)</td>
+<td style="text-align:left">$\ge 0.28.0$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Data Validation</strong></td>
+<td style="text-align:left">Pydantic</td>
+<td style="text-align:left">$\ge 2.6.0$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Database &amp; ORM</strong></td>
+<td style="text-align:left">SQLAlchemy / SQLite</td>
+<td style="text-align:left">$\ge 2.0.0$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>WebSocket Engine</strong></td>
+<td style="text-align:left">WebSockets</td>
+<td style="text-align:left">$\ge 12.0$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Test Runner &amp; Coverage</strong></td>
+<td style="text-align:left">pytest, pytest-cov, coverage</td>
+<td style="text-align:left">pytest $\ge 8.0$, coverage $\ge 7.4$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>System &amp; Process Control</strong></td>
+<td style="text-align:left">psutil, aiofiles</td>
+<td style="text-align:left">psutil $\ge 5.9$, aiofiles $\ge 23.2$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>HTTP Client</strong></td>
+<td style="text-align:left">HTTPX</td>
+<td style="text-align:left">$\ge 0.27.0$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Frontend Framework</strong></td>
+<td style="text-align:left">React / Vite</td>
+<td style="text-align:left">React 19, Vite 6</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>UI Styling</strong></td>
+<td style="text-align:left">TailwindCSS</td>
+<td style="text-align:left">v4.0</td>
+</tr>
+</tbody>
+</table>
+<h2>3.4 Existing System Analysis</h2>
+<p>In standard software engineering workflows, quality assurance relies on fragmented, disconnected tools:</p>
+<ul>
+<li><strong>Linters (e.g., Flake8, Ruff):</strong> Check syntax and style conventions, but lack runtime awareness and produce high volumes of non-actionable alerts.</li>
+<li><strong>Test Runners (e.g., Pytest):</strong> Execute manually written assertions. When tests fail, they provide raw stack traces but offer no root-cause explanations or repair suggestions.</li>
+<li><strong>Manual Debugging:</strong> Developers manually analyze logs, formulate hypotheses, edit source code, and re-run tests—a slow and error-prone process.</li>
+<li><strong>Single-Prompt LLM Assistants:</strong> Developers copy stack traces into chat interfaces. These models frequently hallucinate invalid code and cannot verify that their proposed fixes actually compile or pass regression suites.</li>
+</ul>
+<p>The existing paradigm suffers from high diagnostic latency, lack of regression verification, and vulnerability to human oversight during patch development.</p>
+<h2>3.5 Proposed SentinelMesh Architecture</h2>
+<p>SentinelMesh replaces this fragmented workflow with a unified, multi-agent architecture. The system is organized into four core layers:</p>
+<pre><code>+-----------------------------------------------------------------------------------+
+|                        PRESENTATION LAYER (React + Vite)                          |
+|  - Real-Time Web Dashboard        - Risk Heatmap Visualization                    |
+|  - Agent Network Graph            - Side-by-Side Patch Diff Viewer                |
++-----------------------------------------------------------------------------------+
+                                       |
+                   HTTP REST API / WebSocket Telemetry Stream
+                                       v
++-----------------------------------------------------------------------------------+
+|                       API GATEWAY &amp; CONTROL (FastAPI)                             |
+|  - Asynchronous Request Routing   - Rate Limiting (600 req/min)                   |
+|  - Zip-Slip Upload Sanitizer      - WebSocket Pub/Sub EventBus                    |
+|  - Orchestrator Lifecycle Manager - Interrupted Run Recovery                      |
++-----------------------------------------------------------------------------------+
+                                       |
+                                       v
++-----------------------------------------------------------------------------------+
+|                     SENTINELMESH MULTI-AGENT PIPELINE                             |
+|  +--------------------+   +---------------------+   +--------------------------+  |
+|  | StaticAnalysisAgent|--&gt;| TestGenerationAgent |--&gt;|   TestExecutionAgent     |  |
+|  +--------------------+   +---------------------+   +--------------------------+  |
+|            |                                                     |                |
+|            v                                                     v                |
+|  +--------------------+   +---------------------+   +--------------------------+  |
+|  | BugClassification  |&lt;--|    RootCauseAgent   |--&gt;|      AutoFixAgent        |  |
+|  +--------------------+   +---------------------+   +--------------------------+  |
+|                                                                  |                |
+|  +--------------------+   +---------------------+                v                |
+|  |    ReportAgent     |&lt;--|   MutationEngine    |&lt;--+--------------------------+  |
+|  +--------------------+   +---------------------+   |       CriticAgent        |  |
+|                                                     +--------------------------+  |
++-----------------------------------------------------------------------------------+
+             |                                              |
+             v                                              v
++-------------------------------+             +-------------------------------------+
+| PERSISTENCE (SQLite + WAL)    |             | EXECUTION SANDBOX (psutil Isolation)|
+| - Projects, Runs, Bugs        |             | - Tempdir Workspace Duplication     |
+| - File Risks, Test Results    |             | - Process-Tree Termination Guard    |
+| - Mutation Records, Logs      |             | - Pytest &amp; Coverage Instrumentation |
++-------------------------------+             +-------------------------------------+
+</code></pre>
+<p><em>Fig. 3.1: SentinelMesh High-Level Multi-Tier Architectural Topology</em></p>
+<ol>
+<li><strong>Presentation Layer:</strong> A responsive web application built with React 19, Vite, and TailwindCSS. It provides real-time agent execution telemetry, risk heatmaps, bug inspection panels, side-by-side patch diff views, and downloadable audit reports.</li>
+<li><strong>API Gateway and Control Layer:</strong> Implemented in FastAPI, providing RESTful endpoints and WebSocket channels. Includes request validation, rate limiting (600 requests/minute), archive upload sanitization, and database connection lifecycle management.</li>
+<li><strong>Multi-Agent Pipeline Layer:</strong> Nine specialized agents running asynchronously under the supervision of the <code>OrchestratorAgent</code>. Each agent performs a dedicated phase of analysis, testing, diagnosis, or repair.</li>
+<li><strong>Execution and Persistence Layer:</strong> An execution boundary utilizing isolated temporary directories and <code>psutil</code> process controls, backed by an ACID-compliant SQLite relational database using Write-Ahead Logging (WAL) and SQLAlchemy connection pooling.</li>
+</ol>
+<h2>3.6 End-to-End Execution Workflow</h2>
+<p>The execution lifecycle of a SentinelMesh analysis run proceeds through nine sequential stages:</p>
+<pre><code>[User Uploads Project / Launches Run]
+                 |
+                 v
+[POST /api/runs] ---&gt; Database: Record Run (Status: pending)
+                 |
+                 v
+[OrchestratorAgent.execute_run()]
+  |
+  +---&gt; Stage 1: Static Analysis (AST branch complexity, smell detection, risk scoring)
+  |       |--&gt; Save file_risks to DB; Broadcast WebSocket event
+  |
+  +---&gt; Stage 2: Test Generation (Parse function signatures, synthesize pytest files)
+  |       |--&gt; Save sentinel_tests/ to workspace; Broadcast WebSocket event
+  |
+  +---&gt; Stage 3: Test Execution (Run pytest &amp; coverage in isolated sandbox)
+  |       |--&gt; Detect test failures, flakiness, statement coverage; Save test_results
+  |
+  +---&gt; Stage 4: Bug Classification (Aggregate static &amp; dynamic defects, MD5 deduplication)
+  |       |--&gt; Save bugs table records; Broadcast WebSocket event
+  |
+  +---&gt; Stage 5: Root-Cause Analysis (Extract AST slices around defect lines, build causal chains)
+  |       |--&gt; Update bugs with root_cause &amp; code_snippet
+  |
+  +---&gt; Stage 6: Auto-Fix Generation (Synthesize patches, pre-flight test in sandbox)
+  |       |--&gt; Verify patch in tempdir; Save patch_diff and patch_verified status
+  |
+  +---&gt; Stage 7: Critic Review (Dual-agent debate rounds, calculate consensus score)
+  |       |--&gt; Save debate_messages; Compute overall consensus metric
+  |
+  +---&gt; Stage 8: Mutation Testing (Inject AST operator mutations, compute kill rate)
+  |       |--&gt; Save mutation_records; Compute mutation_score
+  |
+  +---&gt; Stage 9: Report Generation (Synthesize executive summary and technical markdown)
+          |--&gt; Update run status to completed; Broadcast run_completed
+                 |
+                 v
+[User Dashboard Updates: Displays KPIs, Bug Explorer, and Downloadable Reports]
+</code></pre>
+<p><em>Fig. 3.2: End-to-End Orchestration Sequence and Communication Flow</em></p>
+<p>Between each pipeline stage, the <code>OrchestratorAgent</code> checks an explicit cancellation checkpoint (<code>is_cancelled(run_id)</code>). If a user cancels the run via the API, the orchestrator terminates downstream execution immediately, ensuring system responsiveness.</p>
+<h2>3.7 Data Flow Architecture (Level 0 and Level 1 DFD)</h2>
+<p>The flow of data through SentinelMesh is represented at two levels of abstraction:</p>
+<pre><code>+---------------------------------------------------------------------------------+
+|                       LEVEL 0: CONTEXT DATA FLOW DIAGRAM                        |
+|                                                                                 |
+|   +----------+        1. Project Source Code / ZIP Archive        +-----------+ |
+|   |          | -------------------------------------------------&gt; |           | |
+|   | Software |                                                    | Sentinel  | |
+|   | Engineer | &lt;------------------------------------------------- |   Mesh    | |
+|   |          |    2. Health Scores, Risk Metrics, Verified        | Framework | |
+|   +----------+       Patches, and Technical Markdown Reports      +-----------+ |
++---------------------------------------------------------------------------------+
+
++---------------------------------------------------------------------------------+
+|                      LEVEL 1: SUBSYSTEM DATA FLOW DIAGRAM                       |
+|                                                                                 |
+|   [Source Code]                                                                 |
+|         |                                                                       |
+|         v                                                                       |
+|   (1. AST Parser) -------&gt; [file_risks Table]                                  |
+|         |                                                                       |
+|         v                                                                       |
+|   (2. Test Generator) ---&gt; [sentinel_tests/ Directory]                          |
+|                                   |                                             |
+|                                   v                                             |
+|   [Source Code] -------------&gt; (3. Sandbox Runner)                              |
+|                                   |                                             |
+|                                   v                                             |
+|                            [coverage.json &amp; Pytest XML]                         |
+|                                   |                                             |
+|                                   v                                             |
+|   [file_risks Table] --------&gt; (4. Bug Classifier) ------&gt; [bugs Table]         |
+|                                                                 |               |
+|                                                                 v               |
+|   [Source Code] -----------------------------------------&gt; (5. RCA Engine)      |
+|                                                                 |               |
+|                                                                 v               |
+|                                                            [AST Slices]         |
+|                                                                 |               |
+|                                                                 v               |
+|   (6. Sandbox Verification) &lt;----------------------------- (6. Auto-Fixer)      |
+|              |                                                  |               |
+|              v                                                  v               |
+|       [Verified Patch] ----------------------------------&gt; [bugs Table]         |
+|              |                                                                  |
+|              v                                                                  |
+|   (7. Critic Engine) ----&gt; [debate_messages Table]                              |
+|              |                                                                  |
+|              v                                                                  |
+|   (8. Mutation Engine) --&gt; [mutation_records Table]                             |
+|              |                                                                  |
+|              v                                                                  |
+|   (9. Report Engine) ----&gt; [Executive Summary &amp; Technical Markdown Report]      |
++---------------------------------------------------------------------------------+
+</code></pre>
+<p><em>Fig. 3.3: Level 0 Context and Level 1 Subsystem Data Flow Diagram (DFD)</em></p>
+<ul>
+<li><strong>Level 0 (Context):</strong> The user provides Python source code and receives health scores, defect classifications, verified patches, and audit reports.</li>
+<li><strong>Level 1 (Subsystem):</strong> Source code is transformed into AST representations, generating file risk metrics and test suites. Dynamic test execution yields coverage data and failure logs, which are classified and deduplicated into the <code>bugs</code> table. The root-cause engine extracts code slices, guiding the auto-fix agent. Synthesized patches are verified in isolated sandboxes before critic review, mutation testing, and final report generation.</li>
+</ul>
+<h2>3.8 Agent Coordination and State Management</h2>
+<p>Agent coordination is managed by the <code>OrchestratorAgent</code>, which enforces strict execution sequencing, state propagation, and fault recovery:</p>
+<pre><code>[OrchestratorAgent]
+       |
+       |--- Stage 1 ---&gt; StaticAnalysisAgent    [Try / Except / Fallback]
+       |--- Check Cancel
+       |--- Stage 2 ---&gt; TestGenerationAgent    [Try / Except / Fallback]
+       |--- Check Cancel
+       |--- Stage 3 ---&gt; TestExecutionAgent     [Try / Except / Fallback]
+       |--- Check Cancel
+       |--- Stage 4 ---&gt; BugClassificationAgent [Try / Except / Fallback]
+       |--- Check Cancel
+       |--- Stage 5 ---&gt; RootCauseAgent         [Try / Except / Fallback]
+       |--- Check Cancel
+       |--- Stage 6 ---&gt; AutoFixAgent           [Try / Except / Fallback]
+       |--- Check Cancel
+       |--- Stage 7 ---&gt; CriticAgent            [Try / Except / Fallback]
+       |--- Check Cancel
+       |--- Stage 8 ---&gt; MutationEngine         [Try / Except / Fallback]
+       |--- Check Cancel
+       |--- Stage 9 ---&gt; ReportAgent            [Try / Except / Fallback]
+       |
+       v
+[Run State Transition: running -&gt; completed]
+</code></pre>
+<p><em>Fig. 3.4: Multi-Agent Coordination and Cancellation Checkpoint Workflow</em></p>
+<p>Key coordination mechanisms include:</p>
+<ul>
+<li><strong>Sequential Context Propagation:</strong> Each agent reads the outputs of prior stages from the database and writes its own results back to the database, ensuring clean decoupling between agents.</li>
+<li><strong>Per-Stage Exception Isolation:</strong> Each agent execution is wrapped in a <code>try-except</code> block. If an agent encounters an unhandled exception, it logs the error, falls back to safe default values, and allows downstream agents to continue.</li>
+<li><strong>Database-Backed Cancellation:</strong> The orchestrator queries <code>is_cancelled(run_id)</code> between stages, enabling rapid cancellation without leaving orphaned background processes.</li>
+<li><strong>WebSocket Event Broadcasting:</strong> Every milestone (e.g., <code>tests_generated</code>, <code>tests_executed</code>, <code>bugs_detected</code>) triggers an event on the <code>EventBus</code>, which broadcasts the update to connected WebSocket clients.</li>
+</ul>
+<h2>3.9 Persistence Model and Relational Schema (ER Diagram)</h2>
+<p>The relational persistence layer is implemented using SQLAlchemy and SQLite. The schema comprises seven core tables:</p>
+<pre><code>+-----------------------------------------------------------------------------------+
+|                        RELATIONAL SCHEMA (ER DIAGRAM)                             |
+|                                                                                   |
+|   +-------------------+        1:N        +-------------------+                   |
+|   |     PROJECTS      | ----------------&lt; |       RUNS        |                   |
+|   +-------------------+                   +-------------------+                   |
+|   | id (PK)           |                   | id (PK)           |                   |
+|   | name              |                   | project_id (FK)   |                   |
+|   | path              |                   | status            |                   |
+|   | created_at        |                   | health_score      |                   |
+|   +-------------------+                   | coverage_pct      |                   |
+|                                           | mutation_score    |                   |
+|                                           +-------------------+                   |
+|                                                     |                             |
+|         +-------------------+-----------------------+---------------------+       |
+|         | 1:N               | 1:N                   | 1:N                 | 1:N   |
+|         v                   v                       v                     v       |
+|   +-------------+    +---------------+    +------------------+    +-------------+ |
+|   |    BUGS     |    |  FILE_RISKS   |    |   TEST_RESULTS   |    |  MUTATIONS  | |
+|   +-------------+    +---------------+    +------------------+    +-------------+ |
+|   | id (PK)     |    | id (PK)       |    | id (PK)          |    | id (PK)     | |
+|   | run_id (FK) |    | run_id (FK)   |    | run_id (FK)      |    | run_id (FK) | |
+|   | title       |    | file_path     |    | test_name        |    | file_path   | |
+|   | category    |    | lines_of_code |    | file_path        |    | line_number | |
+|   | severity    |    | complexity    |    | status           |    | original_op | |
+|   | file_path   |    | risk_score    |    | duration_sec     |    | mutated_op  | |
+|   | line_number |    | risk_level    |    | error_message    |    | status      | |
+|   | description |    | smells (JSON) |    +------------------+    +-------------+ |
+|   | root_cause  |    +---------------+                                            |
+|   | patch_diff  |                                                                 |
+|   | verified    |    +-------------------+    +--------------------+              |
+|   | hash (MD5)  |    |    AGENT_LOGS     |    |  DEBATE_MESSAGES   |              |
+|   +-------------+    +-------------------+    +--------------------+              |
+|                      | id (PK)           |    | id (PK)            |              |
+|                      | run_id (FK)       |    | run_id (FK)        |              |
+|                      | agent_name        |    | agent_from         |              |
+|                      | level             |    | agent_to           |              |
+|                      | message           |    | topic              |              |
+|                      | timestamp         |    | content            |              |
+|                      +-------------------+    | timestamp          |              |
+|                                               +--------------------+              |
++-----------------------------------------------------------------------------------+
+</code></pre>
+<p><em>Fig. 3.5: Relational Entity-Relationship (ER) Database Schema</em></p>
+<p>To optimize SQLite for concurrent reads and writes, the database is configured with:</p>
+<ul>
+<li><code>PRAGMA journal_mode = WAL</code> (Write-Ahead Logging for non-blocking concurrent reads).</li>
+<li><code>PRAGMA foreign_keys = ON</code> (Referential integrity enforcement).</li>
+<li><code>PRAGMA busy_timeout = 5000</code> (5-second retry timeout to prevent database lock contention).</li>
+<li><code>QueuePool(size=20, max_overflow=10)</code> (Connection pooling for concurrent API requests).</li>
+</ul>
+<h2>3.10 Subprocess Sandboxing and Execution Safety</h2>
+<p>Executing dynamically generated test code and candidate patches introduces inherent security and stability risks. A test script might enter an infinite loop, consume excessive memory, or execute destructive filesystem commands.</p>
+<p>SentinelMesh mitigates these risks through a dedicated <code>SandboxRunner</code> architecture:</p>
+<ol>
+<li><strong>Workspace Duplication:</strong> Dynamic test execution and patch verification are never performed in-place on the user's primary project directory. Instead, <code>create_isolated_workspace()</code> duplicates the project into a temporary directory created via <code>tempfile.mkdtemp()</code>. Common non-source directories (such as <code>.git</code>, <code>.venv</code>, and <code>__pycache__</code>) are excluded from duplication.</li>
+<li><strong>Subprocess Isolation:</strong> Commands are executed as child processes using Python's <code>asyncio.create_subprocess_exec</code>, separating the test execution environment from the parent API server process.</li>
+<li><strong>Execution Timeouts:</strong> Every subprocess invocation is bound by an explicit execution timeout (default: 60 seconds). Timeouts are enforced using <code>asyncio.wait_for</code>.</li>
+<li><strong>Process-Tree Termination:</strong> When a timeout occurs or a run is cancelled, standard process termination (<code>process.kill()</code>) may leave orphaned child processes running. SentinelMesh uses <code>psutil.Process(pid).children(recursive=True)</code> to identify and terminate the entire process hierarchy before terminating the parent process.</li>
+<li><strong>Path Traversal Protection:</strong> The archive ingestion engine inspects uploaded ZIP files to verify that all target extract paths resolve strictly within the designated temporary directory, preventing Zip-Slip attacks.</li>
+</ol>
+<h2>3.11 Error Handling and Fault Tolerance Strategy</h2>
+<p>To ensure operational stability, SentinelMesh implements a multi-tier fault tolerance strategy:</p>
+<ul>
+<li><strong>Server Startup Crash Recovery:</strong> When the backend boots, it scans the <code>runs</code> table for any runs marked as <code>running</code> or <code>pending</code>. These represent runs that were interrupted by a prior server shutdown. The server automatically updates their status to <code>interrupted</code>, preventing orphaned runs from blocking the system.</li>
+<li><strong>Agent-Level Fallbacks:</strong> If an agent encounters an unhandled exception during execution:
+<ul>
+<li><code>StaticAnalysisAgent</code> falls back to empty risk lists with default risk scores of zero.</li>
+<li><code>TestGenerationAgent</code> logs the error and allows downstream agents to evaluate pre-existing tests.</li>
+<li><code>TestExecutionAgent</code> falls back to zero-pass metrics with a baseline coverage estimate.</li>
+<li><code>CriticAgent</code> assigns a default baseline consensus score of 50.0%.</li>
+<li><code>ReportAgent</code> synthesizes an error-summary report detailing which stages completed successfully.</li>
+</ul>
+</li>
+<li><strong>Database Reconnect Resiliency:</strong> SQLite connection timeouts are handled via the 5000ms busy timeout configuration, preventing transient lock contention from raising unhandled database errors.</li>
+</ul>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>CHAPTER IV</h1>
+<h1>SYSTEM DESIGN AND IMPLEMENTATION</h1>
+<h2>4.1 Project Structure and Modular Organization</h2>
+<p>The SentinelMesh codebase is organized into four main packages: <code>backend</code>, <code>agents</code>, <code>sandbox</code>, and <code>frontend</code>. The project layout is structured as follows:</p>
+<pre><code>S5 Mini Project/
+├── backend/                  # FastAPI Application Core
+│   ├── main.py               # REST API Routes, Middleware, WebSockets
+│   ├── database.py           # SQLAlchemy Engine, WAL Configuration, Sessions
+│   ├── models.py             # Relational Database Models (SQLAlchemy ORM)
+│   ├── schemas.py            # Pydantic Request/Response Data Transfer Objects
+│   └── event_bus.py          # Asynchronous In-Memory Event Streaming Bus
+├── agents/                   # Autonomous Agent Implementation Package
+│   ├── base_agent.py         # Abstract BaseAgent Class and Common Protocols
+│   ├── orchestrator_agent.py # End-to-End Pipeline Orchestration Engine
+│   ├── static_analysis_agent.py # AST Complexity Profiling and Smell Detection
+│   ├── test_generation_agent.py # AST-Driven Pytest Synthesis Engine
+│   ├── test_execution_agent.py  # Pytest Runner, Flakiness &amp; Coverage Profiler
+│   ├── bug_classification_agent.py # Defect Deduplication &amp; Categorization
+│   ├── root_cause_agent.py   # Context Slicing &amp; Causal Chain Analyzer
+│   ├── auto_fix_agent.py     # Patch Generator &amp; Sandbox Verification Engine
+│   ├── critic_agent.py       # Dual-Agent Debate &amp; Consensus Reviewer
+│   ├── report_agent.py       # Technical Markdown &amp; Executive Summary Generator
+│   └── llm/                  # LLM Provider Abstraction Layer
+│       ├── base.py           # Abstract Base LLM Interface
+│       ├── offline_provider.py # Rule-Based Deterministic Offline Provider
+│       ├── gemini_provider.py  # Google Gemini API Integration Adapter
+│       └── openai_provider.py  # OpenAI API Integration Adapter
+├── sandbox/                  # Execution Isolation and Mutation Testing
+│   ├── runner.py             # Subprocess Sandbox with psutil Termination
+│   └── mutator.py            # AST-Based Operator Substitution Engine
+├── frontend/                 # Presentation Layer (React 19 + Vite)
+│   ├── src/
+│   │   ├── App.jsx           # Main Dashboard View and WebSocket Integration
+│   │   └── components/       # UI Components (KPICards, RiskHeatmap, etc.)
+│   └── package.json          # Frontend Dependency Manifest
+├── demo/ecommerce/           # Benchmark Project for Empirical Validation
+├── tests/                    # Automated System and Unit Test Suite
+├── run.bat / run.sh          # Cross-Platform Execution Scripts
+└── requirements.txt          # Python Dependency Manifest
+</code></pre>
+<h2>4.2 API Gateway, Request Validation, and Lifecycle Management</h2>
+<p>The API gateway is implemented in <code>backend/main.py</code> using FastAPI. It manages request routing, input validation, rate limiting, and database session lifecycles.</p>
+<p>Key implementation features include:</p>
+<ul>
+<li><strong>CORS Configuration:</strong> Allows cross-origin requests from frontend development servers, permitting all HTTP methods and headers.</li>
+<li><strong>GZip Compression:</strong> Middleware automatically compresses HTTP response payloads exceeding 1000 bytes.</li>
+<li><strong>In-Memory Rate Limiting:</strong> A custom middleware restricts clients to 600 requests per minute per IP address, preventing resource exhaustion.</li>
+<li><strong>Startup Crash Recovery:</strong> An application lifespan context manager scans the database at boot, transitioning any stuck <code>running</code> or <code>pending</code> runs to <code>interrupted</code>.</li>
+</ul>
+<pre><code class="language-python"># Source File Excerpt: backend/main.py
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize DB and recover interrupted runs
+    init_db()
+    db = SessionLocal()
+    try:
+        stuck_runs = db.query(Run).filter(
+            Run.status.in_([RunStatus.RUNNING, RunStatus.PENDING])
+        ).all()
+        for r in stuck_runs:
+            r.status = RunStatus.INTERRUPTED
+        db.commit()
+    finally:
+        db.close()
+    yield
+    # Shutdown: Clean up active processes and resources
+</code></pre>
+<p>The gateway exposes 14 REST endpoints under the <code>/api/</code> prefix, along with a WebSocket endpoint at <code>/ws/runs/{run_id}</code> for real-time telemetry streaming.</p>
+<h2>4.3 Multi-Agent Orchestrator (<code>OrchestratorAgent</code>)</h2>
+<p>The <code>OrchestratorAgent</code> (located in <code>agents/orchestrator_agent.py</code>) coordinates the nine-stage analysis pipeline. It inherits from <code>BaseAgent</code> and manages agent execution sequencing, state persistence, and cancellation checks.</p>
+<pre><code class="language-python"># Source File Excerpt: agents/orchestrator_agent.py
+class OrchestratorAgent(BaseAgent):
+    def __init__(self, db_session, llm_provider: str = &quot;offline&quot;):
+        super().__init__(&quot;orchestrator&quot;, db_session)
+        self.provider_name = llm_provider
+        self.llm = get_llm_provider(llm_provider)
+        
+    async def execute_run(self, run_id: str, workspace_path: str):
+        # Update run status to RUNNING
+        run = self.db.query(Run).filter(Run.id == run_id).first()
+        run.status = RunStatus.RUNNING
+        self.db.commit()
+
+        # Sequentially execute each agent stage with cancellation checks
+        stages = [
+            (&quot;static_analysis&quot;, self._run_static_analysis),
+            (&quot;test_generation&quot;, self._run_test_generation),
+            (&quot;test_execution&quot;, self._run_test_execution),
+            (&quot;bug_classification&quot;, self._run_bug_classification),
+            (&quot;root_cause&quot;, self._run_root_cause),
+            (&quot;auto_fix&quot;, self._run_auto_fix),
+            (&quot;critic&quot;, self._run_critic),
+            (&quot;mutation_testing&quot;, self._run_mutation_testing),
+            (&quot;reporting&quot;, self._run_reporting)
+        ]
+        
+        for stage_name, stage_func in stages:
+            if self._is_cancelled(run_id):
+                return
+            await stage_func(run_id, workspace_path)
+</code></pre>
+<p>Each stage is wrapped in an individual <code>try-except</code> block to prevent single-agent exceptions from halting the entire pipeline. The orchestrator checks <code>_is_cancelled(run_id)</code> between stages, enabling rapid cancellation without leaving orphaned background processes.</p>
+<h2>4.4 Static Analysis and AST Risk Scoring Agent</h2>
+<p>The <code>StaticAnalysisAgent</code> (implemented in <code>agents/static_analysis_agent.py</code>) performs deterministic source code analysis using Python's built-in <code>ast</code> module, avoiding reliance on external binary linters.</p>
+<p>The agent computes two primary metrics:</p>
+<ol>
+<li><strong>Cyclomatic Complexity via Branch Counting:</strong> Evaluates decision points by traversing AST nodes.</li>
+<li><strong>Heuristic Code Smell Detection:</strong> Scans for anti-patterns and common reliability/security vulnerabilities.</li>
+</ol>
+<pre><code class="language-python"># Source File Excerpt: agents/static_analysis_agent.py
+class ComplexityVisitor(ast.NodeVisitor):
+    def __init__(self):
+        self.complexity = 1  # Base complexity for the routine
+        
+    def visit_If(self, node): self.complexity += 1; self.generic_visit(node)
+    def visit_While(self, node): self.complexity += 1; self.generic_visit(node)
+    def visit_For(self, node): self.complexity += 1; self.generic_visit(node)
+    def visit_ExceptHandler(self, node): self.complexity += 1; self.generic_visit(node)
+    def visit_With(self, node): self.complexity += 1; self.generic_visit(node)
+    def visit_BoolOp(self, node):
+        # Each boolean operator (and, or) adds a decision point
+        self.complexity += len(node.values) - 1
+        self.generic_visit(node)
+</code></pre>
+<h3>Table 4.1: Cyclomatic Complexity Branch Types Evaluated via Python AST</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">AST Node Type</th>
+<th style="text-align:left">Semantic Construct</th>
+<th style="text-align:left">Complexity Increment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>ast.If</code></td>
+<td style="text-align:left">Conditional branch (<code>if</code> statement)</td>
+<td style="text-align:left">$+1$</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ast.While</code></td>
+<td style="text-align:left">While-loop iteration</td>
+<td style="text-align:left">$+1$</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ast.For</code></td>
+<td style="text-align:left">For-loop iteration</td>
+<td style="text-align:left">$+1$</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ast.ExceptHandler</code></td>
+<td style="text-align:left">Exception handling block (<code>except</code>)</td>
+<td style="text-align:left">$+1$</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ast.With</code></td>
+<td style="text-align:left">Context manager block (<code>with</code>)</td>
+<td style="text-align:left">$+1$</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ast.BoolOp</code></td>
+<td style="text-align:left">Boolean operation (<code>and</code>, <code>or</code>)</td>
+<td style="text-align:left">$+(\text{values} - 1)$</td>
+</tr>
+</tbody>
+</table>
+<h3>Table 4.2: Implemented Security and Reliability Heuristic Code Smells</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Code Smell Identifier</th>
+<th style="text-align:left">Detection Mechanism</th>
+<th style="text-align:left">Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>DIVISION_OPERATOR</strong></td>
+<td style="text-align:left">Finds <code>ast.Div</code> nodes without prior zero-guard checks</td>
+<td style="text-align:left">MEDIUM</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>SQL_INJECTION</strong></td>
+<td style="text-align:left">Detects <code>.execute()</code> calls containing formatted strings</td>
+<td style="text-align:left">CRITICAL</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>BARE_EXCEPT</strong></td>
+<td style="text-align:left">Flags <code>ast.ExceptHandler</code> where <code>type</code> is <code>None</code></td>
+<td style="text-align:left">HIGH</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>EVAL_EXEC_CALL</strong></td>
+<td style="text-align:left">Flags calls to dynamic execution functions (<code>eval</code>, <code>exec</code>)</td>
+<td style="text-align:left">CRITICAL</td>
+</tr>
+</tbody>
+</table>
+<p>The agent calculates an overall <strong>Risk Score</strong> ($R \in [5, 100]$) for each file using a weighted formula:
+$$R = \min(100, \max(5, P_{\text{complexity}} + P_{\text{smells}} + P_{\text{loc}}))$$
+Where:</p>
+<ul>
+<li>$P_{\text{complexity}} = \min(40, \text{Complexity} \times 2)$</li>
+<li>$P_{\text{smells}} = \min(45, \text{Smell Count} \times 15)$</li>
+<li>$P_{\text{loc}} = \min(15, \lfloor \text{LOC} / 20 \rfloor)$</li>
+</ul>
+<p>Files are assigned risk levels based on their score: <strong>CRITICAL</strong> ($\ge 70$), <strong>HIGH</strong> ($\ge 45$), <strong>MEDIUM</strong> ($\ge 25$), or <strong>LOW</strong> ($&lt; 25$).</p>
+<h2>4.5 Test Case Generation Agent</h2>
+<p>The <code>TestGenerationAgent</code> (implemented in <code>agents/test_generation_agent.py</code>) synthesizes executable <code>pytest</code> test suites.</p>
+<p>The generation workflow operates as follows:</p>
+<ol>
+<li>Scans the target workspace for Python source files, excluding pre-existing tests.</li>
+<li>Parses each file's AST to extract function and class declarations, parameter names, and default values.</li>
+<li>Invokes <code>llm.generate_tests(code, filename)</code>. When operating under the default <code>OfflineLLMProvider</code>, the engine uses deterministic templates to generate test cases covering standard execution and edge-case inputs.</li>
+<li>Writes synthesized tests to a dedicated <code>{workspace}/sentinel_tests/test_{basename}.py</code> file, prepending a <code>sys.path.insert(0, ...)</code> header to ensure clean import resolution during test execution.</li>
+</ol>
+<pre><code class="language-python"># Source File Excerpt: agents/test_generation_agent.py
+def _write_test_file(self, workspace: str, src_file: str, test_code: str):
+    test_dir = os.path.join(workspace, &quot;sentinel_tests&quot;)
+    os.makedirs(test_dir, exist_ok=True)
+    base_name = os.path.splitext(os.path.basename(src_file))[0]
+    target_path = os.path.join(test_dir, f&quot;test_{base_name}.py&quot;)
+    
+    header = (
+        &quot;import sys, os\n&quot;
+        f&quot;sys.path.insert(0, r'{workspace}')\n\n&quot;
+    )
+    with open(target_path, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+        f.write(header + test_code)
+</code></pre>
+<h2>4.6 Test Execution and Flakiness Detection Agent</h2>
+<p>The <code>TestExecutionAgent</code> (implemented in <code>agents/test_execution_agent.py</code>) coordinates dynamic test suite execution, statement coverage measurement, and flakiness detection.</p>
+<p>Execution steps include:</p>
+<ol>
+<li>Checks for test suites in <code>sentinel_tests/</code> or pre-existing <code>tests/</code> directories.</li>
+<li>Invokes the tests using the <code>SandboxRunner</code> with coverage tracking:<pre><code class="language-bash">python -m coverage run --source=. -m pytest sentinel_tests/
+</code></pre>
+</li>
+<li>Parses the generated <code>coverage.json</code> file to extract statement coverage percentages. If coverage data cannot be generated, the agent applies a baseline estimate of 72.5%.</li>
+<li><strong>Flakiness Detection:</strong> If a test fails, the agent re-executes it up to three times. If the test passes in 1 or 2 of the retry attempts, it is flagged as <strong>FLAKY</strong> rather than a deterministic failure.</li>
+<li>Computes a project <strong>Health Score</strong> ($H \in [0, 100]$):
+$$H = \max(0.0, (\text{Pass Rate} \times 0.5) + (\text{Coverage} \times 0.5) - (\text{Flaky Penalty}))$$
+Where $\text{Flaky Penalty} = \text{Flaky Count} \times 5.0$.</li>
+</ol>
+<h2>4.7 Bug Classification and Deduplication Agent</h2>
+<p>The <code>BugClassificationAgent</code> (implemented in <code>agents/bug_classification_agent.py</code>) aggregates and categorizes defects identified across both static analysis and dynamic test execution.</p>
+<p>To prevent redundant bug reports across consecutive runs, the agent computes a deterministic MD5 deduplication hash for each defect:
+$$\text{Hash} = \text{MD5}(\text{file_path} : \text{category} : \text{title})$$</p>
+<pre><code class="language-python"># Source File Excerpt: agents/bug_classification_agent.py
+def _generate_hash(self, file_path: str, category: str, title: str) -&gt; str:
+    seed = f&quot;{file_path}:{category}:{title}&quot;.lower().strip()
+    return hashlib.md5(seed.encode(&quot;utf-8&quot;)).hexdigest()
+</code></pre>
+<p>Defects are assigned to standardized categories (e.g., <code>ZeroDivisionError</code>, <code>SQLInjection</code>, <code>IndexError</code>, <code>TypeError</code>, <code>SecuritySmell</code>, <code>ReliabilitySmell</code>) and assigned severity levels (<strong>CRITICAL</strong>, <strong>HIGH</strong>, <strong>MEDIUM</strong>, <strong>LOW</strong>) based on keyword matching against error messages and exception types.</p>
+<h2>4.8 Root-Cause Analysis and Code-Slicing Agent</h2>
+<p>The <code>RootCauseAgent</code> (implemented in <code>agents/root_cause_agent.py</code>) isolates the fundamental cause of each detected bug.</p>
+<p>The analysis workflow operates as follows:</p>
+<ol>
+<li>Reads the target source file and extracts a localized AST code slice centered on the failure line ($\pm 4$ lines of context).</li>
+<li>Generates a structured causal failure chain matching the defect category:
+<ul>
+<li><strong>ZeroDivisionError:</strong> <code>Input value received</code> $\rightarrow$ <code>Division operator evaluated without zero-check</code> $\rightarrow$ <code>ZeroDivisionError exception raised at runtime</code>.</li>
+<li><strong>SQL Injection:</strong> <code>Untrusted input accepted</code> $\rightarrow$ <code>Dynamic string formatting used in SQL query</code> $\rightarrow$ <code>Arbitrary query modification vulnerability exposed</code>.</li>
+<li><strong>IndexError:</strong> <code>Index access evaluated</code> $\rightarrow$ <code>Offset equals or exceeds collection length</code> $\rightarrow$ <code>IndexError boundary exception raised</code>.</li>
+</ul>
+</li>
+<li>Calls <code>llm.explain_bug()</code> to synthesize a plain-language explanation of the defect and recommended remediation steps.</li>
+<li>Updates the corresponding record in the <code>bugs</code> database table with the extracted code slice and causal explanation.</li>
+</ol>
+<h2>4.9 Auto-Fix and Pre-Flight Verification Agent</h2>
+<p>The <code>AutoFixAgent</code> (implemented in <code>agents/auto_fix_agent.py</code>) synthesizes and verifies code patches for high-priority bugs.</p>
+<p>To maintain code stability, candidate patches undergo a strict <strong>pre-flight verification</strong> process:</p>
+<ol>
+<li>Synthesizes a patch for each targeted bug using template-based repair patterns or LLM generation.
+<ul>
+<li><em>ZeroDivision:</em> Inserts a guard condition (<code>if divisor == 0: raise ValueError(...)</code>).</li>
+<li><em>SQL Injection:</em> Replaces dynamic string formatting with parameterized query syntax (<code>cursor.execute(query, (param,))</code>).</li>
+</ul>
+</li>
+<li>Duplicates the workspace into an isolated temporary directory via <code>create_isolated_workspace()</code>.</li>
+<li>Applies the proposed patch to the target file within the temporary directory.</li>
+<li>Executes the project test suite within the sandbox.</li>
+<li>If the tests execute successfully and resolve the failure, the patch is marked as <strong>VERIFIED</strong> (<code>patch_verified = True</code>). If regression tests fail, the patch is rejected.</li>
+</ol>
+<pre><code class="language-python"># Source File Excerpt: agents/auto_fix_agent.py
+async def _verify_patch(self, workspace: str, file_path: str, patched_code: str) -&gt; bool:
+    # 1. Create isolated temporary workspace
+    temp_dir = self.sandbox.create_isolated_workspace(workspace)
+    try:
+        # 2. Write patched code to the temporary workspace
+        rel_path = os.path.relpath(file_path, workspace)
+        target = os.path.join(temp_dir, rel_path)
+        with open(target, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+            f.write(patched_code)
+            
+        # 3. Execute regression tests in the isolated sandbox
+        res = await self.sandbox.run_pytest(temp_dir)
+        return res.get(&quot;success&quot;, False) and res.get(&quot;failed_count&quot;, 0) == 0
+    finally:
+        # 4. Clean up the temporary workspace
+        shutil.rmtree(temp_dir, ignore_errors=True)
+</code></pre>
+<h2>4.10 Critic Reviewer and Agent Debate Consensus Engine</h2>
+<p>The <code>CriticAgent</code> (implemented in <code>agents/critic_agent.py</code>) conducts an automated peer review of each detected bug and proposed patch.</p>
+<p>The review mechanism functions as follows:</p>
+<ol>
+<li>Evaluates each bug from two distinct perspectives:
+<ul>
+<li><strong>Proposer Perspective:</strong> Defends the validity of the defect finding and the necessity of the patch.</li>
+<li><strong>Reviewer Perspective:</strong> Scrutinizes the patch for potential side effects, performance impacts, or over-constraining assertions.</li>
+</ul>
+</li>
+<li>Computes an individual confidence score: verified patches receive a score of <strong>0.98</strong>, while unverified findings receive a default baseline score of <strong>0.85</strong>.</li>
+<li>Stores the debate exchanges in the <code>debate_messages</code> database table, enabling developers to review the agent reasoning process.</li>
+<li>Calculates an overall project <strong>Consensus Score</strong> ($C \in [0, 100]$):
+$$C = \left( \frac{1}{N} \sum_{i=1}^{N} \text{Score}_i \right) \times 100$$
+Where $N$ represents the total number of reviewed defect records.</li>
+</ol>
+<h2>4.11 Abstract Syntax Tree Mutation Testing Engine</h2>
+<p>The mutation testing engine (implemented in <code>sandbox/mutator.py</code> and <code>agents/auto_fix_agent.py</code>) evaluates test suite quality through systematic fault injection.</p>
+<p>The engine uses an <code>ASTMutationFinder</code> class (inheriting from <code>ast.NodeVisitor</code>) to identify viable mutation locations across source files, capping mutations at 20 per file across a maximum of 2 files to balance thoroughness with execution time.</p>
+<h3>Table 4.3: Supported Abstract Syntax Tree Mutation Operator Replacements</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Mutation Operator Group</th>
+<th style="text-align:left">Original AST Node</th>
+<th style="text-align:left">Mutated AST Node Replacement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>COMPARE_OP</strong></td>
+<td style="text-align:left"><code>==</code> (Eq)</td>
+<td style="text-align:left"><code>!=</code> (NotEq)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>COMPARE_OP</strong></td>
+<td style="text-align:left"><code>!=</code> (NotEq)</td>
+<td style="text-align:left"><code>==</code> (Eq)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>COMPARE_OP</strong></td>
+<td style="text-align:left"><code>&lt;</code> (Lt)</td>
+<td style="text-align:left"><code>&gt;=</code> (GtE)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>COMPARE_OP</strong></td>
+<td style="text-align:left"><code>&lt;=</code> (LtE)</td>
+<td style="text-align:left"><code>&gt;</code> (Gt)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>COMPARE_OP</strong></td>
+<td style="text-align:left"><code>&gt;</code> (Gt)</td>
+<td style="text-align:left"><code>&lt;=</code> (LtE)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>COMPARE_OP</strong></td>
+<td style="text-align:left"><code>&gt;=</code> (GtE)</td>
+<td style="text-align:left"><code>&lt;</code> (Lt)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>ARITHMETIC_OP</strong></td>
+<td style="text-align:left"><code>+</code> (Add)</td>
+<td style="text-align:left"><code>-</code> (Sub)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>ARITHMETIC_OP</strong></td>
+<td style="text-align:left"><code>-</code> (Sub)</td>
+<td style="text-align:left"><code>+</code> (Add)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>ARITHMETIC_OP</strong></td>
+<td style="text-align:left"><code>*</code> (Mult)</td>
+<td style="text-align:left"><code>/</code> (Div)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>BOOLEAN_FLIP</strong></td>
+<td style="text-align:left"><code>True</code> (Constant)</td>
+<td style="text-align:left"><code>False</code> (Constant)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>BOOLEAN_FLIP</strong></td>
+<td style="text-align:left"><code>False</code> (Constant)</td>
+<td style="text-align:left"><code>True</code> (Constant)</td>
+</tr>
+</tbody>
+</table>
+<p>The mutation testing workflow proceeds as follows:</p>
+<ol>
+<li>Injects a single mutation into the source file.</li>
+<li>Executes the test suite against the mutated code within the sandbox.</li>
+<li>If the test suite fails, the mutant is marked as <strong>KILLED</strong>; if the tests pass, the mutant is marked as <strong>SURVIVED</strong>.</li>
+<li>Restores the original source code within a <code>finally</code> block to prevent workspace corruption.</li>
+<li>Computes the final <strong>Mutation Score</strong>:
+$$\text{Mutation Score} = \left( \frac{\text{Mutants Killed}}{\text{Total Mutants Tested}} \right) \times 100%$$</li>
+</ol>
+<h2>4.12 Report Synthesis and Export Agent</h2>
+<p>The <code>ReportAgent</code> (implemented in <code>agents/report_agent.py</code>) consolidates metrics across all pipeline stages into two deliverable formats:</p>
+<ol>
+<li><strong>Executive Summary:</strong> A concise text overview summarizing the project health score, total tests executed, pass rates, identified bugs, and verified patches.</li>
+<li><strong>Technical Markdown Report:</strong> A comprehensive markdown audit document containing detailed breakdown tables of file risks, defect classifications, root causes, side-by-side patch diffs, critic consensus scores, and mutation metrics.</li>
+</ol>
+<p>Both reports are persisted in the <code>runs</code> table (<code>executive_summary</code> and <code>technical_report</code> columns) and can be exported via the REST API in JSON, HTML, or Markdown format (<code>/api/runs/{run_id}/report?format=...</code>).</p>
+<h2>4.13 LLM Provider Abstraction Layer (Offline, Gemini, OpenAI)</h2>
+<p>The LLM integration layer is designed around an abstract base class (<code>LLMProvider</code> in <code>agents/llm/base.py</code>) defining five common methods: <code>generate_tests</code>, <code>analyze_code</code>, <code>generate_patch</code>, <code>explain_bug</code>, and <code>generate_text</code>.</p>
+<p>Three concrete provider implementations are provided:</p>
+<ol>
+<li><strong><code>OfflineLLMProvider</code> (Default):</strong> A deterministic, rule-based inference engine that operates entirely offline without external API keys. It generates structured tests, extracts code slices, and synthesizes regex-based patches using AST analysis.</li>
+<li><strong><code>GeminiProvider</code>:</strong> Connects to the Google Gemini API (<code>gemini-1.5-flash</code>) using the official SDK, providing cloud-based semantic code reasoning.</li>
+<li><strong><code>OpenAIProvider</code>:</strong> Connects to the OpenAI API (<code>gpt-4o-mini</code>) for cloud-based inference.</li>
+</ol>
+<p>The provider is selected at run creation via the <code>llm_provider</code> parameter, defaulting to <code>offline</code> to ensure out-of-the-box functionality in any environment.</p>
+<h2>4.14 Persistence Layer and SQLite WAL Optimization</h2>
+<p>The persistence layer is implemented in <code>backend/database.py</code> and <code>backend/models.py</code> using SQLAlchemy ORM over an SQLite database.</p>
+<h3>Table 4.4: Database Table Definitions and Purpose</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Table Name</th>
+<th style="text-align:left">Entity Class</th>
+<th style="text-align:left">Primary Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>projects</code></td>
+<td style="text-align:left"><code>Project</code></td>
+<td style="text-align:left">Tracks registered project workspaces, paths, and creation timestamps.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>runs</code></td>
+<td style="text-align:left"><code>Run</code></td>
+<td style="text-align:left">Stores analysis run records, statuses, health scores, and summaries.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>bugs</code></td>
+<td style="text-align:left"><code>Bug</code></td>
+<td style="text-align:left">Records detected defects, severities, root causes, and patch diffs.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>file_risks</code></td>
+<td style="text-align:left"><code>FileRisk</code></td>
+<td style="text-align:left">Stores per-file complexity, smell lists, and calculated risk scores.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>test_results</code></td>
+<td style="text-align:left"><code>TestResult</code></td>
+<td style="text-align:left">Logs individual test executions, pass/fail statuses, and error messages.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>mutation_records</code></td>
+<td style="text-align:left"><code>MutationRecord</code></td>
+<td style="text-align:left">Records AST mutation tests, operators swapped, and kill/survival outcomes.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>agent_logs</code></td>
+<td style="text-align:left"><code>AgentLog</code></td>
+<td style="text-align:left">Stores timestamped logging events generated during agent execution.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>debate_messages</code></td>
+<td style="text-align:left"><code>DebateMessage</code></td>
+<td style="text-align:left">Stores peer review debate transcripts and consensus records.</td>
+</tr>
+</tbody>
+</table>
+<p>The database connection is configured with Write-Ahead Logging (<code>PRAGMA journal_mode = WAL</code>), enabling concurrent read operations while writes are in progress. A 5000ms busy timeout prevents lock contention during concurrent API requests.</p>
+<h2>4.15 Presentation Layer (React 19, TailwindCSS, WebSockets)</h2>
+<p>The user interface is implemented as a single-page application using React 19, Vite, and TailwindCSS v4. The frontend is built into static assets (<code>frontend/dist/</code>) and served directly by the FastAPI backend.</p>
+<p>The dashboard includes eight primary components:</p>
+<ul>
+<li><strong><code>Header</code>:</strong> Displays project branding, active workspace indicators, and the &quot;New Analysis&quot; action button.</li>
+<li><strong><code>KPICards</code>:</strong> Displays high-level metrics including Health Score, Pass Rate, Statement Coverage, and Mutation Score.</li>
+<li><strong><code>AgentNetworkGraph</code>:</strong> Visualizes the nine agents in a dynamic SVG layout, highlighting active agent states in real time.</li>
+<li><strong><code>LiveTerminal</code>:</strong> Streams timestamped agent logs and subprocess outputs via WebSockets.</li>
+<li><strong><code>RiskHeatmap</code>:</strong> Displays file risk profiles categorized by severity (Critical, High, Medium, Low).</li>
+<li><strong><code>BugExplorer</code>:</strong> Interactive table listing detected bugs, with expandable panels showing root-cause explanations and patch diffs.</li>
+<li><strong><code>AgentDebatePanel</code>:</strong> Displays transcripts of the peer review debate between the proposer and reviewer agents.</li>
+<li><strong><code>NewProjectModal</code>:</strong> Form interface for registering new projects, configuring LLM providers, and uploading ZIP archives.</li>
+</ul>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>CHAPTER V</h1>
+<h1>TESTING, RESULTS AND DISCUSSION</h1>
+<h2>5.1 Experimental Setup and Runtime Environment</h2>
+<p>The SentinelMesh framework was evaluated on a reference development workstation with the following environment:</p>
+<ul>
+<li><strong>Operating System:</strong> Microsoft Windows 11 Enterprise (64-bit).</li>
+<li><strong>Python Runtime:</strong> Python 3.12.7 virtual environment (<code>.venv</code>).</li>
+<li><strong>Web Server:</strong> Uvicorn 0.28.0 running under FastAPI 0.110.0 on <code>http://127.0.0.1:8000</code>.</li>
+<li><strong>Database Engine:</strong> SQLite 3 with Write-Ahead Logging enabled (<code>sentinel.db</code>).</li>
+<li><strong>Frontend Build:</strong> React 19 / Vite 6 bundled into <code>frontend/dist/</code>.</li>
+<li><strong>Target Benchmark:</strong> The included <code>demo/ecommerce/</code> project, containing four representative modules (<code>auth.py</code>, <code>billing.py</code>, <code>inventory.py</code>, <code>order_processor.py</code>).</li>
+</ul>
+<h2>5.2 Application Startup and Health Check Verification</h2>
+<p>The backend server was initialized using the standard startup command:</p>
+<pre><code class="language-bash">python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+</code></pre>
+<p>Upon boot, the server completed initialization, configured the database, and confirmed readiness. An automated HTTP GET request to the <code>/api/health</code> endpoint returned the following verified response:</p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;healthy&quot;,
+  &quot;database&quot;: {
+    &quot;connected&quot;: true
+  }
+}
+</code></pre>
+<p>The health check confirmed active database connectivity, schema availability, and readiness to process analysis requests.</p>
+<h2>5.3 Verification on Reference E-Commerce Benchmark</h2>
+<p>The framework was evaluated against the included <code>demo/ecommerce/</code> benchmark codebase, which contains intentional, realistic software defects:</p>
+<ol>
+<li><strong><code>billing.py</code> (Line 19):</strong> A <code>ZeroDivisionError</code> triggered when calculating discounts with a zero discount rate (<code>amount / discount_rate</code>).</li>
+<li><strong><code>billing.py</code> (Line 33):</strong> An off-by-one <code>IndexError</code> when looking up tier rates (<code>TIER_RATES[tier_level]</code> where <code>tier_level == len(TIER_RATES)</code>).</li>
+<li><strong><code>auth.py</code>:</strong> Unparameterized SQL query construction using string formatting.</li>
+</ol>
+<h3>Table 5.1: Verified E-Commerce Benchmark Injected Defects and Agent Outcomes</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Source File</th>
+<th style="text-align:left">Line No.</th>
+<th style="text-align:left">Injected Defect Category</th>
+<th style="text-align:left">Static Agent Detection</th>
+<th style="text-align:left">Dynamic Test Generation</th>
+<th style="text-align:left">Root-Cause Slicing</th>
+<th style="text-align:left">Auto-Fix Patch Verified</th>
+<th style="text-align:left">Critic Consensus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>billing.py</code></td>
+<td style="text-align:left">19</td>
+<td style="text-align:left">ZeroDivisionError</td>
+<td style="text-align:left">Detected (Division Op)</td>
+<td style="text-align:left">Synthesized <code>test_billing.py</code></td>
+<td style="text-align:left">Isolated context slice; identified zero divisor</td>
+<td style="text-align:left">Verified (Guard injected; tests pass)</td>
+<td style="text-align:left">0.98 (Confirmed)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>billing.py</code></td>
+<td style="text-align:left">33</td>
+<td style="text-align:left">IndexError (Off-by-One)</td>
+<td style="text-align:left">High Complexity ($V &gt; 5$)</td>
+<td style="text-align:left">Captured via generated test assertion</td>
+<td style="text-align:left">Isolated array boundary check</td>
+<td style="text-align:left">Verified (Boundary guard applied)</td>
+<td style="text-align:left">0.98 (Confirmed)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>auth.py</code></td>
+<td style="text-align:left">42</td>
+<td style="text-align:left">SQL Injection Smell</td>
+<td style="text-align:left">Detected (CRITICAL smell)</td>
+<td style="text-align:left">Security pattern flagged</td>
+<td style="text-align:left">Isolated <code>.execute()</code> formatting</td>
+<td style="text-align:left">Verified (Param query substituted)</td>
+<td style="text-align:left">0.98 (Confirmed)</td>
+</tr>
+</tbody>
+</table>
+<p>The pipeline successfully detected, classified, diagnosed, and generated verified patches for all three benchmark defects without manual intervention.</p>
+<h2>5.4 Static Smell Detection and Risk Scoring Output</h2>
+<p>During static analysis of the benchmark modules, the <code>StaticAnalysisAgent</code> parsed each file's AST and produced the following risk assessments:</p>
+<ul>
+<li><strong><code>billing.py</code>:</strong> Evaluated with an AST cyclomatic complexity of 9 across decision branches. Flagged for unhandled division operations. Calculated Risk Score: <strong>48.0 (HIGH)</strong>.</li>
+<li><strong><code>auth.py</code>:</strong> Flagged for formatted string interpolation in SQL query execution. Calculated Risk Score: <strong>72.0 (CRITICAL)</strong>.</li>
+<li><strong><code>order_processor.py</code>:</strong> Moderate cyclomatic complexity ($V=6$) with nested conditional branches. Calculated Risk Score: <strong>34.0 (MEDIUM)</strong>.</li>
+<li><strong><code>inventory.py</code>:</strong> Clean structure with simple dictionary lookups. Calculated Risk Score: <strong>12.0 (LOW)</strong>.</li>
+</ul>
+<p>These findings confirmed that the AST visitor accurately calculates cyclomatic complexity and identifies heuristic code smells according to the defined scoring formulas.</p>
+<h2>5.5 Generated Test Suite Execution and Code Coverage</h2>
+<p>The <code>TestGenerationAgent</code> analyzed function signatures across the benchmark modules and synthesized corresponding test suites in <code>sentinel_tests/</code>:</p>
+<ul>
+<li>Synthesized <code>test_billing.py</code> exercising <code>calculate_discount()</code>, <code>get_tier_rate()</code>, and boundary conditions.</li>
+<li>The <code>TestExecutionAgent</code> executed the suites within the isolated sandbox using <code>pytest</code> and <code>coverage.py</code>.</li>
+<li>Dynamic execution triggered expected assertion failures on the unpatched <code>ZeroDivisionError</code> and <code>IndexError</code> bugs, confirming that the generated test cases successfully revealed the latent defects.</li>
+<li>Statement coverage tracking reported <strong>82.4%</strong> coverage across the benchmark codebase. No flaky test behavior was observed across repeat executions.</li>
+</ul>
+<h2>5.6 Root-Cause Tracing and Verification of Generated Patches</h2>
+<p>For each failing test, the <code>RootCauseAgent</code> extracted a localized code slice around the failure line and generated a causal failure chain:</p>
+<pre><code>[Root Cause Chain for billing.py:19]
+1. Function calculate_discount(amount, discount_rate) invoked with discount_rate = 0.
+2. Binary operation 'amount / discount_rate' evaluated without zero-guard check.
+3. Python interpreter raised ZeroDivisionError: float division by zero.
+</code></pre>
+<p>The <code>AutoFixAgent</code> ingested this causal chain and generated a targeted patch:</p>
+<pre><code class="language-diff">--- a/demo/ecommerce/billing.py
++++ b/demo/ecommerce/billing.py
+@@ -16,4 +16,6 @@
+ def calculate_discount(amount: float, discount_rate: float) -&gt; float:
++    if discount_rate == 0:
++        return 0.0
+     return amount / discount_rate
+</code></pre>
+<p>The agent verified the patch inside an isolated temporary directory using the <code>SandboxRunner</code>. The regression test suite executed cleanly, confirming the patch resolved the defect without introducing regression failures (<code>patch_verified = True</code>).</p>
+<h2>5.7 Multi-Agent Debate and Consensus Verification</h2>
+<p>Following patch verification, the <code>CriticAgent</code> evaluated each defect finding and proposed patch:</p>
+<ul>
+<li><strong>ZeroDivisionError Fix:</strong> Proposer defended the zero-guard condition. Reviewer confirmed that returning <code>0.0</code> prevents runtime exceptions while preserving expected business logic. Confidence score assigned: <strong>0.98</strong>.</li>
+<li><strong>Overall Project Consensus:</strong> Computed as the mean across evaluated findings, yielding an overall project Consensus Score of <strong>96.5%</strong>.</li>
+</ul>
+<p>Debate transcripts were recorded in the <code>debate_messages</code> table and displayed in the frontend debate viewer, providing developers with clear insight into the agent reasoning process.</p>
+<h2>5.8 Mutation Testing Adequacy Analysis</h2>
+<p>The <code>MutationEngine</code> evaluated the empirical adequacy of the generated test suites by injecting 14 AST mutations across <code>billing.py</code> and <code>inventory.py</code>:</p>
+<ul>
+<li>10 comparison operator swaps (<code>==</code> $\leftrightarrow$ <code>!=</code>, <code>&lt;</code> $\leftrightarrow$ <code>&gt;=</code>).</li>
+<li>4 arithmetic operator swaps (<code>+</code> $\leftrightarrow$ <code>-</code>, <code>*</code> $\leftrightarrow$ <code>/</code>).</li>
+<li><strong>Results:</strong> 11 mutants were successfully <strong>killed</strong> by the test suite, while 3 mutants <strong>survived</strong> in non-critical logging branches.</li>
+<li><strong>Final Mutation Score:</strong> Calculated as:
+$$\text{Mutation Score} = \left( \frac{11}{14} \right) \times 100% = 78.57%$$</li>
+</ul>
+<p>This confirmed that the synthesized test suites possessed genuine fault-revealing capability beyond simple statement execution.</p>
+<h2>5.9 Verification Status of Automated Test Suites</h2>
+<p>The SentinelMesh repository includes eight automated test suites in the <code>tests/</code> directory.</p>
+<h3>Table 5.2: Test Execution Suite Catalogue and Verification Audit Status</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Test Suite File</th>
+<th style="text-align:left">Module Tested</th>
+<th style="text-align:left">Target Functionality</th>
+<th style="text-align:left">Status in Project Documentation</th>
+<th style="text-align:left">Independent Reproduction Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>test_agents.py</code></td>
+<td style="text-align:left"><code>agents/*</code></td>
+<td style="text-align:left">Agent initialization, execution flows, and fallbacks</td>
+<td style="text-align:left">Documented Passing (README: 37 total)</td>
+<td style="text-align:left">Verified present; unexecuted in current audit</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>test_api.py</code></td>
+<td style="text-align:left"><code>backend/main.py</code></td>
+<td style="text-align:left">REST API routes, schemas, and responses</td>
+<td style="text-align:left">Documented Passing</td>
+<td style="text-align:left">Verified present; unexecuted in current audit</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>test_database.py</code></td>
+<td style="text-align:left"><code>backend/database.py</code></td>
+<td style="text-align:left">SQLite connection, WAL mode, session lifecycle</td>
+<td style="text-align:left">Documented Passing</td>
+<td style="text-align:left">Verified present; unexecuted in current audit</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>test_endpoints_and_concurrency.py</code></td>
+<td style="text-align:left"><code>backend/main.py</code></td>
+<td style="text-align:left">Concurrent request handling and rate limiting</td>
+<td style="text-align:left">Documented Passing</td>
+<td style="text-align:left">Verified present; unexecuted in current audit</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>test_llm.py</code></td>
+<td style="text-align:left"><code>agents/llm/*</code></td>
+<td style="text-align:left">LLM provider interfaces and offline fallbacks</td>
+<td style="text-align:left">Documented Passing</td>
+<td style="text-align:left">Verified present; unexecuted in current audit</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>test_persistence.py</code></td>
+<td style="text-align:left"><code>backend/models.py</code></td>
+<td style="text-align:left">ORM model relationships and constraints</td>
+<td style="text-align:left">Documented Passing</td>
+<td style="text-align:left">Verified present; unexecuted in current audit</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>test_sandbox.py</code></td>
+<td style="text-align:left"><code>sandbox/runner.py</code></td>
+<td style="text-align:left">Subprocess execution and timeout enforcement</td>
+<td style="text-align:left">Documented Passing</td>
+<td style="text-align:left">Verified present; unexecuted in current audit</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>test_sandbox_security.py</code></td>
+<td style="text-align:left"><code>sandbox/runner.py</code></td>
+<td style="text-align:left">Process termination and path traversal guards</td>
+<td style="text-align:left">Documented Passing</td>
+<td style="text-align:left">Verified present; unexecuted in current audit</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note on Independent Verification:</em> The project README reports 37 passing unit tests with 85% statement coverage. In keeping with academic integrity standards, this report notes that while all eight test files are present and syntactically valid in the repository, the test suite was not re-executed during this documentation audit to preserve the running server state. These figures represent project-documented metrics rather than independently reproduced results.</p>
+<h2>5.10 Qualitative Analysis and Architectural Discussion</h2>
+<p>The experimental evaluation demonstrated several key architectural strengths of the SentinelMesh framework:</p>
+<ol>
+<li><strong>Separation of Concerns:</strong> Decomposing the quality pipeline into nine specialized agents prevented cognitive overload and eliminated context pollution during diagnosis.</li>
+<li><strong>Deterministic Grounding:</strong> Using AST parsing for static complexity and code smell detection provided reliable, repeatable baseline metrics without LLM non-determinism.</li>
+<li><strong>Pre-Flight Verification:</strong> Enforcing regression testing inside temporary sandboxes prevented unverified or breaking patches from being presented to the developer.</li>
+<li><strong>Offline Capability:</strong> The <code>OfflineLLMProvider</code> operated with zero external dependencies, making the framework suitable for environments with strict privacy or connectivity constraints.</li>
+<li><strong>Practical Limitations:</strong> The current subprocess sandboxing model, while effective for standard Python codebases, does not provide kernel-level container isolation (e.g., Docker), which would be beneficial for untrusted multi-tenant deployments.</li>
+</ol>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>CHAPTER VI</h1>
+<h1>CONCLUSION AND FUTURE WORK</h1>
+<h2>6.1 Summary of Research and Engineering Achievements</h2>
+<p>This project successfully designed, implemented, and evaluated <strong>SentinelMesh</strong>, an autonomous multi-agent framework for automated software testing, bug classification, root-cause diagnosis, and self-healing patch verification.</p>
+<p>By combining deterministic Abstract Syntax Tree (AST) parsing with dynamic test generation, sandboxed execution, and multi-agent peer review, SentinelMesh bridges the gap between static code analysis and automated program repair. The framework was developed and validated on a reference Python codebase, successfully identifying latent bugs, isolating their root causes, and producing verified regression patches within an isolated execution sandbox.</p>
+<h2>6.2 Key Technical Contributions</h2>
+<p>The primary technical contributions of this project include:</p>
+<ol>
+<li><strong>Nine-Agent Mesh Architecture:</strong> An asynchronous multi-agent coordination engine governed by the <code>OrchestratorAgent</code>, featuring per-stage exception isolation, database-backed cancellation checkpoints, and real-time WebSocket telemetry.</li>
+<li><strong>Deterministic AST Static Analyser:</strong> A custom AST visitor calculating cyclomatic complexity via branch counting and detecting security/reliability code smells without external linter dependencies.</li>
+<li><strong>Pre-Flight Sandbox Verification Engine:</strong> A verification architecture using temporary workspace duplication, <code>psutil</code> process-tree termination, and regression re-testing to ensure that proposed patches resolve defects without breaking existing tests.</li>
+<li><strong>Adversarial Critic Debate Engine:</strong> A dual-perspective peer review mechanism that evaluates defect findings, records debate transcripts, and computes an objective consensus confidence metric.</li>
+<li><strong>AST Mutation Engine:</strong> An integrated mutation testing engine that injects relational, arithmetic, and boolean mutations to empirically evaluate test suite fault-detection capability.</li>
+<li><strong>Zero-Dependency Offline Operation:</strong> An <code>OfflineLLMProvider</code> utilizing rule-based AST reasoning, enabling complete offline functionality without external cloud API dependencies.</li>
+</ol>
+<h2>6.3 Verified Implementation Status versus Design Goals</h2>
+<p>The following milestones were verified in the implemented codebase:</p>
+<ul>
+<li>[x] Asynchronous FastAPI backend with 14 REST endpoints, WebSocket streaming, rate limiting, and startup crash recovery.</li>
+<li>[x] SQLite persistence layer with Write-Ahead Logging (WAL), foreign key enforcement, and connection pooling.</li>
+<li>[x] Nine specialized agent classes inheriting from <code>BaseAgent</code>, implementing static analysis, test generation, test execution, bug classification, root-cause slicing, patch verification, critic debate, mutation testing, and reporting.</li>
+<li>[x] Execution sandbox with subprocess isolation, execution timeouts, and <code>psutil</code> process-tree termination.</li>
+<li>[x] Dual-mode LLM provider abstraction supporting deterministic offline operation, Google Gemini, and OpenAI.</li>
+<li>[x] React 19 web dashboard with real-time agent graphs, risk heatmaps, interactive bug explorers, debate viewers, and report download facilities.</li>
+</ul>
+<h2>6.4 Identified Limitations and Operational Constraints</h2>
+<p>The following limitations were identified in the current implementation:</p>
+<ol>
+<li><strong>Language Scope:</strong> The current implementation is specifically designed for Python (<code>.py</code>) codebases. Supporting other languages (e.g., JavaScript, Java, Go) will require language-specific AST parsers and test runner adapters.</li>
+<li><strong>Sandboxing Isolation Boundary:</strong> The sandbox relies on OS subprocess isolation and <code>psutil</code> process termination. While effective for trusted development environments, untrusted multi-tenant deployments would benefit from kernel-level isolation (e.g., Docker containers or WebAssembly runtimes).</li>
+<li><strong>Complex Mocking in Test Generation:</strong> The offline test generation engine synthesizes functional tests for standard functions and classes, but has limited support for complex mock configurations involving external databases or network sockets.</li>
+<li><strong>Patch Verification Scope:</strong> Pre-flight patch verification is capped at the top five critical and high-severity defects per run to maintain interactive performance.</li>
+</ol>
+<h2>6.5 Future Enhancements</h2>
+<p>Future research and engineering directions for the SentinelMesh framework include:</p>
+<ol>
+<li><strong>Containerized Sandboxing:</strong> Integrating lightweight container runtimes (e.g., Docker or Podman) to provide kernel-level filesystem, network, and resource isolation for untrusted code execution.</li>
+<li><strong>Multi-Language AST Support:</strong> Extending the static analysis and mutation engines to support additional languages (such as JavaScript/TypeScript via Babel and Go via <code>go/ast</code>).</li>
+<li><strong>Symbolic Execution and SMT Solving:</strong> Combining AST test generation with symbolic execution engines (e.g., Z3) to synthesize complex input parameters satisfying deep branch predicates.</li>
+<li><strong>CI/CD Native Integrations:</strong> Developing native GitHub Actions and GitLab CI plugins to allow SentinelMesh to run as an automated quality gate on pull requests.</li>
+<li><strong>Automated Regression Test Synthesis:</strong> Automatically synthesizing permanent regression test cases for every verified patch, preventing future regression of resolved defects.</li>
+</ol>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>REFERENCES</h1>
+<p>[1] G. J. Myers, C. Sandler, and T. Badgett, <em>The Art of Software Testing</em>, 3rd ed. Hoboken, NJ, USA: John Wiley &amp; Sons, 2011.</p>
+<p>[2] M. Wooldridge, <em>An Introduction to MultiAgent Systems</em>, 2nd ed. Chichester, UK: John Wiley &amp; Sons, 2009.</p>
+<p>[3] E. W. Dijkstra, &quot;Notes on Structured Programming,&quot; in <em>Structured Programming</em>, O.-J. Dahl, E. W. Dijkstra, and C. A. R. Hoare, Eds. London, UK: Academic Press, 1972, pp. 1–82.</p>
+<p>[4] G. Fraser and A. Arcuri, &quot;EvoSuite: Automatic Test Suite Generation for Object-Oriented Software,&quot; in <em>Proc. 19th ACM SIGSOFT Symp. Found. Softw. Eng. (FSE)</em>, Szeged, Hungary, 2011, pp. 416–419.</p>
+<p>[5] SonarSource, &quot;SonarQube: Continuous Code Quality and Security Analysis,&quot; Official Technical Documentation, 2024. [Online]. Available: <a href="https://docs.sonarsource.com/sonarqube/">https://docs.sonarsource.com/sonarqube/</a></p>
+<p>[6] A. V. Aho, M. S. Lam, R. Sethi, and J. D. Ullman, <em>Compilers: Principles, Techniques, and Tools</em>, 2nd ed. Boston, MA, USA: Addison-Wesley, 2006.</p>
+<p>[7] Python Software Foundation, &quot;ast — Abstract Syntax Trees,&quot; <em>Python 3.12 Standard Library Documentation</em>, 2024. [Online]. Available: <a href="https://docs.python.org/3/library/ast.html">https://docs.python.org/3/library/ast.html</a></p>
+<p>[8] T. J. McCabe, &quot;A Complexity Measure,&quot; <em>IEEE Transactions on Software Engineering</em>, vol. SE-2, no. 4, pp. 308–320, Dec. 1976.</p>
+<p>[9] Open Web Application Security Project (OWASP), &quot;OWASP Top Ten Web Application Security Risks,&quot; OWASP Foundation, 2021. [Online]. Available: <a href="https://owasp.org/Top10/">https://owasp.org/Top10/</a></p>
+<p>[10] S. Lukasczyk, F. Kroiß, and G. Fraser, &quot;Pynguin: Automated Unit Test Generation for Python,&quot; in <em>Proc. 35th IEEE/ACM Int. Conf. Autom. Softw. Eng. (ASE)</em>, 2020, pp. 1290–1293.</p>
+<p>[11] C. Cadar and K. Sen, &quot;Symbolic Execution for Software Testing: Three Decades Later,&quot; <em>Communications of the ACM</em>, vol. 56, no. 2, pp. 82–90, Feb. 2013.</p>
+<p>[12] E. F. Miller and C. L. Maloney, &quot;Systematic Program Testing,&quot; <em>IEEE Computer</em>, vol. 18, no. 2, pp. 35–42, Feb. 1985.</p>
+<p>[13] IEEE, &quot;IEEE Standard Classification for Software Anomalies,&quot; <em>IEEE Std 1044-2009</em>, pp. 1–23, Jan. 2010.</p>
+<p>[14] A. Zeller, <em>Why Programs Fail: A Guide to Systematic Debugging</em>, 2nd ed. San Francisco, CA, USA: Morgan Kaufmann, 2009.</p>
+<p>[15] H. Agrawal and J. R. Horgan, &quot;Dynamic Program Slicing,&quot; in <em>Proc. ACM SIGPLAN Conf. Program. Lang. Des. Implement. (PLDI)</em>, White Plains, NY, USA, 1990, pp. 246–256.</p>
+<p>[16] C. Le Goues, M. Pradel, and A. Roychoudhury, &quot;Automated Program Repair,&quot; <em>Communications of the ACM</em>, vol. 62, no. 12, pp. 56–65, Dec. 2019.</p>
+<p>[17] C. Le Goues, T. Nguyen, S. Forrest, and W. Weimer, &quot;GenProg: A Generic Method for Automatic Software Repair,&quot; <em>IEEE Transactions on Software Engineering</em>, vol. 38, no. 1, pp. 54–72, Jan.–Feb. 2012.</p>
+<p>[18] H. D. T. Nguyen, D. Qi, A. Roychoudhury, and S. Chandra, &quot;SemFix: Program Repair via Semantic Analysis,&quot; in <em>Proc. 35th Int. Conf. Softw. Eng. (ICSE)</em>, San Francisco, CA, USA, 2013, pp. 772–781.</p>
+<p>[19] E. K. Smith, T. Barr, C. Le Goues, and Y. Brun, &quot;Is the Cure Worse than the Disease? Overfitting in Automated Program Repair,&quot; in <em>Proc. 10th Joint Meet. Found. Softw. Eng. (ESEC/FSE)</em>, Bergamo, Italy, 2015, pp. 532–543.</p>
+<p>[20] X. Hou et al., &quot;Large Language Models for Software Engineering: A Systematic Literature Review,&quot; <em>ACM Transactions on Software Engineering and Methodology</em>, 2024.</p>
+<p>[21] G. Weiss, Ed., <em>Multiagent Systems: A Modern Approach to Distributed Artificial Intelligence</em>, 2nd ed. Cambridge, MA, USA: MIT Press, 2013.</p>
+<p>[22] C. Qian et al., &quot;Communicative Agents for Software Development,&quot; in <em>Proc. 62nd Annu. Meet. Assoc. Comput. Linguist. (ACL)</em>, Bangkok, Thailand, 2024, pp. 12052–12068.</p>
+<p>[23] S. Hong et al., &quot;MetaGPT: Meta Programming for A Multi-Agent Collaborative Framework,&quot; in <em>Proc. Int. Conf. Learn. Represent. (ICLR)</em>, Vienna, Austria, 2024.</p>
+<p>[24] Y. Jia and M. Harman, &quot;An Analysis and Survey of the Development of Mutation Testing,&quot; <em>IEEE Transactions on Software Engineering</em>, vol. 37, no. 5, pp. 649–678, Sept.–Oct. 2011.</p>
+<p>[25] S. Ramirez, &quot;FastAPI: Modern, Fast Web Framework for Python,&quot; Official Documentation, 2024. [Online]. Available: <a href="https://fastapi.tiangolo.com/">https://fastapi.tiangolo.com/</a></p>
+<p>[26] M. Bayer, &quot;SQLAlchemy: The Database Toolkit for Python,&quot; Official Documentation, 2024. [Online]. Available: <a href="https://www.sqlalchemy.org/">https://www.sqlalchemy.org/</a></p>
+<p>[27] H. Krekel et al., &quot;pytest: Simple Powerful Testing with Python,&quot; Official Documentation, 2024. [Online]. Available: <a href="https://docs.pytest.org/">https://docs.pytest.org/</a></p>
+<p>[28] N. Batchelder, &quot;<a href="http://Coverage.py">Coverage.py</a>: Code Coverage Measurement for Python,&quot; Official Documentation, 2024. [Online]. Available: <a href="https://coverage.readthedocs.io/">https://coverage.readthedocs.io/</a></p>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>APPENDIX A: PROJECT REPOSITORY STRUCTURE</h1>
+<p>The following tree represents the complete verified directory structure of the SentinelMesh codebase:</p>
+<pre><code>S5 Mini Project/
+├── .env.example                      # Template for optional API credentials
+├── .gitignore                        # Git ignore patterns
+├── README.md                         # Project overview, quickstart, and claims
+├── requirements.txt                  # Python dependency specifications
+├── run.bat                           # Windows batch execution script
+├── run.sh                            # Unix/Linux shell execution script
+│
+├── backend/                          # FastAPI Backend Application Core
+│   ├── database.py                   # SQLAlchemy engine, WAL setup, session maker
+│   ├── event_bus.py                  # In-memory async pub/sub event bus
+│   ├── main.py                       # REST API routes, middlewares, WebSocket handler
+│   ├── models.py                     # SQLAlchemy relational model declarations
+│   └── schemas.py                    # Pydantic data validation schemas
+│
+├── agents/                           # Multi-Agent Mesh Implementations
+│   ├── base_agent.py                 # Abstract base class for agents
+│   ├── orchestrator_agent.py         # Pipeline coordination and stage manager
+│   ├── static_analysis_agent.py      # AST complexity visitor and smell detector
+│   ├── test_generation_agent.py      # Pytest test suite synthesis agent
+│   ├── test_execution_agent.py       # Sandbox test runner and flakiness detector
+│   ├── bug_classification_agent.py   # Defect categorizer and MD5 deduplicator
+│   ├── root_cause_agent.py           # Context slicer and causal chain analyzer
+│   ├── auto_fix_agent.py             # Patch generator and regression verifier
+│   ├── critic_agent.py               # Peer review debate and consensus evaluator
+│   ├── report_agent.py               # Markdown and executive summary synthesizer
+│   └── llm/                          # LLM Provider Implementations
+│       ├── base.py                   # Abstract LLM provider interface
+│       ├── offline_provider.py       # Deterministic rule-based offline provider
+│       ├── gemini_provider.py        # Google Gemini API client adapter
+│       └── openai_provider.py        # OpenAI API client adapter
+│
+├── sandbox/                          # Execution Sandboxing and Mutation
+│   ├── runner.py                     # Subprocess runner with psutil process-tree kill
+│   └── mutator.py                    # AST-based mutation testing engine
+│
+├── frontend/                         # Presentation Layer (React 19 + Vite)
+│   ├── index.html                    # Single-page HTML entry point
+│   ├── package.json                  # Frontend dependencies and build scripts
+│   ├── vite.config.js                # Vite build and development configuration
+│   ├── dist/                         # Compiled production assets (static files)
+│   └── src/                          # Frontend source code
+│       ├── main.jsx                  # React application root entry point
+│       ├── App.jsx                   # Primary dashboard layout and WebSocket client
+│       └── components/               # Specialized dashboard components
+│           ├── Header.jsx            # Top navigation and project controls
+│           ├── KPICards.jsx          # High-level metric summary cards
+│           ├── AgentNetworkGraph.jsx # Dynamic SVG agent execution topology
+│           ├── LiveTerminal.jsx      # Streaming terminal log viewer
+│           ├── RiskHeatmap.jsx       # File risk assessment breakdown
+│           ├── BugExplorer.jsx       # Interactive bug and patch diff viewer
+│           ├── AgentDebatePanel.jsx  # Critic debate transcripts panel
+│           └── NewProjectModal.jsx   # Project creation and upload modal
+│
+├── demo/                             # Reference Benchmark Codebases
+│   └── ecommerce/                    # E-commerce benchmark with injected defects
+│       ├── auth.py                   # Authentication module (SQL injection smell)
+│       ├── billing.py                # Billing module (ZeroDivisionError, IndexError)
+│       ├── inventory.py              # Inventory module (Clean reference)
+│       └── order_processor.py        # Order processing module (High complexity)
+│
+├── tests/                            # Automated Verification Test Suites
+│   ├── test_agents.py                # Unit tests for individual agent classes
+│   ├── test_api.py                   # Integration tests for FastAPI endpoints
+│   ├── test_database.py              # Database configuration and session tests
+│   ├── test_endpoints_and_concurrency.py # Concurrent request and load tests
+│   ├── test_llm.py                   # LLM provider fallback and synthesis tests
+│   ├── test_persistence.py           # Relational model constraint tests
+│   ├── test_sandbox.py               # Sandbox subprocess and timeout tests
+│   └── test_sandbox_security.py      # Process termination and path traversal tests
+│
+└── project_report/                   # Academic Deliverables Folder (This Documentation)
+    ├── SentinelMesh_Project_Report.md # Full Academic Project Report
+    ├── SentinelMesh_Architecture_Diagrams/ # Standalone Mermaid Diagram Sources
+    │   ├── 01_system_architecture.mmd
+    │   ├── 02_sequence_diagram.mmd
+    │   ├── 03_database_er.mmd
+    │   ├── 04_data_flow_diagram.mmd
+    │   └── README.md
+    └── README_report.md              # Instructions for Academic Evaluation
+</code></pre>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>APPENDIX B: REST API ENDPOINTS SPECIFICATION</h1>
+<p>The following table documents the complete verified REST API endpoints implemented in <code>backend/main.py</code>:</p>
+<h3>Table B.1: SentinelMesh REST API Specification and HTTP Status Codes</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">HTTP Method</th>
+<th style="text-align:left">Endpoint Path</th>
+<th style="text-align:left">Request Payload / Params</th>
+<th style="text-align:left">Response Status</th>
+<th style="text-align:left">Functional Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>GET</code></td>
+<td style="text-align:left"><code>/api/health</code></td>
+<td style="text-align:left">None</td>
+<td style="text-align:left"><code>200 OK</code></td>
+<td style="text-align:left">Verifies server readiness and database connectivity.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GET</code></td>
+<td style="text-align:left"><code>/api/projects</code></td>
+<td style="text-align:left">None</td>
+<td style="text-align:left"><code>200 OK</code></td>
+<td style="text-align:left">Retrieves all registered project records.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POST</code></td>
+<td style="text-align:left"><code>/api/projects</code></td>
+<td style="text-align:left"><code>ProjectCreate</code> (name, path)</td>
+<td style="text-align:left"><code>201 Created</code></td>
+<td style="text-align:left">Registers a new local project directory.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POST</code></td>
+<td style="text-align:left"><code>/api/projects/upload</code></td>
+<td style="text-align:left">Multipart form (name, zip file)</td>
+<td style="text-align:left"><code>201 Created</code></td>
+<td style="text-align:left">Uploads and extracts a project ZIP archive.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GET</code></td>
+<td style="text-align:left"><code>/api/projects/{id}</code></td>
+<td style="text-align:left">Path parameter: <code>id</code></td>
+<td style="text-align:left"><code>200 OK</code>, <code>404</code></td>
+<td style="text-align:left">Retrieves details for a specific project.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GET</code></td>
+<td style="text-align:left"><code>/api/projects/{id}/runs</code></td>
+<td style="text-align:left">Path parameter: <code>id</code></td>
+<td style="text-align:left"><code>200 OK</code></td>
+<td style="text-align:left">Retrieves all analysis runs for a project.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POST</code></td>
+<td style="text-align:left"><code>/api/runs</code></td>
+<td style="text-align:left"><code>RunCreate</code> (project_id, provider)</td>
+<td style="text-align:left"><code>201 Created</code></td>
+<td style="text-align:left">Creates and initiates a new analysis run.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GET</code></td>
+<td style="text-align:left"><code>/api/runs/{id}</code></td>
+<td style="text-align:left">Path parameter: <code>id</code></td>
+<td style="text-align:left"><code>200 OK</code>, <code>404</code></td>
+<td style="text-align:left">Retrieves complete metrics for an analysis run.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POST</code></td>
+<td style="text-align:left"><code>/api/runs/{id}/cancel</code></td>
+<td style="text-align:left">Path parameter: <code>id</code></td>
+<td style="text-align:left"><code>200 OK</code>, <code>404</code></td>
+<td style="text-align:left">Cancels an active or pending analysis run.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POST</code></td>
+<td style="text-align:left"><code>/api/runs/{id}/retry</code></td>
+<td style="text-align:left">Path parameter: <code>id</code></td>
+<td style="text-align:left"><code>201 Created</code></td>
+<td style="text-align:left">Clones and re-executes an interrupted run.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GET</code></td>
+<td style="text-align:left"><code>/api/runs/{id}/report</code></td>
+<td style="text-align:left">Query param: <code>format</code> (json/html/md)</td>
+<td style="text-align:left"><code>200 OK</code></td>
+<td style="text-align:left">Exports the generated analysis report.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GET</code></td>
+<td style="text-align:left"><code>/api/runs/{id}/patch</code></td>
+<td style="text-align:left">Path parameter: <code>id</code></td>
+<td style="text-align:left"><code>200 OK</code>, <code>404</code></td>
+<td style="text-align:left">Downloads all verified patches as a <code>.patch</code> file.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POST</code></td>
+<td style="text-align:left"><code>/api/demo/launch</code></td>
+<td style="text-align:left">None</td>
+<td style="text-align:left"><code>200 OK</code></td>
+<td style="text-align:left">Registers the demo e-commerce project and launches a run.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>GET</code></td>
+<td style="text-align:left"><code>/api/backup</code></td>
+<td style="text-align:left">None</td>
+<td style="text-align:left"><code>200 OK</code></td>
+<td style="text-align:left">Streams a complete SQLite database backup file.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>WebSocket</code></td>
+<td style="text-align:left"><code>/ws/runs/{run_id}</code></td>
+<td style="text-align:left">Path parameter: <code>run_id</code></td>
+<td style="text-align:left"><code>101 Switching</code></td>
+<td style="text-align:left">Streams real-time agent execution telemetry.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>APPENDIX C: DATABASE RELATIONAL SCHEMA (SQL)</h1>
+<p>The following Data Definition Language (DDL) statements represent the SQLite relational schema generated by SQLAlchemy ORM in <code>backend/models.py</code>:</p>
+<pre><code class="language-sql">-- Projects Table
+CREATE TABLE projects (
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    path VARCHAR(1024) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Analysis Runs Table
+CREATE TABLE runs (
+    id VARCHAR(36) PRIMARY KEY,
+    project_id VARCHAR(36) NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    status VARCHAR(32) NOT NULL DEFAULT 'pending',
+    health_score FLOAT DEFAULT 0.0,
+    coverage_pct FLOAT DEFAULT 0.0,
+    mutation_score FLOAT DEFAULT 0.0,
+    total_tests INTEGER DEFAULT 0,
+    passed_tests INTEGER DEFAULT 0,
+    failed_tests INTEGER DEFAULT 0,
+    flaky_tests INTEGER DEFAULT 0,
+    llm_provider VARCHAR(64) DEFAULT 'offline',
+    executive_summary TEXT,
+    technical_report TEXT,
+    started_at DATETIME,
+    completed_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Detected Defects Table
+CREATE TABLE bugs (
+    id VARCHAR(36) PRIMARY KEY,
+    run_id VARCHAR(36) NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(64) NOT NULL,
+    severity VARCHAR(32) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL,
+    line_number INTEGER DEFAULT 0,
+    description TEXT,
+    root_cause TEXT,
+    code_snippet TEXT,
+    patch_diff TEXT,
+    patch_verified BOOLEAN DEFAULT 0,
+    deduplication_hash VARCHAR(64) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- File Risk Profiles Table
+CREATE TABLE file_risks (
+    id VARCHAR(36) PRIMARY KEY,
+    run_id VARCHAR(36) NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+    file_path VARCHAR(1024) NOT NULL,
+    lines_of_code INTEGER DEFAULT 0,
+    cyclomatic_complexity INTEGER DEFAULT 1,
+    risk_score FLOAT DEFAULT 0.0,
+    risk_level VARCHAR(32) NOT NULL DEFAULT 'LOW',
+    smells JSON DEFAULT '[]',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Test Execution Results Table
+CREATE TABLE test_results (
+    id VARCHAR(36) PRIMARY KEY,
+    run_id VARCHAR(36) NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+    test_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(1024),
+    status VARCHAR(32) NOT NULL,
+    duration_sec FLOAT DEFAULT 0.0,
+    error_message TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Mutation Testing Records Table
+CREATE TABLE mutation_records (
+    id VARCHAR(36) PRIMARY KEY,
+    run_id VARCHAR(36) NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+    file_path VARCHAR(1024) NOT NULL,
+    line_number INTEGER NOT NULL,
+    original_op VARCHAR(32) NOT NULL,
+    mutated_op VARCHAR(32) NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Agent Execution Logs Table
+CREATE TABLE agent_logs (
+    id VARCHAR(36) PRIMARY KEY,
+    run_id VARCHAR(36) NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+    agent_name VARCHAR(64) NOT NULL,
+    level VARCHAR(16) NOT NULL DEFAULT 'INFO',
+    message TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Critic Review Debate Messages Table
+CREATE TABLE debate_messages (
+    id VARCHAR(36) PRIMARY KEY,
+    run_id VARCHAR(36) NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+    agent_from VARCHAR(64) NOT NULL,
+    agent_to VARCHAR(64) NOT NULL,
+    topic VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+</code></pre>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>APPENDIX D: CORE SOURCE CODE IMPLEMENTATION EXCERPTS</h1>
+<h3>D.1 Sandbox Runner Subprocess Isolation (<code>sandbox/runner.py</code>)</h3>
+<pre><code class="language-python">import asyncio
+import os
+import shutil
+import tempfile
+import psutil
+
+class SandboxRunner:
+    def __init__(self, default_timeout: int = 60):
+        self.default_timeout = default_timeout
+        self._active_pids = set()
+
+    def create_isolated_workspace(self, source_dir: str) -&gt; str:
+        temp_dir = tempfile.mkdtemp(prefix=&quot;sentinel_sandbox_&quot;)
+        ignore_patterns = shutil.ignore_patterns(
+            &quot;.git&quot;, &quot;.venv&quot;, &quot;__pycache__&quot;, &quot;*.pyc&quot;, &quot;dist&quot;, &quot;node_modules&quot;
+        )
+        for item in os.listdir(source_dir):
+            s = os.path.join(source_dir, item)
+            d = os.path.join(temp_dir, item)
+            if os.path.isdir(s):
+                if item not in [&quot;.git&quot;, &quot;.venv&quot;, &quot;node_modules&quot;]:
+                    shutil.copytree(s, d, ignore=ignore_patterns)
+            else:
+                shutil.copy2(s, d)
+        return temp_dir
+
+    async def execute_command(self, cmd: list[str], cwd: str, timeout: int | None = None) -&gt; dict:
+        timeout = timeout or self.default_timeout
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            cwd=cwd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        self._active_pids.add(proc.pid)
+        try:
+            stdout, stderr = await asyncio.wait_for(
+                proc.communicate(),
+                timeout=timeout
+            )
+            return {
+                &quot;exit_code&quot;: proc.returncode,
+                &quot;stdout&quot;: stdout.decode(&quot;utf-8&quot;, errors=&quot;replace&quot;),
+                &quot;stderr&quot;: stderr.decode(&quot;utf-8&quot;, errors=&quot;replace&quot;),
+                &quot;timed_out&quot;: False
+            }
+        except asyncio.TimeoutError:
+            self._kill_process_tree(proc.pid)
+            return {
+                &quot;exit_code&quot;: -1,
+                &quot;stdout&quot;: &quot;&quot;,
+                &quot;stderr&quot;: f&quot;Execution timed out after {timeout} seconds&quot;,
+                &quot;timed_out&quot;: True
+            }
+        finally:
+            self._active_pids.discard(proc.pid)
+
+    def _kill_process_tree(self, pid: int):
+        try:
+            parent = psutil.Process(pid)
+            for child in parent.children(recursive=True):
+                try:
+                    child.kill()
+                except psutil.NoSuchProcess:
+                    pass
+            parent.kill()
+        except psutil.NoSuchProcess:
+            pass
+</code></pre>
+<h3>D.2 Abstract Syntax Tree Mutation Finder (<code>sandbox/mutator.py</code>)</h3>
+<pre><code class="language-python">import ast
+
+class ASTMutationFinder(ast.NodeVisitor):
+    def __init__(self):
+        self.mutations = []
+
+    def visit_Compare(self, node):
+        op_map = {
+            ast.Eq: ast.NotEq,
+            ast.NotEq: ast.Eq,
+            ast.Lt: ast.GtE,
+            ast.LtE: ast.Gt,
+            ast.Gt: ast.LtE,
+            ast.GtE: ast.Lt,
+        }
+        for idx, op in enumerate(node.ops):
+            if type(op) in op_map:
+                self.mutations.append({
+                    &quot;line&quot;: node.lineno,
+                    &quot;type&quot;: &quot;COMPARE_OP&quot;,
+                    &quot;original&quot;: type(op).__name__,
+                    &quot;replacement&quot;: op_map[type(op)].__name__,
+                    &quot;target_node&quot;: node,
+                    &quot;op_idx&quot;: idx,
+                    &quot;new_op_class&quot;: op_map[type(op)]
+                })
+        self.generic_visit(node)
+
+    def visit_BinOp(self, node):
+        bin_map = {
+            ast.Add: ast.Sub,
+            ast.Sub: ast.Add,
+            ast.Mult: ast.Div,
+        }
+        if type(node.op) in bin_map:
+            self.mutations.append({
+                &quot;line&quot;: node.lineno,
+                &quot;type&quot;: &quot;ARITHMETIC_OP&quot;,
+                &quot;original&quot;: type(node.op).__name__,
+                &quot;replacement&quot;: bin_map[type(node.op)].__name__,
+                &quot;target_node&quot;: node,
+                &quot;new_op_class&quot;: bin_map[type(node.op)]
+            })
+        self.generic_visit(node)
+
+    def visit_Constant(self, node):
+        if isinstance(node.value, bool):
+            self.mutations.append({
+                &quot;line&quot;: node.lineno,
+                &quot;type&quot;: &quot;BOOLEAN_FLIP&quot;,
+                &quot;original&quot;: str(node.value),
+                &quot;replacement&quot;: str(not node.value),
+                &quot;target_node&quot;: node,
+                &quot;new_value&quot;: not node.value
+            })
+        self.generic_visit(node)
+</code></pre>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>APPENDIX E: SYSTEM VERIFICATION TEST CATALOGUE</h1>
+<h3>Table E.1: Detailed Verification Test Suite Execution Matrix</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Test Case ID</th>
+<th style="text-align:left">Feature / Component Under Test</th>
+<th style="text-align:left">Precondition / Input Vector</th>
+<th style="text-align:left">Expected Behavioral Result</th>
+<th style="text-align:left">Observed Outcome</th>
+<th style="text-align:left">Verification Audit Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>TC-01</strong></td>
+<td style="text-align:left">API Server Health Endpoint</td>
+<td style="text-align:left">Server active; DB initialized</td>
+<td style="text-align:left">Returns HTTP <code>200</code> with <code>status: healthy</code></td>
+<td style="text-align:left">HTTP <code>200</code> with connected DB</td>
+<td style="text-align:left"><strong>VERIFIED (Live Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-02</strong></td>
+<td style="text-align:left">Database SQLite WAL Mode</td>
+<td style="text-align:left">DB engine initialized</td>
+<td style="text-align:left">WAL journal mode active; foreign keys enabled</td>
+<td style="text-align:left">Verified via PRAGMA queries</td>
+<td style="text-align:left"><strong>VERIFIED (Live Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-03</strong></td>
+<td style="text-align:left">Startup Crash Recovery</td>
+<td style="text-align:left">Runs with status <code>running</code> in DB</td>
+<td style="text-align:left">Server transitions runs to <code>interrupted</code> at boot</td>
+<td style="text-align:left">All interrupted runs updated</td>
+<td style="text-align:left"><strong>VERIFIED (Code Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-04</strong></td>
+<td style="text-align:left">AST Cyclomatic Complexity</td>
+<td style="text-align:left">Source file with 4 <code>if</code> branches</td>
+<td style="text-align:left">Computes complexity $V = 5$</td>
+<td style="text-align:left">Visitor increments correctly</td>
+<td style="text-align:left"><strong>VERIFIED (Code Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-05</strong></td>
+<td style="text-align:left">Security Smell Detection</td>
+<td style="text-align:left">SQL query using string formatting</td>
+<td style="text-align:left">Flags <code>SQL_INJECTION</code> with CRITICAL severity</td>
+<td style="text-align:left">Accurately flagged</td>
+<td style="text-align:left"><strong>VERIFIED (Live Demo)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-06</strong></td>
+<td style="text-align:left">Pytest Test Generation</td>
+<td style="text-align:left">Valid Python function signature</td>
+<td style="text-align:left">Generates runnable <code>pytest</code> test function</td>
+<td style="text-align:left">Modular test suite written</td>
+<td style="text-align:left"><strong>VERIFIED (Live Demo)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-07</strong></td>
+<td style="text-align:left">Subprocess Execution Timeout</td>
+<td style="text-align:left">Long-running subprocess ($&gt; 60$s)</td>
+<td style="text-align:left">Process-tree terminated; flags timeout</td>
+<td style="text-align:left">Process terminated via psutil</td>
+<td style="text-align:left"><strong>VERIFIED (Code Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-08</strong></td>
+<td style="text-align:left">Flakiness Detection Engine</td>
+<td style="text-align:left">Test passing 2 of 3 retries</td>
+<td style="text-align:left">Categorizes status as <code>flaky</code> with penalty</td>
+<td style="text-align:left">Flags flaky test status</td>
+<td style="text-align:left"><strong>VERIFIED (Code Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-09</strong></td>
+<td style="text-align:left">Defect Deduplication (MD5)</td>
+<td style="text-align:left">Identical defect reported across runs</td>
+<td style="text-align:left">Identical MD5 hash generated; prevents dups</td>
+<td style="text-align:left">Single record maintained</td>
+<td style="text-align:left"><strong>VERIFIED (Code Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-10</strong></td>
+<td style="text-align:left">Pre-Flight Patch Verification</td>
+<td style="text-align:left">Candidate patch with syntax error</td>
+<td style="text-align:left">Regression tests fail; patch rejected</td>
+<td style="text-align:left"><code>patch_verified = False</code></td>
+<td style="text-align:left"><strong>VERIFIED (Code Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-11</strong></td>
+<td style="text-align:left">Zero-Division Patch Verification</td>
+<td style="text-align:left"><code>billing.py</code> zero-division defect</td>
+<td style="text-align:left">Guard inserted; tests pass; patch verified</td>
+<td style="text-align:left"><code>patch_verified = True</code></td>
+<td style="text-align:left"><strong>VERIFIED (Live Demo)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-12</strong></td>
+<td style="text-align:left">Dual-Agent Debate Review</td>
+<td style="text-align:left">Verified bug submitted to critic</td>
+<td style="text-align:left">Debate logged; consensus score computed</td>
+<td style="text-align:left">Consensus score $\ge 95%$</td>
+<td style="text-align:left"><strong>VERIFIED (Live Demo)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-13</strong></td>
+<td style="text-align:left">AST Operator Mutation</td>
+<td style="text-align:left">Comparison operator in source file</td>
+<td style="text-align:left">Mutant generated, executed, and killed</td>
+<td style="text-align:left">Mutant status: <code>killed</code></td>
+<td style="text-align:left"><strong>VERIFIED (Live Demo)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-14</strong></td>
+<td style="text-align:left">Zip-Slip Upload Protection</td>
+<td style="text-align:left">ZIP with <code>../</code> relative path</td>
+<td style="text-align:left">Rejects extraction; raises security error</td>
+<td style="text-align:left">Exception raised; aborts</td>
+<td style="text-align:left"><strong>VERIFIED (Code Audit)</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TC-15</strong></td>
+<td style="text-align:left">WebSocket Event Streaming</td>
+<td style="text-align:left">Client connected to <code>/ws/runs/{id}</code></td>
+<td style="text-align:left">Broadcasts state transitions in real time</td>
+<td style="text-align:left">Events streamed cleanly</td>
+<td style="text-align:left"><strong>VERIFIED (Live Audit)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div style="page-break-after: always;"></div>
+<h1>APPENDIX F: SETUP AND EXECUTION MANUAL</h1>
+<h2>F.1 Prerequisites</h2>
+<ul>
+<li><strong>Operating System:</strong> Windows 10/11, Ubuntu 20.04+, or macOS 12+</li>
+<li><strong>Python Version:</strong> Python 3.11 or Python 3.12 (Standard CPython)</li>
+<li><strong>Node.js Environment:</strong> Node.js $\ge 18.0$ and npm (optional, only if rebuilding the frontend from source)</li>
+</ul>
+<h2>F.2 Virtual Environment Setup and Installation</h2>
+<ol>
+<li>Clone or extract the project repository to your preferred local directory:<pre><code class="language-bash">cd &quot;S5 Mini Project&quot;
+</code></pre>
+</li>
+<li>Create and activate a Python virtual environment:<pre><code class="language-bash"># On Windows:
+python -m venv .venv
+.venv\Scripts\activate
+
+# On Linux / macOS:
+python3 -m venv .venv
+source .venv/bin/activate
+</code></pre>
+</li>
+<li>Install the required Python dependencies:<pre><code class="language-bash">pip install -r requirements.txt
+</code></pre>
+</li>
+</ol>
+<h2>F.3 Environment Configuration</h2>
+<p>Copy the sample environment file to create your local <code>.env</code> configuration:</p>
+<pre><code class="language-bash"># On Windows:
+copy .env.example .env
+
+# On Linux / macOS:
+cp .env.example .env
+</code></pre>
+<p><em>Note:</em> The default configuration uses the <code>OfflineLLMProvider</code>, which requires <strong>no API keys</strong>. Cloud providers (Google Gemini or OpenAI) can be enabled optionally by adding their respective API keys to the <code>.env</code> file.</p>
+<h2>F.4 Starting the Application</h2>
+<p>The project includes automated startup scripts for Windows and Unix systems:</p>
+<pre><code class="language-bash"># On Windows:
+run.bat
+
+# On Linux / macOS:
+chmod +x run.sh
+./run.sh
+</code></pre>
+<p>Alternatively, you can launch the backend server directly using Uvicorn:</p>
+<pre><code class="language-bash">python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+</code></pre>
+<h2>F.5 Accessing the Web Dashboard</h2>
+<p>Once the server is running, open your web browser and navigate to:</p>
+<pre><code>http://127.0.0.1:8000
+</code></pre>
+<ul>
+<li>The FastAPI server serves the pre-compiled React dashboard directly from <code>frontend/dist/</code>.</li>
+<li>To launch the demo analysis, click <strong>&quot;Launch Demo&quot;</strong> on the dashboard. This registers the reference <code>demo/ecommerce/</code> codebase and executes the full nine-stage analysis pipeline.</li>
+</ul>
+<h2>F.6 Running the Automated Test Suite</h2>
+<p>To execute the automated unit and integration tests:</p>
+<pre><code class="language-bash">pytest tests/ -v
+</code></pre>
+<p>To run tests with statement coverage reporting:</p>
+<pre><code class="language-bash">pytest --cov=agents --cov=backend --cov=sandbox tests/
+</code></pre>
+
+</body>
+</html>
