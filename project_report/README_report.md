@@ -1,20 +1,20 @@
 # SentinelMesh Academic Project Report Deliverables
 
-This directory (`project_report/`) contains the complete academic project documentation for the **S5 Project Work I – Second Review** submission to the **Department of Computer Science and Engineering, Bannari Amman Institute of Technology (BIT)**.
+This directory (`project_report/`) contains the complete **MAIN ACADEMIC PROJECT REPORT** for the Bachelor of Engineering (B.E.) degree submission to the **Department of Computer Science and Engineering, Bannari Amman Institute of Technology (BIT)**.
 
 ## Project & Team Information
 
 - **Project Title:** Intelligent Multi-Agent Framework for Automated Software Testing and Bug Analysis
 - **Project Name:** SentinelMesh
 - **Academic Year:** 2026–2027
-- **Semester & Course:** Semester V (S5), S5 Project Work I (Second Review)
+- **Programme:** Bachelor of Engineering (B.E.) in Computer Science and Engineering
 - **Batch Members:**
   1. **Hariesh P** (Reg. No.: `7376241CS195`)  
      Department: Computer Science and Engineering (CSE)  
-     Email: `harieshp.cs24@bitsathy.ac.in`
+     Official Email: `harieshp.cs24@bitsathy.ac.in`
   2. **Midhum M** (Reg. No.: `7376242AL152`)  
      Department: Artificial Intelligence and Machine Learning (AIML)  
-     Email: `midhumm.al24@bitsathy.ac.in`
+     Official Email: `midhumm.al24@bitsathy.ac.in`
 - **Project Guide:**
   - **RAMYA R** (Guide ID: `CS1906`)  
     Department of Computer Science and Engineering, BIT
@@ -24,19 +24,18 @@ This directory (`project_report/`) contains the complete academic project docume
 ## Deliverables Index
 
 1. **`SentinelMesh_Project_Report.md`**  
-   The comprehensive, complete academic project report formatted in formal GitHub Markdown with standard academic sections:
+   The complete, authoritative **Main Academic Project Report** formatted in formal academic structure:
    - **Front Matter:**
-     - Cover Page & Title Page (conforming to BIT Second Review format)
-     - Two Submission Compliance & Status Tables (all 12 required items marked "Prepared")
-     - Bonafide Certificate (draft with official student & guide details)
-     - Declaration (draft with both candidate signatures)
-     - Acknowledgement (formal academic draft)
+     - Cover Page & Title Page (formal B.E. project submission format)
+     - Bonafide Certificate (with guide RAMYA R and both candidates with individual departments)
+     - Declaration (formal joint academic declaration)
+     - Acknowledgement (academic acknowledgement)
      - Abstract, Table of Contents, List of Figures, List of Tables, List of Abbreviations
-   - **Chapter I — Introduction:** SQA background, automated CI/CD testing, limitations of manual defect analysis, multi-agent rationale, problem statement, objectives, scope, and proposed solution.
+   - **Chapter I — Introduction:** Background, automated testing in CI/CD, limitations of manual defect analysis, multi-agent rationale, problem statement, objectives, scope, proposed solution, significance, and report organization.
    - **Chapter II — Literature Survey:** Theoretical foundations, static analysis, AST grammars, test synthesis, defect classification, root-cause slicing, APR patch verification, multi-agent LLM systems, mutation testing, comparative analysis table, and identified research gaps.
-   - **Chapter III — Objectives and Methodology:** Functional and non-functional requirements, hardware/software specifications, existing system analysis, high-level architecture topology, end-to-end workflow, data flow diagrams (Level 0 and Level 1), agent coordination, relational ER schema, and subprocess sandboxing safety.
-   - **Chapter IV — System Implementation and Modules:** In-depth technical breakdown of all nine agents (`OrchestratorAgent`, `StaticAnalysisAgent`, `TestGenerationAgent`, `TestExecutionAgent`, `BugClassificationAgent`, `RootCauseAgent`, `AutoFixAgent`, `CriticAgent`, `ReportAgent`), the AST mutation engine, sandbox runner with `psutil` process-tree termination, LLM provider abstraction (Offline, Gemini, OpenAI), SQLite WAL database layer, and React 19 / Vite dashboard.
-   - **Chapter V — Results and Discussion:** Live runtime environment, health check verification (`/api/health`), evaluation on the reference `demo/ecommerce/` benchmark, defect diagnosis, pre-flight patch verification, multi-agent debate consensus, mutation testing score, and an audit status table of existing test suites.
+   - **Chapter III — Objectives and Methodology:** Functional and non-functional requirements, hardware/software specifications, existing system analysis, high-level architecture topology, end-to-end workflow, data flow diagrams (Level 0 and Level 1 DFD), agent coordination, relational ER schema, and subprocess sandboxing safety.
+   - **Chapter IV — System Design and Implementation:** In-depth technical breakdown of all nine agents (`OrchestratorAgent`, `StaticAnalysisAgent`, `TestGenerationAgent`, `TestExecutionAgent`, `BugClassificationAgent`, `RootCauseAgent`, `AutoFixAgent`, `CriticAgent`, `ReportAgent`), the AST mutation engine, sandbox runner with `psutil` process-tree termination, LLM provider abstraction (Offline, Gemini, OpenAI), SQLite WAL database layer, and React 19 / Vite dashboard.
+   - **Chapter V — Testing, Results and Discussion:** Live runtime environment, health check verification (`/api/health`), evaluation on the reference `demo/ecommerce/` benchmark, defect diagnosis, pre-flight patch verification, multi-agent debate consensus, mutation testing score, and an audit status table of existing test suites.
    - **Chapter VI — Conclusion and Future Work:** Summary of achievements, technical contributions, verified implementation milestones, identified limitations, and future research directions.
    - **References:** Numbered IEEE-style citations ([1]–[28]) matching every in-text citation.
    - **Appendices A–F:** Project directory tree, REST API specification table, SQLite DDL schema, source code implementation excerpts, verification test matrix, and setup/execution manual.
@@ -53,10 +52,9 @@ This directory (`project_report/`) contains the complete academic project docume
 
 ## Remaining Official Placeholders to Finalize for Viva-Voce
 
-The report is fully detailed with all technical contents and student/guide identifiers. The only remaining items to be signed or finalized during the review examination are:
-1. **Signatures:** Physical/digital signatures on Bonafide Certificate, Declaration, and Examiner evaluation rows.
-2. **HOD & Guide Designation:** Official academic designations (e.g., Assistant Professor / Head of Department) and official date of the Second Review Viva-Voce.
-3. **Drive Links:** If submitting an online evaluation folder, replace `"Link pending"` in the two submission-status tables with your designated Google Drive folder link.
+The report is complete and verified against the actual codebase. The only placeholders remaining for final submission are institutional items that require physical/live examination:
+1. **Physical Signatures:** Signature lines on the Bonafide Certificate, Declaration, and Internal/External Examiner evaluation rows.
+2. **Supervisor & HOD Designations:** Official academic titles (e.g., Assistant Professor / Head of Department) and official examination date.
 
 ---
 

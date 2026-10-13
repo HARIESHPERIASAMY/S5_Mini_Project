@@ -4,7 +4,7 @@
 
 ## COVER PAGE
 
-**A PROJECT REPORT (SECOND REVIEW)**
+**A PROJECT REPORT**
 
 Submitted by
 
@@ -15,9 +15,10 @@ Submitted by
 
 <br>
 
-**Course:** S5 Project Work I – Second Review  
-**Academic Year:** 2026–2027  
-**Programme:** Bachelor of Engineering (B.E.)  
+in partial fulfillment for the award of the degree of  
+**BACHELOR OF ENGINEERING**  
+in  
+**COMPUTER SCIENCE AND ENGINEERING**
 
 <br>
 
@@ -39,7 +40,7 @@ Department of Computer Science and Engineering
 
 ## TITLE PAGE
 
-**A PROJECT REPORT (SECOND REVIEW)**
+**A PROJECT REPORT**
 
 Submitted by
 
@@ -50,10 +51,10 @@ Submitted by
 
 <br>
 
-in partial fulfillment for the course requirements of  
-**S5 PROJECT WORK I (SECOND REVIEW)**  
+in partial fulfillment for the award of the degree of  
+**BACHELOR OF ENGINEERING**  
 in  
-**B.E. COMPUTER SCIENCE AND ENGINEERING**
+**COMPUTER SCIENCE AND ENGINEERING**
 
 <br>
 
@@ -73,42 +74,12 @@ Department of Computer Science and Engineering
 
 <div style="page-break-after: always;"></div>
 
-## SUBMISSION COMPLIANCE AND PROGRESS STATUS
-
-### Status on Partial Completion and Submission of Project Report — List of Documents to be Submitted
-
-| SL. No. | List of Documents | Status (Provide the drive link of the prepared document) |
-| :---: | :--- | :--- |
-| 1 | Cover Page & Title Page (Both are in the same format) | Prepared (Drive Link: Link pending) |
-| 2 | Bonafide Certificate | Prepared (Drive Link: Link pending) |
-| 3 | Declaration | Prepared (Drive Link: Link pending) |
-| 4 | Acknowledgement | Prepared (Drive Link: Link pending) |
-| 5 | Chapter I – Introduction | Prepared (Drive Link: Link pending) |
-| 6 | Chapter II – Literature Survey | Prepared (Drive Link: Link pending) |
-
-<br>
-
-### Submission of Project Report — List of Documents to be Submitted
-
-| SL. No. | List of Documents | Status (Provide the drive link of the prepared document) |
-| :---: | :--- | :--- |
-| 1 | Chapter III – Objectives and Methodology | Prepared (Drive Link: Link pending) |
-| 2 | Chapter IV – Proposed Work Modules (System Implementation) | Prepared (Drive Link: Link pending) |
-| 3 | Chapter V – Results and Discussion | Prepared (Drive Link: Link pending) |
-| 4 | Chapter VI – Conclusions and Suggestions for Future Work | Prepared (Drive Link: Link pending) |
-| 5 | References | Prepared (Drive Link: Link pending) |
-| 6 | Appendices | Prepared (Drive Link: Link pending) |
-
----
-
-<div style="page-break-after: always;"></div>
-
 ## BANNARI AMMAN INSTITUTE OF TECHNOLOGY
 **SATHYAMANGALAM – 638 401**
 
 ### BONAFIDE CERTIFICATE
 
-Certified that this project report titled **“INTELLIGENT MULTI-AGENT FRAMEWORK FOR AUTOMATED SOFTWARE TESTING AND BUG ANALYSIS (SENTINELMESH)”** is the bonafide work of **HARIESH P. (Register No.: 7376241CS195)**, Department of Computer Science and Engineering, and **MIDHUM M. (Register No.: 7376242AL152)**, Department of Artificial Intelligence and Machine Learning, who carried out the project work under my supervision for the course **S5 Project Work I (Second Review)** during the academic year 2026–2027.
+Certified that this project report titled **“INTELLIGENT MULTI-AGENT FRAMEWORK FOR AUTOMATED SOFTWARE TESTING AND BUG ANALYSIS (SENTINELMESH)”** is the bonafide work of **HARIESH P. (Register No.: 7376241CS195)**, Department of Computer Science and Engineering, and **MIDHUM M. (Register No.: 7376242AL152)**, Department of Artificial Intelligence and Machine Learning, who carried out the project work under my supervision in partial fulfillment for the award of the degree of **BACHELOR OF ENGINEERING IN COMPUTER SCIENCE AND ENGINEERING** during the academic year 2026–2027.
 
 <br><br><br>
 
@@ -121,7 +92,7 @@ Sathyamangalam – 638 401 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
 
 <br><br>
 
-Submitted for the Fifth Semester S5 Project Work I Second Review / Viva-Voce examination held on ......................................
+Submitted for the Project Work Viva-Voce examination held on ......................................
 
 <br><br>
 
@@ -134,7 +105,7 @@ Submitted for the Fifth Semester S5 Project Work I Second Review / Viva-Voce exa
 
 ## DECLARATION
 
-We, **HARIESH P. (Register No.: 7376241CS195)**, Department of Computer Science and Engineering, and **MIDHUM M. (Register No.: 7376242AL152)**, Department of Artificial Intelligence and Machine Learning, hereby declare that the project report entitled **“INTELLIGENT MULTI-AGENT FRAMEWORK FOR AUTOMATED SOFTWARE TESTING AND BUG ANALYSIS (SENTINELMESH)”** submitted to the Department of Computer Science and Engineering, Bannari Amman Institute of Technology, Sathyamangalam, in partial fulfillment of the requirements for the course **S5 Project Work I (Second Review)** during the academic year 2026–2027, is a record of original work carried out by us under the supervision of **RAMYA R (Guide ID: CS1906)**, Department of Computer Science and Engineering.
+We, **HARIESH P. (Register No.: 7376241CS195)**, Department of Computer Science and Engineering, and **MIDHUM M. (Register No.: 7376242AL152)**, Department of Artificial Intelligence and Machine Learning, hereby declare that the project report entitled **“INTELLIGENT MULTI-AGENT FRAMEWORK FOR AUTOMATED SOFTWARE TESTING AND BUG ANALYSIS (SENTINELMESH)”** submitted to the Department of Computer Science and Engineering, Bannari Amman Institute of Technology, Sathyamangalam, in partial fulfillment of the requirements for the award of the degree of **Bachelor of Engineering in Computer Science and Engineering**, is a record of original work carried out by us under the supervision of **RAMYA R (Guide ID: CS1906)**, Department of Computer Science and Engineering.
 
 We further declare that this work has not been submitted previously, in part or in full, for the award of any other degree, diploma, fellowship, or similar title in this or any other university or institution.
 
@@ -201,14 +172,13 @@ Defects identified across both static and dynamic vectors are unified, deduplica
 | :--- | :--- | :--- |
 | | **COVER PAGE** | i |
 | | **TITLE PAGE** | ii |
-| | **SUBMISSION COMPLIANCE & STATUS TABLES** | iii |
-| | **BONAFIDE CERTIFICATE** | v |
-| | **DECLARATION** | vi |
-| | **ACKNOWLEDGEMENT** | vii |
-| | **ABSTRACT** | viii |
-| | **LIST OF FIGURES** | xi |
-| | **LIST OF TABLES** | xii |
-| | **LIST OF ABBREVIATIONS** | xiii |
+| | **BONAFIDE CERTIFICATE** | iii |
+| | **DECLARATION** | iv |
+| | **ACKNOWLEDGEMENT** | v |
+| | **ABSTRACT** | vi |
+| | **LIST OF FIGURES** | ix |
+| | **LIST OF TABLES** | x |
+| | **LIST OF ABBREVIATIONS** | xi |
 | **CHAPTER I** | **INTRODUCTION** | **1** |
 | 1.1 | Background of Software Quality Assurance | 1 |
 | 1.2 | The Imperative of Automated Testing in Modern CI/CD | 2 |
@@ -243,7 +213,7 @@ Defects identified across both static and dynamic vectors are unified, deduplica
 | 3.9 | Persistence Model and Relational Schema (ER Diagram) | 37 |
 | 3.10 | Subprocess Sandboxing and Execution Safety | 39 |
 | 3.11 | Error Handling and Fault Tolerance Strategy | 40 |
-| **CHAPTER IV** | **SYSTEM IMPLEMENTATION AND MODULES** | **42** |
+| **CHAPTER IV** | **SYSTEM DESIGN AND IMPLEMENTATION** | **42** |
 | 4.1 | Project Structure and Modular Organization | 42 |
 | 4.2 | API Gateway, Request Validation, and Lifecycle Management | 43 |
 | 4.3 | Multi-Agent Orchestrator (`OrchestratorAgent`) | 46 |
@@ -259,7 +229,7 @@ Defects identified across both static and dynamic vectors are unified, deduplica
 | 4.13 | LLM Provider Abstraction Layer (Offline, Gemini, OpenAI) | 71 |
 | 4.14 | Persistence Layer and SQLite WAL Optimization | 73 |
 | 4.15 | Presentation Layer (React 19, TailwindCSS, WebSockets) | 75 |
-| **CHAPTER V** | **RESULTS AND DISCUSSION** | **78** |
+| **CHAPTER V** | **TESTING, RESULTS AND DISCUSSION** | **78** |
 | 5.1 | Experimental Setup and Runtime Environment | 78 |
 | 5.2 | Application Startup and Health Check Verification | 79 |
 | 5.3 | Verification on Reference E-Commerce Benchmark | 80 |
@@ -900,7 +870,7 @@ To ensure operational stability, SentinelMesh implements a multi-tier fault tole
 <div style="page-break-after: always;"></div>
 
 # CHAPTER IV
-# SYSTEM IMPLEMENTATION AND MODULES
+# SYSTEM DESIGN AND IMPLEMENTATION
 
 ## 4.1 Project Structure and Modular Organization
 The SentinelMesh codebase is organized into four main packages: `backend`, `agents`, `sandbox`, and `frontend`. The project layout is structured as follows:
@@ -1255,7 +1225,7 @@ The dashboard includes eight primary components:
 <div style="page-break-after: always;"></div>
 
 # CHAPTER V
-# RESULTS AND DISCUSSION
+# TESTING, RESULTS AND DISCUSSION
 
 ## 5.1 Experimental Setup and Runtime Environment
 The SentinelMesh framework was evaluated on a reference development workstation with the following environment:
