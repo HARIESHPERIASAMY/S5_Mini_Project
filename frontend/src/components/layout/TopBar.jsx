@@ -63,14 +63,6 @@ export default function TopBar({
 
       {/* Right Controls Bar */}
       <div className="flex items-center gap-2 sm:gap-2.5">
-        {/* Comparison Dropdown / Pill */}
-        <button
-          onClick={onOpenCompare}
-          className="hidden md:flex items-center gap-1.5 px-3 h-9 rounded-lg bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E2E8F0] text-xs font-medium text-[#0F172A] transition-colors cursor-pointer"
-        >
-          <span>Compare runs</span>
-        </button>
-
         {/* Run Settings Popover Trigger (Contains Model & Severity) */}
         <div className="relative" ref={settingsRef}>
           <button
@@ -218,20 +210,6 @@ export default function TopBar({
         >
           <FileCode className="w-3.5 h-3.5" />
           <span>Analyze code</span>
-        </button>
-
-        {/* Assistant Toggle Button */}
-        <button
-          onClick={onToggleAssistant}
-          className={`flex items-center gap-1.5 px-3 h-9 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
-            isAssistantOpen
-              ? "bg-[#EEF2FF] border-[#2457F5] text-[#2457F5]"
-              : "bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]"
-          }`}
-          title="Open Mesh Assistant Chatbot"
-        >
-          <Bot className="w-3.5 h-3.5 text-[#2457F5]" />
-          <span className="hidden xl:inline">Mesh Assistant</span>
         </button>
       </div>
     </header>

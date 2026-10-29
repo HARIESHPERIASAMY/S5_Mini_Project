@@ -1,0 +1,12 @@
+{
+  "name": "sentinelmesh",
+  "private": true,
+  "version": "2.0.0",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
+    "verify-all": "python scripts/verify_all.py",
+    "test": "pytest tests -q"
+  }
+}

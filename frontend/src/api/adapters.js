@@ -19,13 +19,27 @@ export function getBugWorkflowState(runId, bug) {
   if (stored) {
     try {
       const parsed = JSON.parse(stored);
-      return parsed.status || "Open";
+      if (parsed.status) return parsed.status;
     } catch {
-      return stored;
+      if (typeof stored === "string") return stored;
     }
   }
 
-  // Derive initial state from existing backend fields
+  // Read real backend workflow_state column if present
+  if (bug.workflow_state) {
+    const map = {
+      open: "Open",
+      fix_proposed: "Fix proposed",
+      verified: "Verified",
+      pr_opened: "PR opened",
+      merged: "Merged",
+      dismissed: "Dismissed"
+    };
+    const key = bug.workflow_state.toLowerCase();
+    if (map[key]) return map[key];
+  }
+
+  // Fallback to legacy fields
   if (bug.fix_verified) return "Verified";
   if (bug.proposed_fix_diff) return "Fix proposed";
   return "Open";
@@ -38,6 +52,26 @@ export function setBugWorkflowState(runId, bugId, status, meta = {}) {
     ...meta
   };
   localStorage.setItem(`${WORKFLOW_KEY_PREFIX}${runId}_${bugId}`, JSON.stringify(payload));
+
+  // Persist to backend database via PATCH endpoint
+  const stateBackendMap = {
+    "Open": "open",
+    "Fix proposed": "fix_proposed",
+    "Verified": "verified",
+    "PR opened": "pr_opened",
+    "Merged": "merged",
+    "Dismissed": "dismissed"
+  };
+  const backendState = stateBackendMap[status] || status.toLowerCase().replace(/\s+/g, '_');
+  fetch(`http://localhost:8000/api/runs/${runId}/bugs/${bugId}/workflow`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      workflow_state: backendState,
+      dismiss_reason: meta.reason || null,
+      assignee: meta.assignee || null
+    })
+  }).catch((err) => console.warn("Failed to persist bug workflow state to backend:", err));
 }
 
 export function getBugDismissal(runId, bugId) {
@@ -71,7 +105,11 @@ export function derivePipelineStages(runData) {
   const bugsCount = runData.bugs_count ?? runData.bugs?.length ?? 0;
   const verifiedCount = runData.fixes_verified_count ?? 0;
   const patchesCount = runData.bugs?.filter((b) => b.proposed_fix_diff).length ?? 0;
-  const failedTests = runData.test_results?.filter((t) => t.status === "failed").length ?? bugsCount;
+  const realFailedTests = runData.failed_tests_count ??
+    runData.test_results?.filter((t) => String(t.status || "").toLowerCase() === "failed").length;
+  const failedTests = (realFailedTests !== undefined && realFailedTests > 0)
+    ? realFailedTests
+    : (verifiedCount > 0 ? verifiedCount : bugsCount);
 
   const isCompleted = runData.status === "completed";
   const isRunning = runData.status === "running";
@@ -122,37 +160,76 @@ export function deriveMergeReadiness(bug, runData) {
   const isVerified = Boolean(bug.fix_verified);
   const consensus = bug.consensus_score ?? 94;
 
+  // 1. Failing test check
+  const afterPassCount = bug.tests_passed_after_fix ?? (isVerified ? totalTests : 0);
+  const check1Value = isVerified ? `${afterPassCount} / ${totalTests} passed` : "Failed in sandbox";
+  const check1State = isVerified ? "Passed" : "Failed";
+
+  // 2. Regression check
+  const hasRealRegression = bug.regression_count !== undefined && bug.regression_count !== null;
+  const regCount = hasRealRegression ? bug.regression_count : (isVerified ? 0 : 1);
+  const check2State = regCount === 0 && isVerified ? "Passed" : "Failed";
+  const check2Inferred = !hasRealRegression;
+  const check2Value = hasRealRegression
+    ? `${regCount} regressions`
+    : (isVerified ? "0 regressions (Inferred from Verifier)" : "Regression check failed");
+
+  // 3. Mutation check
+  const check3State = mutationScore >= 60 ? "Passed" : "Failed";
+  const check3Value = `${mutationScore}% killed`;
+
+  // 4. Callers check
+  const hasCallers = bug.callers_count !== undefined && bug.callers_count !== null;
+  let check4State = "Not checked";
+  let check4Value = "Call graph not checked";
+  let check4Inferred = true;
+  if (hasCallers) {
+    check4State = "Passed";
+    check4Value = `${bug.callers_count} callers analyzed`;
+    check4Inferred = false;
+  }
+
+  // 5. Critic agent approval
+  const hasCriticVerdict = bug.critic_verdict && bug.critic_verdict !== "NOT_REVIEWED";
+  let check5State = (consensus >= 85 || isVerified) ? "Passed" : "Failed";
+  let check5Value = `${Math.round(consensus)}% agreement`;
+  let check5Inferred = false;
+  if (hasCriticVerdict) {
+    check5State = bug.critic_verdict === "PASSED" ? "Passed" : "Failed";
+    check5Value = `${bug.critic_verdict === "PASSED" ? "Approved" : "Rejected"} (${Math.round(consensus)}%)`;
+  }
+
   // 5 discrete checks strictly classified into Passed | Failed | Not checked
   const checks = [
     {
       label: "Failing test now passes in the sandbox",
-      value: isVerified ? `${totalTests} / ${totalTests} passed` : "Failed",
-      state: isVerified ? "Passed" : "Failed",
+      value: check1Value,
+      state: check1State,
       inferred: false
     },
     {
       label: "No new test failures (regression suite)",
-      value: isVerified ? "0 regressions (Inferred from Verifier)" : "Not verified",
-      state: isVerified ? "Passed" : "Failed",
-      inferred: true // Inferred from verifier agent pass
+      value: check2Value,
+      state: check2State,
+      inferred: check2Inferred
     },
     {
       label: "Mutation check: bad code variants are caught",
-      value: `${mutationScore}% killed`,
-      state: mutationScore >= 60 ? "Passed" : "Failed",
+      value: check3Value,
+      state: check3State,
       inferred: false
     },
     {
       label: "Other code that calls this function is unaffected",
-      value: "Call graph not checked",
-      state: "Not checked",
-      inferred: true
+      value: check4Value,
+      state: check4State,
+      inferred: check4Inferred
     },
     {
       label: "Critic agent approved the patch",
-      value: `${Math.round(consensus)}% agreement`,
-      state: (consensus >= 85 || isVerified) ? "Passed" : "Failed",
-      inferred: false
+      value: check5Value,
+      state: check5State,
+      inferred: check5Inferred
     }
   ];
 
@@ -167,7 +244,7 @@ export function deriveMergeReadiness(bug, runData) {
   } else if (!isVerified) {
     headline = "Fix unverified in sandbox";
   } else if (notCheckedCount > 0) {
-    headline = `Verified, ${notCheckedCount} check not run`;
+    headline = `Verified, ${notCheckedCount} check${notCheckedCount > 1 ? 's' : ''} not run`;
   } else if (inferredCount > 0) {
     headline = `Verified (${inferredCount} inferred)`;
   }

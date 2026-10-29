@@ -111,14 +111,25 @@ export default function RunHistoryView({
               Executed Runs ({runs.length})
             </span>
           </div>
-          <button
-            onClick={fetchRuns}
-            disabled={loading}
-            className="flex items-center gap-1 text-xs text-[#2457F5] font-semibold hover:underline cursor-pointer"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            <span>Refresh</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {runs.length >= 2 && (
+              <button
+                onClick={() => onOpenCompare?.(runs[1]?.id, runs[0]?.id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2457F5] hover:bg-[#1A44D4] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+              >
+                <GitCompare className="w-3.5 h-3.5" />
+                <span>Compare runs</span>
+              </button>
+            )}
+            <button
+              onClick={fetchRuns}
+              disabled={loading}
+              className="flex items-center gap-1 text-xs text-[#2457F5] font-semibold hover:underline cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
 
         {loading ? (

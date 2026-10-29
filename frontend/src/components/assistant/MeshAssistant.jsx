@@ -14,31 +14,11 @@ export default function MeshAssistant({
 }) {
   const [messages, setMessages] = useState([
     {
-      id: "m1",
-      sender: "user",
-      text: "Why did the discount test fail?"
-    },
-    {
-      id: "m2",
+      id: "m0",
       sender: "assistant",
-      text: "The check at main.py:41 uses >, so an order equal to the threshold is skipped. The test builds exactly that case.",
-      citations: [
-        { label: "main.py:41", type: "file" },
-        { label: "Critic debate", type: "debate" }
-      ],
-      actions: []
-    },
-    {
-      id: "m3",
-      sender: "user",
-      text: "Is the fix safe to merge?"
-    },
-    {
-      id: "m4",
-      sender: "assistant",
-      text: "Yes for this one. The sandbox re-run passed 14 of 14 tests and no other function calls it. The zero-check fix is still unverified.",
+      text: "I am Mesh Assistant, grounded in this run's actual telemetry and findings. Ask me about detected defects, failing tests, patch verification, or merge readiness.",
       citations: [],
-      actions: ["Open PR", "Show diff"]
+      actions: []
     }
   ]);
   const [inputText, setInputText] = useState("");

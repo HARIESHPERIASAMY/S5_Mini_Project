@@ -346,9 +346,37 @@ export default function App() {
     triggerDownload(zipBlob, `sentinelmesh_run_${(activeRunId || '2841').slice(0, 8)}_patches.zip`);
   };
 
-  // Derive pipeline stages
+  // Derive pipeline stages and metrics
   const pipelineStages = derivePipelineStages(runData);
   const scoreBreakdown = deriveScoreBreakdown(runData);
+
+  const unverifiedBugs = bugs.filter((b) => !b.fix_verified);
+  const verifiedBugsCount = bugs.filter((b) => b.fix_verified).length;
+  let bannerSentence = "";
+  if (bugs.length === 0) {
+    bannerSentence = "All automated unit, property, and regression checks passed with zero defects.";
+  } else if (unverifiedBugs.length === 0) {
+    bannerSentence = `All ${bugs.length} identified defects have verified patches passing in the sandbox.`;
+  } else {
+    const topOpen = unverifiedBugs[0];
+    bannerSentence = `${verifiedBugsCount} fix${verifiedBugsCount === 1 ? '' : 'es'} verified in sandbox. ${unverifiedBugs.length} defect${unverifiedBugs.length === 1 ? '' : 's'} (${topOpen.title}) remain${unverifiedBugs.length === 1 ? 's' : ''} under triage.`;
+  }
+
+  const criticalBugs = bugs.filter((b) => b.severity?.toUpperCase() === "CRITICAL").length;
+  const highBugs = bugs.filter((b) => b.severity?.toUpperCase() === "HIGH").length;
+  const medBugs = bugs.filter((b) => b.severity?.toUpperCase() === "MEDIUM").length;
+  const lowBugs = bugs.filter((b) => b.severity?.toUpperCase() === "LOW").length;
+  const sevParts = [];
+  if (criticalBugs > 0) sevParts.push(`${criticalBugs} critical`);
+  if (highBugs > 0) sevParts.push(`${highBugs} high`);
+  if (medBugs > 0) sevParts.push(`${medBugs} medium`);
+  if (lowBugs > 0) sevParts.push(`${lowBugs} low`);
+  const bugsSeveritySubtext = sevParts.length > 0 ? sevParts.join(" · ") : (bugs.length === 0 ? "Zero defects" : "No high severity");
+
+  const covPct = runData?.code_coverage ?? 0;
+  const isCovBelowTarget = covPct < 80.0;
+  const hasMultipleRuns = (allRuns || []).length >= 2;
+  const trendDelta = hasMultipleRuns ? Math.round(((allRuns[0]?.suite_health_score || 0) - (allRuns[1]?.suite_health_score || 0)) * 10) / 10 : 0;
 
   return (
     <div className={`flex h-screen w-screen overflow-hidden font-sans antialiased ${theme === 'dark' ? 'bg-[#0B132B] text-slate-100' : 'bg-[#F8FAFC] text-[#0F172A]'}`}>
@@ -450,41 +478,42 @@ export default function App() {
                         Needs attention
                       </span>
                       <h2 className="text-base sm:text-lg font-heading font-extrabold text-[#0F172A] mt-1">
-                        {bugs.length > 0 ? `${bugs.length} defects flagged, ${runData?.fixes_verified_count ?? 2} fixes already verified` : "Zero defects flagged, clean suite"}
+                        {bugs.length > 0 ? `${bugs.length} defects flagged, ${verifiedBugsCount} fixes already verified` : "Zero defects flagged, clean suite"}
                       </h2>
                       <p className="text-xs text-[#64748B] mt-0.5">
-                        Both fixes pass in the sandbox. One critical item, a division without a zero check, is still open.
+                        {bannerSentence}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4">
-                    {/* Health Trend Sparkline */}
-                    <div className="hidden xl:flex items-center gap-2 pl-4 border-l border-[#E2E8F0]">
-                      <div className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <span className="text-[10px] font-mono text-[#64748B] uppercase">Health Trend</span>
-                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-[#FFF4E0] text-[#9A5B00] border border-[#FEDF89] font-bold">
-                            Sample data
+                    {/* Health Trend Sparkline (Condition: Only shown if 2 or more real runs exist) */}
+                    {hasMultipleRuns && (
+                      <div className="hidden xl:flex items-center gap-2 pl-4 border-l border-[#E2E8F0]">
+                        <div className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <span className="text-[10px] font-mono text-[#64748B] uppercase">Health Trend</span>
+                          </div>
+                          <span className={`text-xs font-bold font-mono block mt-0.5 ${trendDelta >= 0 ? "text-[#16A34A]" : "text-[#DC2626]"}`}>
+                            {trendDelta >= 0 ? `+${trendDelta}` : trendDelta} pts
                           </span>
                         </div>
-                        <span className="text-xs font-bold font-mono text-[#16A34A] block mt-0.5">+5.3 pts</span>
+                        <svg className="w-20 h-8" viewBox="0 0 80 32">
+                          <polyline
+                            fill="none"
+                            stroke="#2457F5"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            points="4,24 28,18 52,14 76,6"
+                          />
+                          <circle cx="4" cy="24" r="2.5" fill="#2457F5" />
+                          <circle cx="28" cy="18" r="2.5" fill="#2457F5" />
+                          <circle cx="52" cy="14" r="2.5" fill="#2457F5" />
+                          <circle cx="76" cy="6" r="3" fill="#16A34A" />
+                        </svg>
                       </div>
-                      <svg className="w-20 h-8" viewBox="0 0 80 32">
-                        <polyline
-                          fill="none"
-                          stroke="#2457F5"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          points="4,24 28,18 52,14 76,6"
-                        />
-                        <circle cx="4" cy="24" r="2.5" fill="#2457F5" />
-                        <circle cx="28" cy="18" r="2.5" fill="#2457F5" />
-                        <circle cx="52" cy="14" r="2.5" fill="#2457F5" />
-                        <circle cx="76" cy="6" r="3" fill="#16A34A" />
-                      </svg>
-                    </div>
+                    )}
 
                     <div className="flex items-center gap-2.5">
                       <button
@@ -500,7 +529,7 @@ export default function App() {
                         onClick={() => setScoreDrawerOpen(!scoreDrawerOpen)}
                         className="px-3 h-9 rounded-lg bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#0F172A] transition-colors cursor-pointer"
                       >
-                        Why {runData?.suite_health_score ?? "73.5"}? See breakdown
+                        Why {runData?.suite_health_score ?? "0"}? See breakdown
                       </button>
                     </div>
                   </div>
@@ -551,16 +580,16 @@ export default function App() {
                   <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
                     <span className="text-[11px] font-mono font-bold uppercase text-[#64748B]">Bugs Found</span>
                     <div className="text-2xl font-heading font-extrabold text-[#0F172A] mt-1">
-                      {bugs.length || 3}
+                      {bugs.length}
                     </div>
-                    <span className="text-xs text-[#DC2626] font-medium">1 high · 2 medium</span>
+                    <span className="text-xs text-[#DC2626] font-medium">{bugsSeveritySubtext}</span>
                   </div>
 
                   {/* Card 2 */}
                   <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
                     <span className="text-[11px] font-mono font-bold uppercase text-[#64748B]">Fixes Verified</span>
                     <div className="text-2xl font-heading font-extrabold text-[#0F172A] mt-1">
-                      {runData?.fixes_verified_count ?? 2} / {bugs.length || 3}
+                      {verifiedBugsCount} / {bugs.length}
                     </div>
                     <span className="text-xs text-[#16A34A] font-medium">Re-run in sandbox</span>
                   </div>
@@ -568,17 +597,19 @@ export default function App() {
                   {/* Card 3 */}
                   <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
                     <span className="text-[11px] font-mono font-bold uppercase text-[#64748B]">Coverage</span>
-                    <div className="text-2xl font-heading font-extrabold text-[#0F172A] mt-1">
-                      {runData?.code_coverage ?? 80.4}%
+                    <div className={`text-2xl font-heading font-extrabold mt-1 ${isCovBelowTarget ? 'text-[#D97706]' : 'text-[#0F172A]'}`}>
+                      {covPct}%
                     </div>
-                    <span className="text-xs text-[#64748B] font-medium">Target 80%</span>
+                    <span className={`text-xs font-medium ${isCovBelowTarget ? 'text-[#D97706]' : 'text-[#64748B]'}`}>
+                      {isCovBelowTarget ? 'Below target 80%' : 'Target 80% met'}
+                    </span>
                   </div>
 
                   {/* Card 4 */}
                   <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
                     <span className="text-[11px] font-mono font-bold uppercase text-[#64748B]">Mutants Killed</span>
                     <div className="text-2xl font-heading font-extrabold text-[#0F172A] mt-1">
-                      {runData?.mutation_score ?? 100}%
+                      {runData?.mutation_score ?? 0}%
                     </div>
                     <span className="text-xs text-[#64748B] font-medium">AST operator set</span>
                   </div>
