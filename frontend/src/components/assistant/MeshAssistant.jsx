@@ -154,13 +154,19 @@ export default function MeshAssistant({
                     <button
                       key={i}
                       onClick={() => {
-                        if (c.targetId && onSelectBug && runData?.bugs) {
+                        if (c.type === "patch" && onExportPatch) {
+                          onExportPatch();
+                        } else if (c.targetId && onSelectBug && runData?.bugs) {
                           const target = runData.bugs.find((b) => b.id === c.targetId);
                           if (target) onSelectBug(target);
+                        } else if (c.label && onSelectBug && runData?.bugs) {
+                          const matched = runData.bugs.find(b => c.label.includes(b.file_path));
+                          if (matched) onSelectBug(matched);
                         }
                       }}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EEF2FF] text-[#2457F5] border border-[#2457F5]/25 text-[10px] font-mono font-semibold hover:bg-[#E0E7FF] cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EEF2FF] text-[#2457F5] border border-[#2457F5]/25 text-[10px] font-mono font-semibold hover:bg-[#E0E7FF] transition-colors cursor-pointer"
                     >
+                      <ExternalLink className="w-2.5 h-2.5" />
                       <span>{c.label}</span>
                     </button>
                   ))}

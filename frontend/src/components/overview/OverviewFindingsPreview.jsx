@@ -239,41 +239,47 @@ export default function OverviewFindingsPreview({
           </div>
 
           {/* Side-by-Side Before & After Boxes (Screenshot 1) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
-            {/* BEFORE Box */}
-            <div className="rounded-lg border border-[#FECDCA] bg-[#FEECEC] p-3 text-[#B42318]">
-              <span className="text-[10px] font-bold block mb-1.5 uppercase tracking-wider">
-                Before · test FAILED
-              </span>
-              <div className="space-y-0.5 text-[11px]">
-                <div className="text-[#991B1B]">
-                  <span className="text-[#991B1B]/70 mr-2">{defectLine - 1}</span>
-                  <span>def apply_discount(total):</span>
-                </div>
-                <div className="text-[#991B1B] font-bold">
-                  <span className="text-[#991B1B]/70 mr-2">{defectLine}</span>
-                  <span>&nbsp; {originalLine}</span>
+          {diffText ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
+              {/* BEFORE Box */}
+              <div className="rounded-lg border border-[#FECDCA] bg-[#FEECEC] p-3 text-[#B42318]">
+                <span className="text-[10px] font-bold block mb-1.5 uppercase tracking-wider">
+                  Before · test FAILED
+                </span>
+                <div className="space-y-0.5 text-[11px]">
+                  <div className="text-[#991B1B]">
+                    <span className="text-[#991B1B]/70 mr-2">{defectLine - 1}</span>
+                    <span>def apply_discount(total):</span>
+                  </div>
+                  <div className="text-[#991B1B] font-bold">
+                    <span className="text-[#991B1B]/70 mr-2">{defectLine}</span>
+                    <span>&nbsp; {originalLine}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* AFTER Box */}
-            <div className="rounded-lg border border-[#A6F4C5] bg-[#E7F8EE] p-3 text-[#14753B]">
-              <span className="text-[10px] font-bold block mb-1.5 uppercase tracking-wider">
-                After · 14 of 14 tests PASSED
-              </span>
-              <div className="space-y-0.5 text-[11px]">
-                <div className="text-[#166534]">
-                  <span className="text-[#166534]/70 mr-2">{defectLine - 1}</span>
-                  <span>def apply_discount(total):</span>
-                </div>
-                <div className="text-[#166534] font-bold">
-                  <span className="text-[#166534]/70 mr-2">{defectLine}</span>
-                  <span>&nbsp; {fixedLine}</span>
+              {/* AFTER Box */}
+              <div className="rounded-lg border border-[#A6F4C5] bg-[#E7F8EE] p-3 text-[#14753B]">
+                <span className="text-[10px] font-bold block mb-1.5 uppercase tracking-wider">
+                  After · 14 of 14 tests PASSED
+                </span>
+                <div className="space-y-0.5 text-[11px]">
+                  <div className="text-[#166534]">
+                    <span className="text-[#166534]/70 mr-2">{defectLine - 1}</span>
+                    <span>def apply_discount(total):</span>
+                  </div>
+                  <div className="text-[#166534] font-bold">
+                    <span className="text-[#166534]/70 mr-2">{defectLine}</span>
+                    <span>&nbsp; {fixedLine}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="p-4 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-mono text-[#64748B] text-center">
+              No patch diff proposed yet for this defect.
+            </div>
+          )}
 
           {/* Agent Consensus Footer */}
           <div className="pt-3 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs gap-2">
@@ -295,3 +301,4 @@ export default function OverviewFindingsPreview({
     </div>
   );
 }
+

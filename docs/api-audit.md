@@ -127,3 +127,4 @@ To satisfy the product-grade information architecture without changing the backe
    - Initial state computed from `bug.proposed_fix_diff` and `bug.fix_verified`. User actions ("Dismiss", "Open PR", "Mark Merged") are persisted client-side via `localStorage` per `run_id:bug_id`.
 4. **Mesh Assistant Chatbot**:
    - Queries loaded `RunDetailResponse` directly in-memory, extracting exact grounded matches, test failures, and debate records. Cites real sources (`file:line`, `debate #round`, `test name`) with zero hallucinations.
+

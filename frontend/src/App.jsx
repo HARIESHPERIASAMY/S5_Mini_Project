@@ -6,6 +6,7 @@ import FileTree from './components/findings/FileTree';
 import FindingsTable from './components/findings/FindingsTable';
 import DefectDetailDrawer from './components/findings/DefectDetailDrawer';
 import OverviewFindingsPreview from './components/overview/OverviewFindingsPreview';
+import LiveRunView from './components/liverun/LiveRunView';
 import AgentNetworkGraph from './components/AgentNetworkGraph';
 import LiveTerminal from './components/LiveTerminal';
 import RiskHeatmap from './components/RiskHeatmap';
@@ -356,8 +357,13 @@ export default function App() {
                     {/* Health Trend Sparkline */}
                     <div className="hidden xl:flex items-center gap-2 pl-4 border-l border-[#E2E8F0]">
                       <div className="text-right">
-                        <span className="text-[10px] font-mono text-[#64748B] uppercase block">Health Trend</span>
-                        <span className="text-xs font-bold font-mono text-[#16A34A]">+5.3 pts</span>
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="text-[10px] font-mono text-[#64748B] uppercase">Health Trend</span>
+                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-[#FFF4E0] text-[#9A5B00] border border-[#FEDF89] font-bold">
+                            Sample data
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold font-mono text-[#16A34A] block mt-0.5">+5.3 pts</span>
                       </div>
                       <svg className="w-20 h-8" viewBox="0 0 80 32">
                         <polyline
@@ -481,12 +487,19 @@ export default function App() {
               </div>
             )}
 
-            {/* VIEW: LIVE RUN */}
+            {/* VIEW: LIVE RUN (Horizontal Agent Pipeline + Plain-Language Timeline + Raw Logs Toggle) */}
             {activeView === "liverun" && (
-              <div className="space-y-6">
-                <AgentNetworkGraph agentStates={agentStates} currentAgent={currentAgent} />
-                <LiveTerminal logs={logs} />
-              </div>
+              <LiveRunView
+                runData={runData}
+                logs={logs}
+                agentStates={agentStates}
+                currentAgent={currentAgent}
+                isRunning={isRunning}
+                onSelectFinding={(bugId) => {
+                  setSelectedBugId(bugId);
+                  setActiveView("findings");
+                }}
+              />
             )}
 
             {/* VIEW: FINDINGS (Master-Detail 3-Column Layout - Screenshot 3) */}
