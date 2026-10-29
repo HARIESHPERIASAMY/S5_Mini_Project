@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Network, Cpu, FileSearch, FlaskConical, PlaySquare, 
   Tag, Compass, Wrench, MessageSquareDiff, FileSpreadsheet,
-  CheckCircle2, Loader2, AlertCircle
+  CheckCircle2, Loader2
 } from 'lucide-react';
 
 export default function AgentNetworkGraph({ agentStates = {}, currentAgent = "orchestrator" }) {

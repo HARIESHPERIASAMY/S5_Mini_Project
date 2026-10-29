@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Copy, Check, Trash2, ArrowDownCircle, Filter } from 'lucide-react';
+import { Terminal, Copy, Check, ArrowDownCircle } from 'lucide-react';
 
 export default function LiveTerminal({ logs = [] }) {
   const [filterLevel, setFilterLevel] = useState("ALL");
@@ -98,7 +98,7 @@ export default function LiveTerminal({ logs = [] }) {
           filteredLogs.map((log, idx) => {
             const timeStr = log.timestamp
               ? new Date(log.timestamp).toLocaleTimeString()
-              : new Date().toLocaleTimeString();
+              : '--:--:--';
             const levelClass = getLevelStyle(log.level);
 
             return (

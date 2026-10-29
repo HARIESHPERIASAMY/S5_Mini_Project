@@ -13,7 +13,7 @@ import asyncio
 import concurrent.futures
 import uuid
 import pytest
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 from backend.main import app
 from backend.database import db_session_scope
 from backend.models import Project, Run, Bug, FileRisk

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Play, Download, FileCode, Cpu, Sparkles, RefreshCw } from 'lucide-react';
+import { Shield, Download, FileCode, Cpu, Sparkles, RefreshCw } from 'lucide-react';
 
 export default function Header({
   activeRun,

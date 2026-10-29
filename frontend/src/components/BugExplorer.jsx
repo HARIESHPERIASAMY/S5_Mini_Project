@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Bug, CheckCircle2, AlertOctagon, ShieldAlert, Cpu, 
+  Bug, CheckCircle2, Cpu, 
   HelpCircle, GitPullRequest, Copy, Check, ChevronRight, X
 } from 'lucide-react';
 

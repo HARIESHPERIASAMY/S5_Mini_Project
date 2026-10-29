@@ -9,7 +9,7 @@ import sqlite3
 import tempfile
 from pathlib import Path
 import pytest
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 from backend.main import app
 from backend.database import (
     engine,

@@ -7,7 +7,7 @@ import RiskHeatmap from './components/RiskHeatmap';
 import BugExplorer from './components/BugExplorer';
 import AgentDebatePanel from './components/AgentDebatePanel';
 import NewProjectModal from './components/NewProjectModal';
-import { Sparkles, Shield, RefreshCw, AlertCircle } from 'lucide-react';
+import { Sparkles, Shield, RefreshCw } from 'lucide-react';
 
 const API_BASE = "http://localhost:8000";
 
@@ -120,7 +120,7 @@ export default function App() {
       let data;
       try {
         data = await res.json();
-      } catch (e) {
+      } catch {
         throw new Error(`Server returned status ${res.status} (non-JSON response)`);
       }
       if (!res.ok) {
@@ -148,7 +148,7 @@ export default function App() {
       let proj;
       try {
         proj = await projRes.json();
-      } catch (e) {
+      } catch {
         throw new Error(`Server returned status ${projRes.status} (non-JSON response)`);
       }
       if (!projRes.ok) {
@@ -163,7 +163,7 @@ export default function App() {
       let run;
       try {
         run = await runRes.json();
-      } catch (e) {
+      } catch {
         throw new Error(`Server returned status ${runRes.status} (non-JSON response)`);
       }
       if (!runRes.ok) {
@@ -191,7 +191,7 @@ export default function App() {
       let proj;
       try {
         proj = await projRes.json();
-      } catch (e) {
+      } catch {
         throw new Error(`Server returned status ${projRes.status} (non-JSON response)`);
       }
       if (!projRes.ok) {
@@ -206,7 +206,7 @@ export default function App() {
       let run;
       try {
         run = await runRes.json();
-      } catch (e) {
+      } catch {
         throw new Error(`Server returned status ${runRes.status} (non-JSON response)`);
       }
       if (!runRes.ok) {

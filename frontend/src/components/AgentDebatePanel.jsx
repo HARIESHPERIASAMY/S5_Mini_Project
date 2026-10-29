@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquareDiff, CheckCircle, ShieldCheck, Scale, ArrowRight } from 'lucide-react';
+import { MessageSquareDiff, Scale, ArrowRight } from 'lucide-react';
 
 export default function AgentDebatePanel({ debates = [], consensusScore = 95 }) {
   return (

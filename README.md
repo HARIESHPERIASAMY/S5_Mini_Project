@@ -69,8 +69,12 @@ flowchart TD
 
 ## 🚀 Quick Start (One-Command Launch)
 
-### On Windows
-Double-click `run.bat` or run in terminal:
+### On Windows PowerShell
+Run the native PowerShell launcher:
+```powershell
+.\run.ps1
+```
+*Or use Command Prompt / Double-click:*
 ```cmd
 run.bat
 ```
@@ -81,47 +85,69 @@ chmod +x run.sh
 ./run.sh
 ```
 
-The platform will automatically initialize the database and start the unified server on:
-👉 **Dashboard:** [http://localhost:8000](http://localhost:8000)  
-👉 **Interactive API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+The platform will automatically verify dependencies, initialize the database schema, and launch the server on:
+👉 **Mission Control Dashboard:** [http://localhost:8000](http://localhost:8000)  
+👉 **Interactive API Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 🛠️ Manual Setup
+## 🛠️ Manual Setup & Execution
 
-### 1. Backend Setup
-```bash
-# Install Python dependencies
+### 1. Environment & Prerequisites
+- **Python:** 3.11, 3.12, or 3.13
+- **Node.js:** 18+ (only needed for frontend source development; production bundle is pre-built)
+- **Environment Template:** Copy `.env.example` to `.env` if custom keys are needed (pluggable Gemini / OpenAI / Ollama support; operates 100% offline out-of-the-box).
+
+### 2. Backend Setup (PowerShell / Windows)
+```powershell
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Initialize SQLite database
+python -c "from backend.database import init_db; init_db()"
 
 # Start backend server
 python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 2. Frontend Development Mode (Optional)
-```bash
+### 3. Frontend Development (Optional)
+FastAPI serves the pre-built dashboard directly from `frontend/dist`. To edit frontend React source code:
+```powershell
 cd frontend
 npm install
-npm run dev
+npm run dev      # Runs Vite hot-reloading dev server on http://localhost:5173
+npm run lint     # Runs oxlint static analysis
+npm run build    # Produces production distribution in frontend/dist
 ```
 
 ---
 
 ## 🧪 Testing & Verification
 
-SentinelMesh includes a comprehensive test suite for the platform itself (testing all 9 agents, the AST mutation engine, sandbox execution, database models, and FastAPI endpoints):
+SentinelMesh includes a comprehensive test suite for the platform itself (testing all 9 agents, AST mutation engine, sandbox execution, database models, and FastAPI endpoints):
 
-```bash
-# Run all tests
+```powershell
+# Run all unit and integration tests (37/37 passing)
 pytest tests/ -v
 
-# Run with coverage report
+# Run with test coverage
 pytest --cov=backend --cov=agents --cov=sandbox --cov-report=term-missing tests/
+
+# Execute 20-endpoint API Smoke Test and Contract Audit
+python scripts/audit.py
+
+# Execute Performance & Benchmark Test Suite
+python scripts/benchmark.py
 ```
 
 **Verification Results:**
 - 37 / 37 Tests Passing (100% pass rate)
 - Platform Code Coverage: **85%**
+- API Smoke & Audit Suite: **20 / 20 Endpoints Passing (100%)**
+- Frontend Linter: **0 Warnings, 0 Errors**
 
 ---
 
@@ -142,26 +168,38 @@ S5 Mini Project/
 │   └── report_agent.py         # Executive & Technical Reporter
 ├── backend/                    # FastAPI Backend Gateway
 │   ├── main.py                 # REST Endpoints & WebSocket Server
-│   ├── database.py             # SQLite & SQLAlchemy Engine
+│   ├── database.py             # SQLite WAL Mode & SQLAlchemy Engine
 │   ├── models.py               # Database ORM Schemas
 │   ├── schemas.py              # Pydantic v2 Models
 │   ├── event_bus.py            # Async Pub/Sub & Telemetry Stream
 │   └── llm/                    # Pluggable LLM Layer (Offline/Gemini/OpenAI)
+├── data/                       # Persistent SQLite Database & Project Storage
+├── demo/                       # Pre-Seeded Buggy E-Commerce Microservice
+│   └── ecommerce/              # Real-world bugs (ZeroDiv, SQLi, Off-By-One, NoneType)
+├── docs/                       # Architecture, Benchmark & Audit Reports
+├── frontend/                   # Modern React Mission Control Dashboard
+│   ├── src/                    # Components (Graph, Terminal, Heatmap, Ledger)
+│   └── dist/                   # Production Static Build (Pre-compiled)
+├── project_report/             # Academic Project Submission Deliverables
+│   ├── final_submissions/      # DOCX & PDF Reports, PPTX Slides, Compliance Checklists
+│   ├── scripts/                # Automated Report Generators & Verification Tools
+│   ├── guidelines/             # University Report Guidelines & Formatting Rules
+│   └── assets/                 # Architecture Diagrams, Plagiarism Receipts, Logos
 ├── sandbox/                    # Subprocess Isolation & Mutator
 │   ├── runner.py               # Safe Subprocess Manager with Timeout
 │   └── mutator.py              # AST Mutation Testing Engine
-├── demo/                       # Pre-Seeded Buggy E-Commerce Microservice
-│   └── ecommerce/              # Real-world bugs (ZeroDiv, SQLi, Off-By-One, NoneType)
-├── frontend/                   # Modern React Mission Control Dashboard
-│   ├── src/                    # Components (Graph, Terminal, Heatmap, Ledger)
-│   └── dist/                   # Production Static Build
-├── tests/                      # Automated Unit & Integration Tests
-├── docs/                       # Architecture & Implementation Plans
+├── scripts/                    # CLI Utilities (API Audit Harness & Performance Benchmarks)
+├── tests/                      # Automated Unit, Security & Integration Tests
+├── .env.example                # Safe Environment Variables Template
+├── .gitignore                  # Git Ignore Rules
+├── pytest.ini                  # Pytest Configuration
 ├── requirements.txt            # Python Dependencies
-├── run.bat                     # Windows Launch Script
-├── run.sh                      # Unix/Linux Launch Script
+├── run.bat                     # Windows CMD Launcher
+├── run.ps1                     # Windows PowerShell Launcher
+├── run.sh                      # Unix/Linux Launcher
 └── README.md                   # Platform Documentation
 ```
+
 
 ---
 

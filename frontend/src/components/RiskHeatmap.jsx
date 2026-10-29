@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, FileCode2, Layers, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Flame, FileCode2, ShieldAlert } from 'lucide-react';
 
 export default function RiskHeatmap({ fileRisks = [] }) {
   const [activeFile, setActiveFile] = useState(null);

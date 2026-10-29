@@ -3,7 +3,7 @@ Tests for SentinelMesh REST API and Demo Launcher.
 """
 
 import pytest
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 from backend.main import app
 from backend.database import Base, engine
 
