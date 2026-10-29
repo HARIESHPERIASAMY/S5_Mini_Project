@@ -82,6 +82,15 @@ class BugResponse(BaseModel):
     verification_output: Optional[str] = None
     consensus_score: float
     deduplication_key: Optional[str] = None
+    workflow_state: Optional[str] = "open"
+    dismiss_reason: Optional[str] = None
+    assignee: Optional[str] = None
+    tests_passed_after_fix: Optional[int] = None
+    tests_failed_after_fix: Optional[int] = None
+    regression_count: Optional[int] = 0
+    critic_verdict: Optional[str] = "NOT_REVIEWED"
+    callers_count: Optional[int] = 0
+    affected_callers: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -171,6 +180,9 @@ class RunResponse(BaseModel):
     suite_health_score: float
     bugs_count: int
     fixes_verified_count: int
+    failed_tests_count: Optional[int] = 0
+    agent_durations: Optional[str] = None
+    token_cost_usd: Optional[float] = 0.0
     current_agent: str
     progress_pct: int
     executive_summary: Optional[str] = None
@@ -218,3 +230,53 @@ class MetricsResponse(BaseModel):
     interrupted_runs: int
     avg_latency_ms: float
     database_status: str
+
+
+class BugWorkflowUpdate(BaseModel):
+    workflow_state: str  # open, fix_proposed, verified, pr_opened, merged, dismissed
+    dismiss_reason: Optional[str] = None
+    assignee: Optional[str] = None
+
+
+class ImpactSimulationResponse(BaseModel):
+    current_score: float
+    simulated_score: float
+    score_delta: float
+    current_coverage: float
+    simulated_coverage: float
+    coverage_delta: float
+    tests_fixed: int
+    regression_risk: str
+
+
+class RunComparisonResponse(BaseModel):
+    base_run_id: str
+    target_run_id: str
+    score_delta: float
+    coverage_delta: float
+    fixed_bugs: List[BugResponse] = []
+    new_bugs: List[BugResponse] = []
+    unchanged_bugs: List[BugResponse] = []
+
+
+class WebhookTestRequest(BaseModel):
+    url: str
+    secret: Optional[str] = None
+
+
+class WebhookTestResponse(BaseModel):
+    success: bool
+    status_code: Optional[int] = None
+    message: str
+
+
+class HealthTrendPoint(BaseModel):
+    run_id: str
+    score: float
+    created_at: datetime
+
+
+class HealthTrendsResponse(BaseModel):
+    project_id: str
+    points: List[HealthTrendPoint] = []
+

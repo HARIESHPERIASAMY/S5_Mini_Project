@@ -85,6 +85,35 @@ def auto_migrate():
                     conn.execute(text("ALTER TABLE runs ADD COLUMN idempotency_key VARCHAR(255)"))
                 if "trace_id" not in run_cols:
                     conn.execute(text("ALTER TABLE runs ADD COLUMN trace_id VARCHAR(64)"))
+                if "failed_tests_count" not in run_cols:
+                    conn.execute(text("ALTER TABLE runs ADD COLUMN failed_tests_count INTEGER DEFAULT 0"))
+                if "agent_durations" not in run_cols:
+                    conn.execute(text("ALTER TABLE runs ADD COLUMN agent_durations TEXT"))
+                if "token_cost_usd" not in run_cols:
+                    conn.execute(text("ALTER TABLE runs ADD COLUMN token_cost_usd FLOAT DEFAULT 0.0"))
+
+            # Check columns in bugs
+            res_bugs = conn.execute(text("PRAGMA table_info(bugs)")).fetchall()
+            bug_cols = {row[1] for row in res_bugs}
+            if bug_cols:
+                if "workflow_state" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN workflow_state VARCHAR(50) DEFAULT 'open'"))
+                if "dismiss_reason" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN dismiss_reason VARCHAR(255)"))
+                if "assignee" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN assignee VARCHAR(100)"))
+                if "tests_passed_after_fix" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN tests_passed_after_fix INTEGER"))
+                if "tests_failed_after_fix" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN tests_failed_after_fix INTEGER"))
+                if "regression_count" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN regression_count INTEGER DEFAULT 0"))
+                if "critic_verdict" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN critic_verdict VARCHAR(50) DEFAULT 'NOT_REVIEWED'"))
+                if "callers_count" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN callers_count INTEGER DEFAULT 0"))
+                if "affected_callers" not in bug_cols:
+                    conn.execute(text("ALTER TABLE bugs ADD COLUMN affected_callers TEXT"))
 
             # Check columns in agent_logs
             res_logs = conn.execute(text("PRAGMA table_info(agent_logs)")).fetchall()

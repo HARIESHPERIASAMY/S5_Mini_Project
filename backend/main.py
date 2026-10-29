@@ -37,7 +37,11 @@ from backend.schemas import (
     ProjectCreate, ProjectResponse,
     RunResponse, RunDetailResponse, PaginatedRunsResponse,
     StartRunRequest, ActionResponse, MetricsResponse,
-    StandardErrorResponse
+    StandardErrorResponse,
+    BugResponse, BugWorkflowUpdate,
+    ImpactSimulationResponse, RunComparisonResponse,
+    WebhookTestRequest, WebhookTestResponse,
+    HealthTrendsResponse, HealthTrendPoint
 )
 from backend.event_bus import bus
 from backend.llm import get_llm_provider
@@ -466,6 +470,47 @@ def list_runs(
     )
 
 
+@app.get("/api/runs/compare", response_model=RunComparisonResponse)
+def compare_runs(
+    base_id: str = Query(..., description="Baseline run ID"),
+    target_id: str = Query(..., description="Target or candidate run ID"),
+    db: Session = Depends(get_db)
+):
+    """Compares two pipeline runs, identifying fixed, new, and unchanged bugs."""
+    base_run = db.query(Run).filter(Run.id == base_id).first()
+    if not base_run:
+        raise HTTPException(status_code=404, detail=f"Base run '{base_id}' not found")
+    target_run = db.query(Run).filter(Run.id == target_id).first()
+    if not target_run:
+        raise HTTPException(status_code=404, detail=f"Target run '{target_id}' not found")
+
+    score_delta = round(float(target_run.suite_health_score or 0.0) - float(base_run.suite_health_score or 0.0), 1)
+    coverage_delta = round(float(target_run.code_coverage or 0.0) - float(base_run.code_coverage or 0.0), 1)
+
+    base_bugs = base_run.bugs or []
+    target_bugs = target_run.bugs or []
+
+    def make_key(b):
+        return b.deduplication_key or f"{b.file_path}:{b.line_number}:{b.bug_type or b.title}"
+
+    base_keys = {make_key(b): b for b in base_bugs}
+    target_keys = {make_key(b): b for b in target_bugs}
+
+    fixed = [b for k, b in base_keys.items() if k not in target_keys or getattr(target_keys[k], "fix_verified", False)]
+    new = [b for k, b in target_keys.items() if k not in base_keys]
+    unchanged = [b for k, b in target_keys.items() if k in base_keys and not getattr(b, "fix_verified", False)]
+
+    return RunComparisonResponse(
+        base_run_id=base_id,
+        target_run_id=target_id,
+        score_delta=score_delta,
+        coverage_delta=coverage_delta,
+        fixed_bugs=fixed,
+        new_bugs=new,
+        unchanged_bugs=unchanged
+    )
+
+
 @app.get("/api/runs/{run_id}", response_model=RunDetailResponse)
 def get_run_details(run_id: str, db: Session = Depends(get_db)):
     run = db.query(Run).filter(Run.id == run_id).first()
@@ -639,6 +684,171 @@ def get_report(
         },
         "technical_report": run.technical_report
     }
+
+
+# ---------------------------------------------------------------------------
+# V2 Workflow, Comparison, Simulation, and Integration Endpoints
+# ---------------------------------------------------------------------------
+
+@app.patch("/api/runs/{run_id}/bugs/{bug_id}/workflow", response_model=BugResponse)
+async def update_bug_workflow(
+    run_id: str,
+    bug_id: str,
+    payload: BugWorkflowUpdate,
+    db: Session = Depends(get_db)
+):
+    """Updates bug triage and merge-readiness workflow state and broadcasts update."""
+    bug = db.query(Bug).filter(Bug.id == bug_id, Bug.run_id == run_id).first()
+    if not bug:
+        raise HTTPException(status_code=404, detail=f"Bug '{bug_id}' not found for run '{run_id}'")
+
+    valid_states = {"open", "fix_proposed", "verified", "pr_opened", "merged", "dismissed"}
+    if payload.workflow_state not in valid_states:
+        raise HTTPException(status_code=400, detail=f"Invalid workflow state. Must be one of {sorted(valid_states)}")
+
+    bug.workflow_state = payload.workflow_state
+    if payload.dismiss_reason is not None:
+        bug.dismiss_reason = payload.dismiss_reason
+    if payload.assignee is not None:
+        bug.assignee = payload.assignee
+
+    db.commit()
+    db.refresh(bug)
+
+    # Broadcast real-time event to connected UI clients
+    await bus.publish(
+        run_id=run_id,
+        event_type="bug_workflow_updated",
+        agent_name="workflow",
+        data={
+            "bug_id": bug.id,
+            "workflow_state": bug.workflow_state,
+            "dismiss_reason": bug.dismiss_reason,
+            "assignee": bug.assignee
+        }
+    )
+    return bug
+
+
+@app.post("/api/runs/{run_id}/bugs/{bug_id}/simulate-impact", response_model=ImpactSimulationResponse)
+def simulate_bug_fix_impact(
+    run_id: str,
+    bug_id: str,
+    db: Session = Depends(get_db)
+):
+    """Calculates authoritative health score and coverage delta if the bug fix is merged."""
+    run = db.query(Run).filter(Run.id == run_id).first()
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    bug = db.query(Bug).filter(Bug.id == bug_id, Bug.run_id == run_id).first()
+    if not bug:
+        raise HTTPException(status_code=404, detail="Bug not found")
+
+    test_results = run.test_results or []
+    total_tests = len(test_results)
+    passed_count = sum(1 for t in test_results if str(getattr(t, "status", "")).upper() == "PASSED")
+    failed_count = sum(1 for t in test_results if str(getattr(t, "status", "")).upper() == "FAILED")
+    flaky_count = sum(1 for t in test_results if getattr(t, "is_flaky", False))
+    flaky_penalty = min(25.0, flaky_count * 10.0)
+
+    current_cov = float(run.code_coverage or 0.0)
+    current_score = float(run.suite_health_score or 0.0)
+
+    # If this bug has failed tests or unverified state, simulate 1 test fix & modest coverage gain
+    tests_fixed = 1 if (failed_count > 0 or not bug.fix_verified) else 0
+    sim_passed = min(total_tests, passed_count + tests_fixed) if total_tests > 0 else (passed_count + tests_fixed)
+    sim_total = max(1, total_tests)
+    sim_pass_rate = (sim_passed / sim_total * 100.0) if sim_total > 0 else 100.0
+    sim_cov = min(100.0, current_cov + (1.5 if tests_fixed > 0 else 0.0))
+
+    sim_score = round(max(0.0, min(100.0, (sim_pass_rate * 0.5) + (sim_cov * 0.5) - flaky_penalty)), 1)
+    score_delta = round(sim_score - current_score, 1)
+    cov_delta = round(sim_cov - current_cov, 1)
+
+    return ImpactSimulationResponse(
+        current_score=current_score,
+        simulated_score=sim_score,
+        score_delta=score_delta,
+        current_coverage=current_cov,
+        simulated_coverage=sim_cov,
+        coverage_delta=cov_delta,
+        tests_fixed=tests_fixed,
+        regression_risk="LOW" if (bug.regression_count or 0) == 0 else "MEDIUM"
+    )
+
+
+@app.post("/api/integrations/webhook/test", response_model=WebhookTestResponse)
+def test_webhook_endpoint(payload: WebhookTestRequest):
+    """Safely pings an external webhook endpoint with a 5s timeout."""
+    import urllib.request
+    import urllib.error
+    import json
+
+    if not payload.url.startswith(("http://", "https://")):
+        return WebhookTestResponse(
+            success=False,
+            status_code=None,
+            message="Invalid webhook URL. Must start with http:// or https://"
+        )
+
+    try:
+        body = json.dumps({
+            "event": "sentinelmesh.ping",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": "SentinelMesh Test Runner"
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            payload.url,
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "SentinelMesh-Webhook-Tester/1.0"
+            },
+            method="POST"
+        )
+        if payload.secret:
+            req.add_header("X-SentinelMesh-Secret", payload.secret)
+
+        with urllib.request.urlopen(req, timeout=5.0) as resp:
+            status_code = resp.getcode()
+            success = 200 <= status_code < 300
+            return WebhookTestResponse(
+                success=success,
+                status_code=status_code,
+                message=f"Webhook responded with HTTP {status_code}"
+            )
+    except urllib.error.HTTPError as he:
+        return WebhookTestResponse(
+            success=False,
+            status_code=he.code,
+            message=f"HTTP Error {he.code}: {he.reason}"
+        )
+    except Exception as ex:
+        return WebhookTestResponse(
+            success=False,
+            status_code=None,
+            message=f"Connection failed: {str(ex)}"
+        )
+
+
+@app.get("/api/projects/{project_id}/health-trends", response_model=HealthTrendsResponse)
+def get_project_health_trends(project_id: str, db: Session = Depends(get_db)):
+    """Returns chronological run health scores for historical trend rendering."""
+    proj = db.query(Project).filter(Project.id == project_id).first()
+    if not proj:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    runs = db.query(Run).filter(Run.project_id == project_id).order_by(Run.started_at.asc()).all()
+    points = [
+        HealthTrendPoint(
+            run_id=r.id,
+            score=float(r.suite_health_score or 0.0),
+            created_at=r.started_at or datetime.now(timezone.utc)
+        )
+        for r in runs
+    ]
+    return HealthTrendsResponse(project_id=project_id, points=points)
 
 
 # ---------------------------------------------------------------------------

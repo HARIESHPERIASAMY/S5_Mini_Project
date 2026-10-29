@@ -62,6 +62,9 @@ class Run(Base):
     suite_health_score = Column(Float, default=0.0)     # 0 to 100
     bugs_count = Column(Integer, default=0)
     fixes_verified_count = Column(Integer, default=0)
+    failed_tests_count = Column(Integer, default=0)
+    agent_durations = Column(Text, nullable=True)  # JSON mapping: agent_name -> seconds
+    token_cost_usd = Column(Float, default=0.0)
 
     # Progress & State
     current_agent = Column(String(100), default="orchestrator")
@@ -107,6 +110,17 @@ class Bug(Base):
     verification_output = Column(Text, nullable=True)
     consensus_score = Column(Float, default=0.90)        # Critic agent score
     deduplication_key = Column(String(255), nullable=True)
+
+    # Workflow & Merge-Gate Telemetry
+    workflow_state = Column(String(50), default="open")  # open, fix_proposed, verified, pr_opened, merged, dismissed
+    dismiss_reason = Column(String(255), nullable=True)
+    assignee = Column(String(100), nullable=True)
+    tests_passed_after_fix = Column(Integer, nullable=True)
+    tests_failed_after_fix = Column(Integer, nullable=True)
+    regression_count = Column(Integer, default=0)
+    critic_verdict = Column(String(50), default="NOT_REVIEWED")  # PASSED, FAILED, NOT_REVIEWED
+    callers_count = Column(Integer, default=0)
+    affected_callers = Column(Text, nullable=True)  # JSON array of caller names
 
     run = relationship("Run", back_populates="bugs")
 
