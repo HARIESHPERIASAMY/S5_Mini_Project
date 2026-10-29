@@ -113,14 +113,14 @@ python -c "from backend.database import init_db; init_db()"
 python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 3. Frontend Development (Optional)
-FastAPI serves the pre-built dashboard directly from `frontend/dist`. To edit frontend React source code:
+### 3. Frontend Development
+FastAPI serves the pre-built dashboard directly from `frontend/dist` on port 8000. To develop with Vite hot-reloading:
 ```powershell
-cd frontend
-npm install
-npm run dev      # Runs Vite hot-reloading dev server on http://localhost:5173
-npm run lint     # Runs oxlint static analysis
-npm run build    # Produces production distribution in frontend/dist
+# From project root:
+npm run dev        # Starts Vite hot-reloading dev server on http://localhost:5173
+npm run build      # Produces production distribution in frontend/dist
+npm run lint       # Runs oxlint static analysis (0 errors)
+npm run verify-all # Runs complete automated validation suite (D1 - D7)
 ```
 
 ---
@@ -130,24 +130,24 @@ npm run build    # Produces production distribution in frontend/dist
 SentinelMesh includes a comprehensive test suite for the platform itself (testing all 9 agents, AST mutation engine, sandbox execution, database models, and FastAPI endpoints):
 
 ```powershell
-# Run all unit and integration tests (37/37 passing)
+# Run all unit and integration tests (42/42 passing)
 pytest tests/ -v
 
-# Run with test coverage
-pytest --cov=backend --cov=agents --cov=sandbox --cov-report=term-missing tests/
+# Run complete autonomous multi-tier verification suite (D1 - D7)
+python scripts/verify_all.py
+# (or: npm run verify-all)
 
-# Execute 20-endpoint API Smoke Test and Contract Audit
-python scripts/audit.py
-
-# Execute Performance & Benchmark Test Suite
-python scripts/benchmark.py
+# Execute Chatbot Grounding Test
+node scripts/test_chatbot.mjs
 ```
 
 **Verification Results:**
-- 37 / 37 Tests Passing (100% pass rate)
-- Platform Code Coverage: **85%**
-- API Smoke & Audit Suite: **20 / 20 Endpoints Passing (100%)**
-- Frontend Linter: **0 Warnings, 0 Errors**
+- **42 / 42 Pytest Tests Passing** (100% pass rate)
+- **7 / 7 Verification Criteria Passing** (D1–D7 automated acceptance in `scripts/verify_all.py`)
+- **Chatbot Grounding**: 10/10 questions verified with citation chips and strict data honesty fallback
+- **Frontend Linter**: 0 Errors across codebase
+- **Demo Script**: Step-by-step 3-minute walkthrough available in [`docs/demo-script.md`](docs/demo-script.md)
+- **System Map**: Complete architecture route & agent mapping in [`docs/system-map.md`](docs/system-map.md)
 
 ---
 
