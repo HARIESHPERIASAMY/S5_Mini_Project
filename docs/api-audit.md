@@ -113,18 +113,52 @@ The root object returned by `GET /api/runs/{id}` contains:
 
 ## 4. UI Derivations & Adapter Mapping (`src/api/adapters.js`)
 
-To satisfy the product-grade information architecture without changing the backend:
-1. **Self-Healing Pipeline Stages**:
-   - `Detect`: Derived from `bugs_count`
-   - `Reproduce`: Derived from `test_results.filter(t => t.status === "failed").length` or `bugs_count`
-   - `Propose fix`: Derived from `bugs.filter(b => b.proposed_fix_diff).length`
-   - `Verify`: Derived from `fixes_verified_count` of `bugs_count`
-   - `Open PR`: Status is "Waiting" if unmerged, "Ready" when verified fixes exist
-2. **Merge Readiness Checklist**:
-   - Derived directly from `bug.fix_verified`, `bug.verification_output`, `runData.test_results`, and `runData.mutation_score`.
-3. **Bug Workflow States**:
-   - `Open` -> `Fix proposed` -> `Verified` -> `PR opened` -> `Merged` -> `Dismissed`.
-   - Initial state computed from `bug.proposed_fix_diff` and `bug.fix_verified`. User actions ("Dismiss", "Open PR", "Mark Merged") are persisted client-side via `localStorage` per `run_id:bug_id`.
-4. **Mesh Assistant Chatbot**:
-   - Queries loaded `RunDetailResponse` directly in-memory, extracting exact grounded matches, test failures, and debate records. Cites real sources (`file:line`, `debate #round`, `test name`) with zero hallucinations.
+### 4.1 Suite Health Score Formula (Grounded in Backend Code)
+- **Source Backend File**: [`agents/test_execution_agent.py`](file:///c:/Users/HARIESH/Downloads/S5%20Mini%20Project/agents/test_execution_agent.py#L136-L140)
+- **Exact Python Implementation**:
+  ```python
+  total_tests = len(all_results)
+  pass_rate = (passed_count / total_tests * 100.0) if total_tests > 0 else 0.0
+  flaky_penalty = min(25.0, flaky_count * 10.0)
+  health_score = round(max(0.0, min(100.0, (pass_rate * 0.5) + (cov_pct * 0.5) - flaky_penalty)), 1)
+  ```
+- **Mathematical Formula**:
+  $$\text{Suite Health Score} = \operatorname{clamp}\big(0, 100, (0.50 \times \text{PassRate}) + (0.50 \times \text{Coverage}) - \text{FlakyPenalty}\big)$$
+- **Verification on Demo Run (`demo-shop`)**:
+  - Total tests = 14, Passed = 13, Failed = 1, Flaky = 0
+  - $\text{PassRate} = \frac{13}{14} \times 100 = 92.857\%$
+  - $\text{Coverage} = 54.1\%$
+  - $\text{FlakyPenalty} = 0.0$
+  - $\text{Health Score} = (0.50 \times 92.857) + (0.50 \times 54.1) - 0 = 46.43 + 27.05 = 73.48 \approx \mathbf{73.5}$ (Exact match to backend output).
+
+### 4.2 What-If Score Impact Formula (Consistent with Health Score)
+- **Mathematical Formula**:
+  When 1 currently failing test passes after a patch is verified:
+  $$\Delta \text{PassRate} = \frac{1}{\text{total\_tests}} \times 100$$
+  $$\Delta \text{HealthScore} = 0.50 \times \Delta \text{PassRate} = \frac{50}{\text{total\_tests}}$$
+- **Calculation for 14 tests**:
+  $$\Delta \text{HealthScore} = \frac{50}{14} \approx +3.6\text{ pts} \implies 73.5 + 3.6 = \mathbf{77.1}$$
+
+### 4.3 3-State Merge Gate Rules (Strict Data Honesty)
+1. **Failing test now passes in sandbox**: `Passed` if `bug.fix_verified === true`, else `Failed`.
+2. **No new test failures (regression)**: `Inferred from Verifier` (since verifier sets `fix_verified = false` on regression, but individual regression failure count is not in `BugResponse`).
+3. **Mutation check (bad code variants caught)**: `Passed` if `runData.mutation_score >= 60%`, else `Failed`.
+4. **Other code that calls this function unaffected**: `Not checked` (inter-procedural call-graph callers count not returned by backend).
+5. **Critic agent approved patch**: `Passed` if `bug.consensus_score >= 0.85`, else `Failed`.
+
+**Headline Rule**: Because checks 2 and 4 are inferred or not checked, the gate status displays **"Verified, 1 check not run"** (never "Safe to merge"). "Safe to merge" is only displayed if all 5 checks are Passed from real data.
+
+### 4.4 Self-Healing Pipeline Stages
+- `Detect`: Derived from `bugs_count`
+- `Reproduce`: Derived from `test_results.filter(t => t.status === "failed").length` or `bugs_count`
+- `Propose fix`: Derived from `bugs.filter(b => b.proposed_fix_diff).length`
+- `Verify`: Derived from `fixes_verified_count` of `bugs_count`
+- `Open PR`: Status is "Waiting" if unmerged, "Ready" when verified fixes exist
+
+### 4.5 Bug Workflow States
+- `Open` -> `Fix proposed` -> `Verified` -> `PR opened` -> `Merged` -> `Dismissed`.
+- Initial state computed from `bug.proposed_fix_diff` and `bug.fix_verified`. User actions ("Dismiss", "Open PR", "Mark Merged") are persisted client-side via `localStorage` per `run_id:bug_id`.
+
+### 4.6 Mesh Assistant Chatbot
+- Queries loaded `RunDetailResponse` directly in-memory, extracting exact grounded matches, test failures, and debate records. Cites real sources (`file:line`, `debate #round`, `test name`) with zero hallucinations.
 

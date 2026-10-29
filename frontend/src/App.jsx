@@ -7,6 +7,12 @@ import FindingsTable from './components/findings/FindingsTable';
 import DefectDetailDrawer from './components/findings/DefectDetailDrawer';
 import OverviewFindingsPreview from './components/overview/OverviewFindingsPreview';
 import LiveRunView from './components/liverun/LiveRunView';
+import StartScreen from './components/start/StartScreen';
+import RunHistoryView from './components/history/RunHistoryView';
+import CompareRunsModal from './components/compare/CompareRunsModal';
+import ReportsView from './components/reports/ReportsView';
+import IntegrationsView from './components/integrations/IntegrationsView';
+import SettingsView from './components/settings/SettingsView';
 import AgentNetworkGraph from './components/AgentNetworkGraph';
 import LiveTerminal from './components/LiveTerminal';
 import RiskHeatmap from './components/RiskHeatmap';
@@ -15,7 +21,8 @@ import DefectExplainer from './components/DefectExplainer';
 import AgentDebatePanel from './components/AgentDebatePanel';
 import NewProjectModal from './components/NewProjectModal';
 import { derivePipelineStages, deriveScoreBreakdown, setBugWorkflowState } from './api/adapters';
-import { Sparkles, Shield, RefreshCw, Bot } from 'lucide-react';
+import { generateSarifReport, generateJUnitXml, createZipBundle } from './utils/exporters';
+import { Sparkles, Shield, RefreshCw, Bot, AlertCircle } from 'lucide-react';
 
 const API_BASE = "http://localhost:8000";
 
@@ -43,6 +50,14 @@ export default function App() {
   const [pendingAssistantPrompt, setPendingAssistantPrompt] = useState(null);
   const [, setWorkflowVersion] = useState(0);
 
+  // Cross-run comparison, runs history list, and theme
+  const [allRuns, setAllRuns] = useState([]);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
+  const [compareBaseId, setCompareBaseId] = useState(null);
+  const [compareTargetId, setCompareTargetId] = useState(null);
+  const [backendDisconnected, setBackendDisconnected] = useState(false);
+  const [theme, setTheme] = useState("light");
+
   const handleUpdateWorkflowState = (bugId, newStatus) => {
     setBugWorkflowState(activeRunId || "2841", bugId, newStatus);
     setWorkflowVersion((v) => v + 1);
@@ -55,6 +70,31 @@ export default function App() {
 
   const wsRef = useRef(null);
 
+  // Fetch all runs list on mount
+  const fetchRunsList = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/runs?limit=25`);
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.items || [];
+        setAllRuns(items);
+        setBackendDisconnected(false);
+        if (!activeRunId && items.length > 0) {
+          setActiveRunId(items[0].id);
+        }
+      } else {
+        setBackendDisconnected(true);
+      }
+    } catch (err) {
+      console.warn("Backend not reachable:", err);
+      setBackendDisconnected(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchRunsList();
+  }, []);
+
   // Poll run details
   useEffect(() => {
     if (!activeRunId) return;
@@ -65,14 +105,18 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           setRunData(data);
+          setBackendDisconnected(false);
           if (data.status === "completed" || data.status === "failed" || data.status === "interrupted") {
             setIsRunning(false);
           } else {
             setIsRunning(true);
           }
+        } else {
+          setBackendDisconnected(true);
         }
       } catch (err) {
         console.error("Error fetching run details:", err);
+        setBackendDisconnected(true);
       }
     };
 
@@ -247,12 +291,54 @@ export default function App() {
     window.open(`${API_BASE}/api/runs/${activeRunId}/report?format=html`, "_blank");
   };
 
+  const triggerDownload = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportSarif = () => {
+    if (!runData) return;
+    const sarif = generateSarifReport(runData);
+    const blob = new Blob([JSON.stringify(sarif, null, 2)], { type: "application/json" });
+    triggerDownload(blob, `sentinelmesh_run_${(activeRunId || '2841').slice(0, 8)}.sarif`);
+  };
+
+  const handleExportJUnit = () => {
+    if (!runData) return;
+    const xml = generateJUnitXml(runData);
+    const blob = new Blob([xml], { type: "application/xml" });
+    triggerDownload(blob, `sentinelmesh_run_${(activeRunId || '2841').slice(0, 8)}_junit.xml`);
+  };
+
+  const handleExportPatchZip = () => {
+    if (!runData) return;
+    const bugsWithDiff = (runData.bugs || []).filter((b) => b.proposed_fix_diff);
+    const files = bugsWithDiff.map((b, idx) => ({
+      name: `fix_${idx + 1}_${(b.file_path || 'file').replace(/[^a-zA-Z0-9]/g, '_')}_line_${b.line_number || 1}.patch`,
+      content: b.proposed_fix_diff
+    }));
+    if (files.length === 0) {
+      files.push({
+        name: "README.txt",
+        content: "No unified diff patches proposed for this run."
+      });
+    }
+    const zipBlob = createZipBundle(files);
+    triggerDownload(zipBlob, `sentinelmesh_run_${(activeRunId || '2841').slice(0, 8)}_patches.zip`);
+  };
+
   // Derive pipeline stages
   const pipelineStages = derivePipelineStages(runData);
   const scoreBreakdown = deriveScoreBreakdown(runData);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A] font-sans antialiased">
+    <div className={`flex h-screen w-screen overflow-hidden font-sans antialiased ${theme === 'dark' ? 'bg-[#0B132B] text-slate-100' : 'bg-[#F8FAFC] text-[#0F172A]'}`}>
       {/* 1. Collapsible Dark Navy Sidebar */}
       <Sidebar
         activeView={activeView}
@@ -276,44 +362,50 @@ export default function App() {
           onOpenAnalyzeCode={() => setIsModalOpen(true)}
           onExportPatch={handleExportPatch}
           onDownloadReport={handleDownloadReport}
+          onExportSarif={handleExportSarif}
+          onExportJUnit={handleExportJUnit}
+          onExportPatchZip={handleExportPatchZip}
+          onOpenCompare={() => setCompareModalOpen(true)}
           onToggleAssistant={() => setAssistantOpen(!assistantOpen)}
           isAssistantOpen={assistantOpen}
           runId={activeRunId}
+          runsList={allRuns}
         />
+
+        {/* Backend Disconnection Banner */}
+        {backendDisconnected && (
+          <div className="bg-[#FEF2F2] border-b border-[#FCA5A5] text-[#991B1B] px-4 py-2.5 text-xs flex items-center justify-between z-10">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-[#DC2626] flex-shrink-0" />
+              <span className="font-semibold">Backend disconnected. Retrying connection to port 8000...</span>
+            </div>
+            <button
+              onClick={() => {
+                setBackendDisconnected(false);
+                fetchRunsList();
+              }}
+              className="px-2.5 py-1 bg-white border border-[#FCA5A5] rounded text-[11px] font-bold text-[#991B1B] hover:bg-[#FEE2E2] cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* View Content + Mesh Assistant Flex Container */}
         <div className="flex-1 flex overflow-hidden">
           {/* Main Scrollable View Container */}
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
             
-            {/* If no run yet: Onboarding / Start Screen Callout */}
-            {!activeRunId && (
-              <div className="sm-card p-8 text-center bg-white border border-[#E2E8F0] rounded-xl shadow-xs">
-                <div className="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#2457F5] flex items-center justify-center mx-auto mb-3">
-                  <Shield className="w-6 h-6" />
-                </div>
-                <h2 className="text-xl font-heading font-extrabold text-[#0F172A]">
-                  Autonomous Multi-Agent Software Testing & Self-Healing
-                </h2>
-                <p className="text-xs text-[#64748B] mt-1.5 max-w-lg mx-auto">
-                  Analyze Python repositories, execute isolated regressions, synthesize boundary edge tests, and verify self-healing patches.
-                </p>
-                <div className="mt-5 flex items-center justify-center gap-3">
-                  <button
-                    onClick={handleLaunchDemo}
-                    className="flex items-center gap-2 px-5 h-10 rounded-lg bg-[#2457F5] hover:bg-[#1A44D4] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    <span>Run demo project</span>
-                  </button>
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="px-4 h-10 rounded-lg bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-semibold text-[#0F172A] transition-colors cursor-pointer"
-                  >
-                    Analyze custom code
-                  </button>
-                </div>
-              </div>
+            {/* If no run yet and on overview: Start Screen */}
+            {!activeRunId && (activeView === "overview" || activeView === "start") && (
+              <StartScreen
+                onLaunchDemo={handleLaunchDemo}
+                onSubmitSnippet={handleSubmitSnippet}
+                onUploadZip={handleUploadZip}
+                llmProvider={llmProvider}
+                onSelectProvider={setLlmProvider}
+                isRunning={isRunning}
+              />
             )}
 
             {/* Running Telemetry Progress Pill */}
@@ -328,7 +420,7 @@ export default function App() {
             )}
 
             {/* VIEW: OVERVIEW */}
-            {activeView === "overview" && (
+            {activeView === "overview" && activeRunId && (
               <div className="space-y-6">
                 {/* 1. Verdict Banner */}
                 <div className="sm-card p-5 bg-white border border-[#E2E8F0] rounded-xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
@@ -403,18 +495,39 @@ export default function App() {
 
                 {/* Score Breakdown Drawer */}
                 {scoreDrawerOpen && (
-                  <div className="sm-card p-4 bg-[#FAFBFD] border border-[#E2E8F0] rounded-xl text-xs space-y-2">
+                  <div className="sm-card p-4 bg-[#FAFBFD] border border-[#E2E8F0] rounded-xl text-xs space-y-3">
                     <div className="flex items-center justify-between font-heading font-bold text-[#0F172A]">
-                      <span>Health Score Breakdown Formula</span>
-                      <button onClick={() => setScoreDrawerOpen(false)} className="text-[#64748B] hover:text-[#0F172A]">✕</button>
+                      <div className="flex items-center gap-2">
+                        <span>Backend Health Score Breakdown</span>
+                        <span className="text-[10px] font-mono font-normal text-[#64748B] bg-white px-2 py-0.5 rounded border border-[#E2E8F0]">
+                          Source: {scoreBreakdown.sourceFile}
+                        </span>
+                      </div>
+                      <button onClick={() => setScoreDrawerOpen(false)} className="text-[#64748B] hover:text-[#0F172A] cursor-pointer">✕</button>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-[11px]">
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-[11px]">
                       {scoreBreakdown.metrics.map((m, i) => (
-                        <div key={i} className="p-2.5 bg-white rounded-lg border border-[#E2E8F0]">
-                          <span className="text-[#64748B] block">{m.name} ({m.weight})</span>
-                          <strong className="text-sm font-bold text-[#0F172A]">{m.value}</strong>
+                        <div key={i} className="p-3 bg-white rounded-lg border border-[#E2E8F0] space-y-1">
+                          <div className="flex items-center justify-between text-[#64748B]">
+                            <span>{m.name}</span>
+                            <span className="font-bold text-[#2457F5]">{m.weight}</span>
+                          </div>
+                          <strong className="text-base font-bold text-[#0F172A] block">{m.value}</strong>
+                          <span className="text-[10px] text-[#64748B] block">{m.detail}</span>
                         </div>
                       ))}
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-white border border-[#E2E8F0] font-mono text-[11px] text-[#475569] space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[#0F172A]">Exact Formula:</span>
+                        <span>{scoreBreakdown.formula}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[#16A34A] pt-1 border-t border-[#E2E8F0]">
+                        <span className="font-bold">Calculated from Real Values:</span>
+                        <span>{scoreBreakdown.verification}</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -555,78 +668,42 @@ export default function App() {
 
             {/* VIEW: RUN HISTORY */}
             {activeView === "history" && (
-              <div className="sm-card p-6 bg-white border border-[#E2E8F0] rounded-xl text-center">
-                <h3 className="font-heading font-bold text-[#0F172A] text-base">Run History & Comparison</h3>
-                <p className="text-xs text-[#64748B] mt-1">Comparing current run against historical benchmarks.</p>
-                <div className="mt-4 p-4 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] font-mono text-xs">
-                  Run #{activeRunId ? activeRunId.slice(0, 6) : "2841"}: Score {runData?.suite_health_score || 73.5} · {bugs.length} defects · Verified {runData?.fixes_verified_count || 2}
-                </div>
-              </div>
+              <RunHistoryView
+                currentRunId={activeRunId}
+                onSelectRun={(id) => {
+                  setActiveRunId(id);
+                  setActiveView("overview");
+                }}
+                onOpenCompare={(baseId, compId) => {
+                  setCompareBaseId(baseId);
+                  setCompareTargetId(compId);
+                  setCompareModalOpen(true);
+                }}
+              />
             )}
 
             {/* VIEW: REPORTS */}
             {activeView === "reports" && (
-              <div className="sm-card p-6 bg-white border border-[#E2E8F0] rounded-xl space-y-4">
-                <h3 className="font-heading font-bold text-[#0F172A] text-base">Export Technical Reports</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <button onClick={handleDownloadReport} className="p-4 rounded-lg border border-[#E2E8F0] hover:border-[#2457F5] text-left cursor-pointer">
-                    <strong className="block text-xs font-bold text-[#0F172A]">Standalone HTML Report</strong>
-                    <span className="text-[11px] text-[#64748B]">Complete offline interactive audit</span>
-                  </button>
-                  <button onClick={handleExportPatch} className="p-4 rounded-lg border border-[#E2E8F0] hover:border-[#2457F5] text-left cursor-pointer">
-                    <strong className="block text-xs font-bold text-[#0F172A]">Unified Diff Patch (.patch)</strong>
-                    <span className="text-[11px] text-[#64748B]">PR-ready code modifications</span>
-                  </button>
-                  <button onClick={() => window.print()} className="p-4 rounded-lg border border-[#E2E8F0] hover:border-[#2457F5] text-left cursor-pointer">
-                    <strong className="block text-xs font-bold text-[#0F172A]">PDF Executive Summary</strong>
-                    <span className="text-[11px] text-[#64748B]">Print-ready QA receipt</span>
-                  </button>
-                </div>
-              </div>
+              <ReportsView
+                runData={runData}
+                runId={activeRunId}
+                onExportPatch={handleExportPatch}
+              />
             )}
 
             {/* VIEW: INTEGRATIONS */}
             {activeView === "integrations" && (
-              <div className="sm-card p-6 bg-white border border-[#E2E8F0] rounded-xl space-y-4">
-                <h3 className="font-heading font-bold text-[#0F172A] text-base">CI/CD Integrations</h3>
-                <div className="p-4 rounded-lg bg-[#0F172A] text-slate-200 font-mono text-xs overflow-x-auto">
-                  <span className="text-slate-400"># .github/workflows/sentinelmesh.yml</span>
-                  <pre>{`name: SentinelMesh Self-Healing QA
-on: [push, pull_request]
-jobs:
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run SentinelMesh Swarm
-        run: curl -sSL http://localhost:8000/api/runs`}</pre>
-                </div>
-              </div>
+              <IntegrationsView runData={runData} />
             )}
 
             {/* VIEW: SETTINGS */}
             {activeView === "settings" && (
-              <div className="sm-card p-6 bg-white border border-[#E2E8F0] rounded-xl space-y-4 text-xs">
-                <h3 className="font-heading font-bold text-[#0F172A] text-base">Swarm Engine Settings</h3>
-                <div className="space-y-3 max-w-md">
-                  <div>
-                    <label className="block text-[#64748B] font-medium mb-1">Active LLM Provider</label>
-                    <select
-                      value={llmProvider}
-                      onChange={(e) => setLlmProvider(e.target.value)}
-                      className="w-full h-9 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg font-semibold"
-                    >
-                      <option value="offline">Offline Engine (Zero-Key)</option>
-                      <option value="gemini">Google Gemini 2.5</option>
-                      <option value="openai">OpenAI / Ollama</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[#64748B] font-medium mb-1">Sandbox Timeout</label>
-                    <input type="text" defaultValue="30 seconds" readOnly className="w-full h-9 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-[#64748B]" />
-                  </div>
-                </div>
-              </div>
+              <SettingsView
+                llmProvider={llmProvider}
+                onSelectProvider={setLlmProvider}
+                theme={theme}
+                onToggleTheme={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
+              />
             )}
 
           </main>
@@ -668,6 +745,15 @@ jobs:
         onSubmitSnippet={handleSubmitSnippet}
         onUploadZip={handleUploadZip}
         onLaunchDemo={handleLaunchDemo}
+      />
+
+      {/* Compare Runs Modal */}
+      <CompareRunsModal
+        isOpen={compareModalOpen}
+        onClose={() => setCompareModalOpen(false)}
+        initialBaseRunId={compareBaseId}
+        initialCompareRunId={compareTargetId}
+        availableRuns={allRuns}
       />
     </div>
   );

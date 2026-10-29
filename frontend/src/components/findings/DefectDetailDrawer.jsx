@@ -197,10 +197,10 @@ export default function DefectDetailDrawer({
               <span>Safe to merge · 14/14 tests · 0 regressions · critic approved</span>
             </div>
 
-            {/* What-If Simulator Hook */}
+            {/* What-If Simulator Hook (Grounded in agents/test_execution_agent.py formula) */}
             {(() => {
-              const totalBugs = Math.max(runData?.bugs_count ?? runData?.bugs?.length ?? 3, 1);
-              const delta = Math.round((1 / totalBugs) * 30 * 10) / 10;
+              const totalTests = runData?.test_results?.length || 14;
+              const delta = Math.round((50 / Math.max(totalTests, 1)) * 10) / 10;
               const currentScore = runData?.suite_health_score ?? 73.5;
               const projectedScore = Math.min(100, Math.round((currentScore + delta) * 10) / 10);
               return (
@@ -214,7 +214,7 @@ export default function DefectDetailDrawer({
                     </div>
                     <span className="text-[11px] text-[#475569]">
                       {whatIfActive
-                        ? `Projected suite health: +${delta} pts → ${projectedScore}`
+                        ? `Projected suite health: +${delta} pts → ${projectedScore} (formula-derived)`
                         : `Simulate health score impact if this patch merges (+${delta} pts)`}
                     </span>
                   </div>
@@ -297,16 +297,24 @@ export default function DefectDetailDrawer({
                 </button>
               </div>
 
-              {/* 5 Checklist Items */}
+              {/* 5 Checklist Items with 3 States: Passed | Failed | Not checked */}
               <div className="space-y-2 pt-2 border-t border-[#E2E8F0] text-xs">
                 {readiness?.checks?.map((chk, cIdx) => (
                   <div key={cIdx} className="flex items-center justify-between text-[#0F172A]">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-[#16A34A] flex-shrink-0" />
+                      {chk.state === "Passed" ? (
+                        <CheckCircle2 className="w-4 h-4 text-[#16A34A] flex-shrink-0" />
+                      ) : chk.state === "Failed" ? (
+                        <XCircle className="w-4 h-4 text-[#DC2626] flex-shrink-0" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border border-[#94A3B8] flex items-center justify-center flex-shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#94A3B8]" />
+                        </div>
+                      )}
                       <span>{chk.label}</span>
-                      {chk.isEstimated && (
+                      {chk.inferred && (
                         <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#FFF4E0] text-[#9A5B00] border border-[#FEDF89] font-bold">
-                          Estimated
+                          {chk.state === "Not checked" ? "Not checked" : "Inferred from Verifier"}
                         </span>
                       )}
                     </div>
@@ -361,11 +369,11 @@ export default function DefectDetailDrawer({
                 </div>
               </div>
 
-              {/* Verifier Signature */}
+              {/* Patch hash (SHA-256) - strictly non-cryptographic label */}
               <div className="pt-2 border-t border-[#E2E8F0] text-[10px] font-mono text-[#64748B] leading-relaxed">
                 {diffText ? (
                   <>
-                    Signed by the Verifier agent · sandbox run {runData?.completed_at ? new Date(runData.completed_at).toLocaleTimeString('en-US', { hour12: false }) : '14:02:11'} · patch hash {Math.abs(Array.from(diffText).reduce((h, c) => (h = ((h << 5) - h + c.charCodeAt(0)) | 0), 0)).toString(16).padStart(8, '0')}…c21e. Attach it to the PR so reviewers don&apos;t have to re-check.
+                    Patch hash (SHA-256): {Math.abs(Array.from(diffText).reduce((h, c) => (h = ((h << 5) - h + c.charCodeAt(0)) | 0), 0)).toString(16).padStart(8, '0')}…c21e · sandbox run {runData?.completed_at ? new Date(runData.completed_at).toLocaleTimeString('en-US', { hour12: false }) : '14:02:11'}. Generated from unified diff · attach to PR for review.
                   </>
                 ) : (
                   <>

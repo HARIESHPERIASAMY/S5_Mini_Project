@@ -13,6 +13,10 @@ export default function TopBar({
   onOpenAnalyzeCode,
   onExportPatch,
   onDownloadReport,
+  onExportSarif,
+  onExportJUnit,
+  onExportPatchZip,
+  onOpenCompare,
   onToggleAssistant,
   isAssistantOpen = false,
   runId,
@@ -61,10 +65,10 @@ export default function TopBar({
       <div className="flex items-center gap-2 sm:gap-2.5">
         {/* Comparison Dropdown / Pill */}
         <button
-          onClick={() => alert("Comparison mode: Run #" + (runId ? runId.slice(0, 6) : "2841") + " compared with baseline run.")}
-          className="hidden md:flex items-center gap-1.5 px-3 h-9 rounded-lg bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E2E8F0] text-xs font-medium text-[#0F172A] transition-colors"
+          onClick={onOpenCompare}
+          className="hidden md:flex items-center gap-1.5 px-3 h-9 rounded-lg bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E2E8F0] text-xs font-medium text-[#0F172A] transition-colors cursor-pointer"
         >
-          <span>Compare with run #2840</span>
+          <span>Compare runs</span>
         </button>
 
         {/* Run Settings Popover Trigger (Contains Model & Severity) */}
@@ -137,47 +141,72 @@ export default function TopBar({
           </button>
 
           {exportOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl border border-[#E2E8F0] shadow-lg py-1 text-xs z-50">
-              <button
-                onClick={() => {
-                  onExportPatch();
-                  setExportOpen(false);
-                }}
-                className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2"
-              >
-                <GitPullRequest className="w-3.5 h-3.5 text-[#16A34A]" />
-                <span>PR Patch (.patch)</span>
-              </button>
-              <button
-                onClick={() => {
-                  onDownloadReport();
-                  setExportOpen(false);
-                }}
-                className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2"
-              >
-                <FileText className="w-3.5 h-3.5 text-[#2457F5]" />
-                <span>Technical Report (HTML)</span>
-              </button>
-              <button
-                onClick={() => {
-                  window.print();
-                  setExportOpen(false);
-                }}
-                className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2"
-              >
-                <Download className="w-3.5 h-3.5 text-[#D97706]" />
-                <span>Executive Summary (PDF)</span>
-              </button>
-              <button
-                onClick={() => {
-                  alert("SARIF security report formatted for GitHub Code Scanning.");
-                  setExportOpen(false);
-                }}
-                className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 border-t border-[#E2E8F0]"
-              >
-                <Shield className="w-3.5 h-3.5 text-[#64748B]" />
-                <span>GitHub SARIF Export</span>
-              </button>
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl border border-[#E2E8F0] shadow-lg py-1.5 text-xs z-50 divide-y divide-[#F1F5F9]">
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    onExportPatch && onExportPatch();
+                    setExportOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
+                >
+                  <GitPullRequest className="w-3.5 h-3.5 text-[#16A34A]" />
+                  <span>PR Patch (.patch)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    onDownloadReport && onDownloadReport();
+                    setExportOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#2457F5]" />
+                  <span>Technical Report (HTML)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    window.print();
+                    setExportOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#7C3AED]" />
+                  <span>Executive Summary (PDF)</span>
+                </button>
+              </div>
+
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    onExportSarif && onExportSarif();
+                    setExportOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
+                >
+                  <Shield className="w-3.5 h-3.5 text-[#1D4ED8]" />
+                  <span>OASIS SARIF 2.1.0 (.sarif)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    onExportJUnit && onExportJUnit();
+                    setExportOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
+                >
+                  <FileCode className="w-3.5 h-3.5 text-[#16A34A]" />
+                  <span>JUnit XML Test Results (.xml)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    onExportPatchZip && onExportPatchZip();
+                    setExportOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#D97706]" />
+                  <span>Patch Bundle Archive (.zip)</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
