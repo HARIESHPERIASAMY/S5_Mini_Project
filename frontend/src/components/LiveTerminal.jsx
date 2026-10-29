@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Copy, Check, ArrowDownCircle } from 'lucide-react';
+import { Terminal, Copy, Check, Pause, Play } from 'lucide-react';
 
 export default function LiveTerminal({ logs = [] }) {
   const [filterLevel, setFilterLevel] = useState("ALL");
+  const [filterAgent, setFilterAgent] = useState("ALL");
   const [copied, setCopied] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const terminalEndRef = useRef(null);
@@ -13,104 +14,168 @@ export default function LiveTerminal({ logs = [] }) {
     }
   }, [logs, autoScroll]);
 
-  const filteredLogs = logs.filter(l => {
-    if (filterLevel === "ALL") return true;
-    return (l.level || "INFO").toUpperCase() === filterLevel;
+  // Extract unique agent names for filter
+  const agentList = Array.from(new Set(logs.map((l) => l.agent_name).filter(Boolean)));
+
+  const filteredLogs = logs.filter((l) => {
+    if (filterLevel !== "ALL" && (l.level || "INFO").toUpperCase() !== filterLevel) {
+      return false;
+    }
+    if (filterAgent !== "ALL" && l.agent_name !== filterAgent) {
+      return false;
+    }
+    return true;
   });
 
   const handleCopyLogs = () => {
-    const text = logs.map(l => `[${l.timestamp || ''}] [${l.agent_name || 'system'}] [${l.level || 'INFO'}]: ${l.message || ''}`).join('\n');
+    const text = filteredLogs
+      .map(
+        (l) =>
+          `[${l.timestamp || ''}] [${l.agent_name || 'system'}] [${l.level || 'INFO'}]: ${
+            l.message || JSON.stringify(l.data || '')
+          }`
+      )
+      .join('\n');
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const getLevelStyle = (level) => {
+  const getLevelBadge = (level) => {
     switch ((level || "INFO").toUpperCase()) {
       case "ERROR":
-        return "text-rose-400 bg-rose-950/60 border-rose-800/60";
+        return "bg-[#FEECEC] text-[#B42318] border-[#FECDCA]";
       case "WARN":
-        return "text-amber-400 bg-amber-950/60 border-amber-800/60";
+        return "bg-[#FFF4E0] text-[#9A5B00] border-[#FEDF89]";
       case "TELEMETRY":
-        return "text-cyan-400 bg-cyan-950/60 border-cyan-800/60";
+        return "bg-[#EAF1FF] text-[#1D4ED8] border-[#B2CCFF]";
       default:
-        return "text-emerald-400 bg-emerald-950/60 border-emerald-800/60";
+        return "bg-[#E7F8EE] text-[#14753B] border-[#A6F4C5]";
     }
   };
 
+  const getAgentTag = (name) => {
+    const colors = [
+      "bg-[#EAF1FF] text-[#1D4ED8]",
+      "bg-[#F1EAFE] text-[#6D28D9]",
+      "bg-[#E7F8EE] text-[#14753B]",
+      "bg-[#FFF4E0] text-[#9A5B00]",
+      "bg-[#F8FAFC] text-[#0F172A]"
+    ];
+    let hash = 0;
+    const str = name || "system";
+    for (let i = 0; i < str.length; i++) hash = (hash + str.charCodeAt(i)) % colors.length;
+    return colors[hash];
+  };
+
   return (
-    <div className="glass-panel rounded-2xl p-4 flex flex-col h-[520px] relative overflow-hidden font-mono border border-slate-800">
-      {/* Terminal Title Bar */}
-      <div className="flex items-center justify-between pb-3 border-b border-mesh-border text-xs">
+    <div className="card-surface p-4 sm:p-5 bg-white border border-[#E3E8F0] rounded-2xl flex flex-col h-[520px] shadow-xs relative font-mono">
+      {/* Title & Controls Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-[#E3E8F0] gap-2.5">
         <div className="flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-cyan-400" />
-          <span className="font-semibold text-white tracking-wide uppercase">
-            Telemetry & Agent Log Stream
-          </span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px]">
-            {logs.length} lines
+          <Terminal className="w-4 h-4 text-[#2563EB]" />
+          <h3 className="text-xs sm:text-sm font-bold text-[#0F172A] tracking-wider uppercase font-mono">
+            Telemetry & Agent Log
+          </h3>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] border border-[#E2E8F0] text-[#5B6577]">
+            {filteredLogs.length} events
           </span>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto justify-end">
+          {/* Agent Filter */}
+          <select
+            value={filterAgent}
+            onChange={(e) => setFilterAgent(e.target.value)}
+            className="h-8 px-2 text-[11px] bg-[#F8FAFC] border border-[#E3E8F0] rounded-lg text-[#0F172A] focus:outline-none cursor-pointer"
+            title="Filter by Swarm Agent"
+          >
+            <option value="ALL">All Agents</option>
+            {agentList.map((a) => (
+              <option key={a} value={a}>
+                @{a}
+              </option>
+            ))}
+          </select>
+
           {/* Level Filter */}
           <select
             value={filterLevel}
             onChange={(e) => setFilterLevel(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-slate-300 rounded px-2 py-0.5 text-[11px] focus:outline-none"
+            className="h-8 px-2 text-[11px] bg-[#F8FAFC] border border-[#E3E8F0] rounded-lg text-[#0F172A] focus:outline-none cursor-pointer"
+            title="Filter by Severity Level"
           >
-            <option value="ALL">ALL LEVELS</option>
+            <option value="ALL">All Levels</option>
             <option value="INFO">INFO</option>
             <option value="WARN">WARN</option>
             <option value="ERROR">ERROR</option>
             <option value="TELEMETRY">TELEMETRY</option>
           </select>
 
-          {/* Copy */}
-          <button
-            onClick={handleCopyLogs}
-            title="Copy Logs"
-            className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-          </button>
-
-          {/* Auto Scroll Toggle */}
+          {/* Pause Scroll Toggle */}
           <button
             onClick={() => setAutoScroll(!autoScroll)}
-            title="Auto-Scroll"
-            className={`p-1 rounded transition-colors ${autoScroll ? "bg-cyan-950 text-cyan-300 border border-cyan-800" : "bg-slate-800 text-slate-500"}`}
+            title={autoScroll ? "Pause live auto-scroll" : "Resume auto-scroll"}
+            className={`h-8 px-2.5 rounded-lg flex items-center gap-1 text-[11px] font-semibold border transition-all cursor-pointer ${
+              autoScroll
+                ? "bg-[#EAF1FF] text-[#1D4ED8] border-[#B2CCFF]"
+                : "bg-[#F8FAFC] text-[#5B6577] border-[#E3E8F0]"
+            }`}
           >
-            <ArrowDownCircle className="w-3.5 h-3.5" />
+            {autoScroll ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            <span className="hidden md:inline">{autoScroll ? "Live" : "Paused"}</span>
+          </button>
+
+          {/* Copy Log */}
+          <button
+            onClick={handleCopyLogs}
+            title="Copy filtered logs to clipboard"
+            className="h-8 px-2.5 rounded-lg bg-white hover:bg-[#F8FAFC] border border-[#E3E8F0] text-[#0F172A] text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer"
+          >
+            {copied ? <Check className="w-3 h-3 text-[#16A34A]" /> : <Copy className="w-3 h-3 text-[#5B6577]" />}
+            <span>{copied ? "Copied" : "Copy"}</span>
           </button>
         </div>
       </div>
 
-      {/* Terminal Output Area */}
-      <div className="flex-1 overflow-y-auto pt-3 text-[11px] leading-relaxed space-y-1.5 pr-1 select-text">
+      {/* Output Console Box */}
+      <div className="flex-1 overflow-y-auto pt-3 text-[11px] leading-relaxed space-y-1.5 pr-1 select-text bg-[#FAFBFD] rounded-xl p-3 mt-2 border border-[#F1F5F9]">
         {filteredLogs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-2">
-            <span className="animate-pulse">Waiting for multi-agent swarm activity...</span>
-            <span className="text-[10px] text-slate-600">Click "Run Demo Project" to launch analysis stream</span>
+          <div className="flex flex-col items-center justify-center h-full text-[#8E9BAE] text-center gap-2 p-6">
+            <Terminal className="w-8 h-8 stroke-1 text-[#CBD5E1]" />
+            <p className="font-semibold text-xs text-[#5B6577]">Waiting for multi-agent swarm activity...</p>
+            <span className="text-[11px] max-w-sm">
+              Click "Run Demo Project" or submit custom code to stream real-time AST, test execution, and auto-fix events.
+            </span>
           </div>
         ) : (
           filteredLogs.map((log, idx) => {
             const timeStr = log.timestamp
               ? new Date(log.timestamp).toLocaleTimeString()
               : '--:--:--';
-            const levelClass = getLevelStyle(log.level);
+            const levelStyle = getLevelBadge(log.level);
+            const agentTagStyle = getAgentTag(log.agent_name);
 
             return (
-              <div key={idx} className="flex items-start gap-2 hover:bg-slate-900/50 rounded px-1.5 py-0.5 transition-colors">
-                <span className="text-slate-500 flex-shrink-0 text-[10px]">[{timeStr}]</span>
-                <span className={`px-1.5 py-0.2 rounded border text-[9px] uppercase font-bold flex-shrink-0 ${levelClass}`}>
+              <div
+                key={idx}
+                className="flex items-start gap-2 hover:bg-white p-1 rounded-md transition-colors border border-transparent hover:border-[#E3E8F0]"
+              >
+                <span className="text-[#8E9BAE] flex-shrink-0 text-[10px] select-none pt-0.5">
+                  [{timeStr}]
+                </span>
+                <span
+                  className={`px-1.5 py-0.2 rounded border text-[9px] uppercase font-bold flex-shrink-0 ${levelStyle}`}
+                >
                   {log.level || "INFO"}
                 </span>
-                <span className="text-cyan-400 font-semibold flex-shrink-0 text-[10px]">
-                  @{log.agent_name || "orchestrator"}:
+                <span
+                  className={`px-1.5 py-0.2 rounded text-[10px] font-bold flex-shrink-0 ${agentTagStyle}`}
+                >
+                  @{log.agent_name || "orchestrator"}
                 </span>
-                <span className="text-slate-300 break-words flex-1">
+                <span className="text-[#0F172A] break-words flex-1 font-mono text-[11px]">
                   {log.message || JSON.stringify(log.data || "")}
                 </span>
               </div>
@@ -120,13 +185,15 @@ export default function LiveTerminal({ logs = [] }) {
         <div ref={terminalEndRef} />
       </div>
 
-      {/* Bottom Prompt Bar */}
-      <div className="mt-2 pt-2 border-t border-mesh-border flex items-center justify-between text-[10px] text-slate-500">
-        <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-          <span>WebSocket Stream Connected</span>
+      {/* Console Footer */}
+      <div className="pt-2 mt-2 border-t border-[#E3E8F0] flex items-center justify-between text-[11px] text-[#5B6577]">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
+          <span>WebSocket Stream Synchronized</span>
         </span>
-        <span>sentinel-node://localhost:8000/ws</span>
+        <span className="text-[10px] text-[#8E9BAE] font-mono">
+          channel: /ws/runs
+        </span>
       </div>
     </div>
   );

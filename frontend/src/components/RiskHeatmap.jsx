@@ -1,80 +1,143 @@
-import React, { useState } from 'react';
-import { Flame, FileCode2, ShieldAlert } from 'lucide-react';
+import React from 'react';
+import { Flame, FileCode2, ShieldAlert, X } from 'lucide-react';
 
-export default function RiskHeatmap({ fileRisks = [] }) {
-  const [activeFile, setActiveFile] = useState(null);
+export default function RiskHeatmap({ fileRisks = [], selectedFile, onSelectFile }) {
+  // Sort files descending by risk_score
+  const sortedFiles = [...fileRisks].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0));
 
-  const getRiskColor = (score) => {
-    if (score >= 70) return { bg: "bg-rose-950/80", border: "border-rose-500", text: "text-rose-400", glow: "shadow-[0_0_15px_rgba(244,63,94,0.3)]", tag: "CRITICAL" };
-    if (score >= 45) return { bg: "bg-amber-950/80", border: "border-amber-500", text: "text-amber-400", glow: "shadow-[0_0_12px_rgba(245,158,11,0.25)]", tag: "HIGH" };
-    if (score >= 25) return { bg: "bg-yellow-950/70", border: "border-yellow-500/70", text: "text-yellow-400", glow: "", tag: "MEDIUM" };
-    return { bg: "bg-emerald-950/70", border: "border-emerald-500/60", text: "text-emerald-400", glow: "", tag: "LOW" };
+  const getRiskStyle = (score) => {
+    if (score >= 70) {
+      return {
+        bg: "bg-[#FEECEC]",
+        border: "border-[#FECDCA]",
+        text: "text-[#B42318]",
+        badge: "bg-[#FEECEC] text-[#B42318] border-[#FECDCA]",
+        tag: "CRITICAL"
+      };
+    }
+    if (score >= 45) {
+      return {
+        bg: "bg-[#FFF4E0]",
+        border: "border-[#FEDF89]",
+        text: "text-[#9A5B00]",
+        badge: "bg-[#FFF4E0] text-[#9A5B00] border-[#FEDF89]",
+        tag: "HIGH"
+      };
+    }
+    if (score >= 25) {
+      return {
+        bg: "bg-[#FEFCE8]",
+        border: "border-[#FEF08A]",
+        text: "text-[#854D0E]",
+        badge: "bg-[#FEFCE8] text-[#854D0E] border-[#FEF08A]",
+        tag: "MEDIUM"
+      };
+    }
+    return {
+      bg: "bg-[#E7F8EE]",
+      border: "border-[#A6F4C5]",
+      text: "text-[#14753B]",
+      badge: "bg-[#E7F8EE] text-[#14753B] border-[#A6F4C5]",
+      tag: "LOW"
+    };
   };
 
   return (
-    <div className="glass-panel rounded-2xl p-5 border border-slate-800 flex flex-col">
-      <div className="flex items-center justify-between pb-3 border-b border-mesh-border mb-4">
+    <div className="card-surface p-4 sm:p-5 bg-white border border-[#E3E8F0] rounded-2xl flex flex-col shadow-xs">
+      {/* Title & Legend Bar */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-3 border-b border-[#E3E8F0] mb-4 gap-3">
         <div className="flex items-center gap-2">
-          <Flame className="w-4 h-4 text-rose-400" />
-          <h3 className="text-sm font-semibold text-white tracking-wide uppercase font-mono">
+          <Flame className="w-4 h-4 text-[#DC2626]" />
+          <h3 className="text-xs sm:text-sm font-heading font-bold text-[#0F172A] uppercase tracking-wider font-mono">
             Codebase Risk Density Heatmap
           </h3>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">
-            {fileRisks.length} Modules Monitored
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#5B6577] font-mono border border-[#E2E8F0]">
+            {sortedFiles.length} Modules Monitored
           </span>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-3 text-xs font-mono">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-rose-500" /> Critical (&gt;70%)</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-amber-500" /> High (45-70%)</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-yellow-500" /> Medium (25-45%)</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-emerald-500" /> Low (&lt;25%)</span>
+        <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-[#5B6577]">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded bg-[#DC2626]" /> Critical (≥70%)
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded bg-[#D97706]" /> High (45–69%)
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded bg-[#CA8A04]" /> Medium (25–44%)
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded bg-[#16A34A]" /> Low (&lt;25%)
+          </span>
         </div>
       </div>
 
+      {/* Filter Active Indicator */}
+      {selectedFile && (
+        <div className="mb-4 p-2.5 rounded-xl bg-[#EAF1FF] border border-[#B2CCFF] flex items-center justify-between text-xs font-mono">
+          <div className="flex items-center gap-2 text-[#1D4ED8]">
+            <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+            <span>
+              Filtering Bug Ledger to: <strong>{selectedFile}</strong>
+            </span>
+          </div>
+          <button
+            onClick={() => onSelectFile && onSelectFile(null)}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-[#B2CCFF] text-[#1D4ED8] hover:bg-[#F8FAFC] font-semibold text-[11px]"
+          >
+            <X className="w-3 h-3" />
+            <span>Clear Filter</span>
+          </button>
+        </div>
+      )}
+
       {/* Grid of File Tiles */}
-      {fileRisks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-8 text-slate-500 text-xs font-mono">
+      {sortedFiles.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-8 text-[#8E9BAE] text-xs font-mono text-center">
+          <FileCode2 className="w-8 h-8 text-[#CBD5E1] mb-2" />
           <span>No static risk models loaded yet. Launch analysis to build heatmap.</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {fileRisks.map((file, idx) => {
-            const risk = getRiskColor(file.risk_score);
-            const isSelected = activeFile?.file_path === file.file_path;
+          {sortedFiles.map((file, idx) => {
+            const risk = getRiskStyle(file.risk_score);
+            const isSelected = selectedFile === file.file_path;
 
             return (
               <div
                 key={idx}
-                onClick={() => setActiveFile(file)}
-                className={`p-3.5 rounded-xl border ${risk.border} ${risk.bg} ${risk.glow} cursor-pointer transition-all duration-200 transform hover:-translate-y-0.5 ${isSelected ? "ring-2 ring-cyan-400" : ""}`}
+                onClick={() => onSelectFile && onSelectFile(isSelected ? null : file.file_path)}
+                className={`p-3.5 rounded-xl border ${risk.border} ${risk.bg} cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs ${
+                  isSelected ? "ring-2 ring-[#2563EB] shadow-sm" : ""
+                }`}
+                title="Click to filter bug ledger to this file"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <FileCode2 className={`w-4 h-4 ${risk.text} flex-shrink-0`} />
-                    <span className="text-xs font-mono font-bold text-white truncate">
+                    <span className="text-xs font-mono font-bold text-[#0F172A] truncate">
                       {file.file_path}
                     </span>
                   </div>
-                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-current ${risk.text}`}>
+                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${risk.badge}`}>
                     {file.risk_score}%
                   </span>
                 </div>
 
                 {/* Metrics Badges */}
                 <div className="mt-3 grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono">
-                  <div className="p-1 rounded bg-slate-900/60 border border-slate-800">
-                    <span className="text-slate-400 block">LOC</span>
-                    <span className="font-bold text-white">{file.loc}</span>
+                  <div className="p-1.5 rounded-lg bg-white/80 border border-[#E3E8F0]">
+                    <span className="text-[#5B6577] block text-[9px]">LOC</span>
+                    <span className="font-bold text-[#0F172A]">{file.loc}</span>
                   </div>
-                  <div className="p-1 rounded bg-slate-900/60 border border-slate-800">
-                    <span className="text-slate-400 block">Cyclomatic</span>
-                    <span className="font-bold text-cyan-400">{file.cyclomatic_complexity}</span>
+                  <div className="p-1.5 rounded-lg bg-white/80 border border-[#E3E8F0]">
+                    <span className="text-[#5B6577] block text-[9px]">Complexity</span>
+                    <span className="font-bold text-[#2563EB]">{file.cyclomatic_complexity}</span>
                   </div>
-                  <div className="p-1 rounded bg-slate-900/60 border border-slate-800">
-                    <span className="text-slate-400 block">Smells</span>
-                    <span className={`font-bold ${file.security_smells > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                  <div className="p-1.5 rounded-lg bg-white/80 border border-[#E3E8F0]">
+                    <span className="text-[#5B6577] block text-[9px]">Smells</span>
+                    <span className={`font-bold ${file.security_smells > 0 ? "text-[#DC2626]" : "text-[#16A34A]"}`}>
                       {file.security_smells}
                     </span>
                   </div>
@@ -82,32 +145,6 @@ export default function RiskHeatmap({ fileRisks = [] }) {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Selected File Detailed Drawer */}
-      {activeFile && (
-        <div className="mt-4 p-4 rounded-xl glass-panel-glow border border-cyan-500/40 text-xs font-mono flex flex-col md:flex-row items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <ShieldAlert className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-sm">{activeFile.file_path}</span>
-                <span className="px-2 py-0.5 rounded bg-cyan-950 border border-cyan-800 text-cyan-300">
-                  Risk Level: {activeFile.risk_level} ({activeFile.risk_score}%)
-                </span>
-              </div>
-              <p className="text-slate-400 mt-1 text-[11px]">
-                Analyzed lines: {activeFile.loc} | Cyclomatic Complexity: {activeFile.cyclomatic_complexity} | Smells detected: {activeFile.security_smells}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setActiveFile(null)}
-            className="text-slate-400 hover:text-white px-2 py-1 bg-slate-800 rounded text-xs"
-          >
-            Close Details
-          </button>
         </div>
       )}
     </div>
