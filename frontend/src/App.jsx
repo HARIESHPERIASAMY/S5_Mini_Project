@@ -1,20 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Header from './components/Header';
-import ReadinessStrip from './components/ReadinessStrip';
-import KPICards from './components/KPICards';
+import Sidebar from './components/layout/Sidebar';
+import TopBar from './components/layout/TopBar';
+import MeshAssistant from './components/assistant/MeshAssistant';
+import FileTree from './components/findings/FileTree';
+import FindingsTable from './components/findings/FindingsTable';
+import DefectDetailDrawer from './components/findings/DefectDetailDrawer';
+import OverviewFindingsPreview from './components/overview/OverviewFindingsPreview';
 import AgentNetworkGraph from './components/AgentNetworkGraph';
 import LiveTerminal from './components/LiveTerminal';
 import RiskHeatmap from './components/RiskHeatmap';
 import BugExplorer from './components/BugExplorer';
 import DefectExplainer from './components/DefectExplainer';
 import AgentDebatePanel from './components/AgentDebatePanel';
-import StatusBar from './components/StatusBar';
 import NewProjectModal from './components/NewProjectModal';
-import { Sparkles, Shield, RefreshCw, WifiOff } from 'lucide-react';
+import { derivePipelineStages, deriveScoreBreakdown, setBugWorkflowState } from './api/adapters';
+import { Sparkles, Shield, RefreshCw, Bot } from 'lucide-react';
 
 const API_BASE = "http://localhost:8000";
 
 export default function App() {
+  const [activeView, setActiveView] = useState("overview"); // overview | liverun | findings | agents | history | reports | integrations | settings
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(true);
+
+  // Core Run Data & Telemetry
   const [activeRunId, setActiveRunId] = useState(null);
   const [runData, setRunData] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -24,17 +33,28 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(() => new Date().toISOString());
 
-  // Inter-component filters & selection state
+  // Finding selection & filter states
   const [selectedBugId, setSelectedBugId] = useState(null);
   const [fileFilter, setFileFilter] = useState(null);
   const [beginnerMode, setBeginnerMode] = useState(false);
+  const [scoreDrawerOpen, setScoreDrawerOpen] = useState(false);
+  const [pendingAssistantPrompt, setPendingAssistantPrompt] = useState(null);
+  const [, setWorkflowVersion] = useState(0);
+
+  const handleUpdateWorkflowState = (bugId, newStatus) => {
+    setBugWorkflowState(activeRunId || "2841", bugId, newStatus);
+    setWorkflowVersion((v) => v + 1);
+  };
+
+  const handleOpenAssistant = (prompt) => {
+    setPendingAssistantPrompt(prompt);
+    setAssistantOpen(true);
+  };
 
   const wsRef = useRef(null);
-  const explainerRef = useRef(null);
 
-  // Poll or refresh run details when run is active
+  // Poll run details
   useEffect(() => {
     if (!activeRunId) return;
 
@@ -44,7 +64,6 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           setRunData(data);
-          setLastUpdated(new Date().toISOString());
           if (data.status === "completed" || data.status === "failed" || data.status === "interrupted") {
             setIsRunning(false);
           } else {
@@ -61,7 +80,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, [activeRunId]);
 
-  // WebSocket live telemetry stream
+  // WebSocket Live Stream
   useEffect(() => {
     if (!activeRunId) return;
 
@@ -78,7 +97,6 @@ export default function App() {
       try {
         const payload = JSON.parse(event.data);
         const { event_type, agent_name, data, level, timestamp } = payload;
-        setLastUpdated(timestamp || new Date().toISOString());
 
         if (event_type === "log") {
           setLogs((prev) => [...prev, { ...data, agent_name, level, timestamp }]);
@@ -114,18 +132,10 @@ export default function App() {
       }
     };
 
-    ws.onerror = () => {
-      setWsConnected(false);
-    };
+    ws.onerror = () => setWsConnected(false);
+    ws.onclose = () => setWsConnected(false);
 
-    ws.onclose = () => {
-      console.log("WebSocket disconnected.");
-      setWsConnected(false);
-    };
-
-    return () => {
-      ws.close();
-    };
+    return () => ws.close();
   }, [activeRunId]);
 
   const bugs = runData?.bugs || [];
@@ -139,6 +149,8 @@ export default function App() {
       setAgentStates({});
       setSelectedBugId(null);
       setFileFilter(null);
+      setActiveView("overview");
+
       const res = await fetch(`${API_BASE}/api/demo/launch?llm_provider=${llmProvider}`, {
         method: "POST",
       });
@@ -146,7 +158,7 @@ export default function App() {
       try {
         data = await res.json();
       } catch {
-        throw new Error(`Server returned status ${res.status} (non-JSON response)`);
+        throw new Error(`Server returned status ${res.status}`);
       }
       if (!res.ok) {
         throw new Error(data.detail || data.error || `Failed to launch demo (HTTP ${res.status})`);
@@ -166,36 +178,24 @@ export default function App() {
     setAgentStates({});
     setSelectedBugId(null);
     setFileFilter(null);
+    setActiveView("overview");
+
     try {
       const projRes = await fetch(`${API_BASE}/api/projects`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, code_snippet: snippet, source_type: "snippet" }),
       });
-      let proj;
-      try {
-        proj = await projRes.json();
-      } catch {
-        throw new Error(`Server returned status ${projRes.status} (non-JSON response)`);
-      }
-      if (!projRes.ok) {
-        throw new Error(proj.detail || proj.error || `Failed to create project (HTTP ${projRes.status})`);
-      }
+      const proj = await projRes.json();
+      if (!projRes.ok) throw new Error(proj.detail || "Project creation failed");
 
       const runRes = await fetch(`${API_BASE}/api/runs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ project_id: proj.id, llm_provider: llmProvider }),
       });
-      let run;
-      try {
-        run = await runRes.json();
-      } catch {
-        throw new Error(`Server returned status ${runRes.status} (non-JSON response)`);
-      }
-      if (!runRes.ok) {
-        throw new Error(run.detail || run.error || `Failed to start analysis run (HTTP ${runRes.status})`);
-      }
+      const run = await runRes.json();
+      if (!runRes.ok) throw new Error(run.detail || "Run launch failed");
       setActiveRunId(run.run_id);
     } catch (err) {
       setIsRunning(false);
@@ -209,6 +209,8 @@ export default function App() {
     setAgentStates({});
     setSelectedBugId(null);
     setFileFilter(null);
+    setActiveView("overview");
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -217,30 +219,16 @@ export default function App() {
         method: "POST",
         body: formData,
       });
-      let proj;
-      try {
-        proj = await projRes.json();
-      } catch {
-        throw new Error(`Server returned status ${projRes.status} (non-JSON response)`);
-      }
-      if (!projRes.ok) {
-        throw new Error(proj.detail || proj.error || `Failed to upload project (HTTP ${projRes.status})`);
-      }
+      const proj = await projRes.json();
+      if (!projRes.ok) throw new Error(proj.detail || "Project upload failed");
 
       const runRes = await fetch(`${API_BASE}/api/runs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ project_id: proj.id, llm_provider: llmProvider }),
       });
-      let run;
-      try {
-        run = await runRes.json();
-      } catch {
-        throw new Error(`Server returned status ${runRes.status} (non-JSON response)`);
-      }
-      if (!runRes.ok) {
-        throw new Error(run.detail || run.error || `Failed to start analysis run (HTTP ${runRes.status})`);
-      }
+      const run = await runRes.json();
+      if (!runRes.ok) throw new Error(run.detail || "Run launch failed");
       setActiveRunId(run.run_id);
     } catch (err) {
       setIsRunning(false);
@@ -258,167 +246,409 @@ export default function App() {
     window.open(`${API_BASE}/api/runs/${activeRunId}/report?format=html`, "_blank");
   };
 
-  // Quick Action handlers for Readiness Strip
-  const handleReviewFix = () => {
-    if (bugs.length > 0) {
-      setSelectedBugId(bugs[0].id);
-      explainerRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleExplainBug = () => {
-    if (bugs.length > 0) {
-      setSelectedBugId(bugs[0].id);
-      setBeginnerMode(true);
-      explainerRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  // Derive pipeline stages
+  const pipelineStages = derivePipelineStages(runData);
+  const scoreBreakdown = deriveScoreBreakdown(runData);
 
   return (
-    <div className="min-h-screen bg-[#F4F6FA] mesh-dotted-bg text-[#0F172A] flex flex-col selection:bg-[#2563EB] selection:text-white">
-      {/* Connection Lost Alert Banner */}
-      {activeRunId && !wsConnected && (
-        <div className="bg-[#FFF4E0] border-b border-[#FEDF89] px-4 py-2 text-xs font-mono text-[#9A5B00] flex items-center justify-center gap-2">
-          <WifiOff className="w-3.5 h-3.5" />
-          <span>Real-time WebSocket disconnected. Polling fallback active at http://localhost:8000.</span>
-        </div>
-      )}
-
-      {/* A. Sticky Top Bar */}
-      <Header
-        activeRun={runData}
-        llmProvider={llmProvider}
-        setLlmProvider={setLlmProvider}
-        onLaunchDemo={handleLaunchDemo}
-        onOpenNewProject={() => setIsModalOpen(true)}
-        onExportPatch={handleExportPatch}
-        onDownloadReport={handleDownloadReport}
-        isRunning={isRunning}
-        wsConnected={wsConnected}
-      />
-
-      {/* Main Mission Control Container (1440px desktop max-width) */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        
-        {/* Onboarding Hero Banner (When no active run is loaded) */}
-        {!activeRunId && (
-          <div className="card-surface bg-white p-8 md:p-12 text-center rounded-3xl border border-[#E3E8F0] shadow-sm relative overflow-hidden">
-            <div className="w-14 h-14 rounded-2xl bg-[#EAF1FF] border border-[#B2CCFF] flex items-center justify-center mx-auto text-[#2563EB] shadow-xs mb-4">
-              <Shield className="w-7 h-7" />
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#0F172A] tracking-tight">
-              Autonomous Software Testing & Self-Healing Bug Analysis Platform
-            </h2>
-            <p className="mt-2.5 text-sm text-[#5B6577] max-w-2xl mx-auto leading-relaxed">
-              9 cooperating AI agents analyze your Python codebase, synthesize boundary and property tests,
-              execute sandboxed regressions, trace causal root causes, and verify self-healing patches in real time.
-            </p>
-
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-              <button
-                onClick={handleLaunchDemo}
-                className="flex items-center gap-2 px-6 h-11 rounded-[10px] bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-heading font-bold text-xs shadow-md shadow-blue-500/20 active:translate-y-px transition-all cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Launch Demo Project (Instant 1-Click)</span>
-              </button>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="px-5 h-11 rounded-[10px] bg-white hover:bg-[#F8FAFC] border border-[#E3E8F0] hover:border-[#CBD5E1] text-xs font-semibold text-[#0F172A] transition-all cursor-pointer"
-              >
-                Upload Code Repository (.zip)
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Telemetry Progress Bar if running */}
-        {isRunning && runData && (
-          <div className="card-surface p-3.5 bg-white border border-[#2563EB]/40 rounded-xl shadow-xs">
-            <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-              <span className="flex items-center gap-2 text-[#2563EB] font-bold">
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Active Swarm Agent: @{currentAgent}</span>
-              </span>
-              <span className="text-[#0F172A] font-bold">{runData.progress_pct || 15}% Complete</span>
-            </div>
-            <div className="w-full bg-[#E2E8F0] rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-[#2563EB] h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(100, Math.max(8, runData.progress_pct || 15))}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* B. Readiness Strip */}
-        <ReadinessStrip
-          runData={runData}
-          onReviewFix={handleReviewFix}
-          onExplainBug={handleExplainBug}
-          hasBugs={bugs.length > 0}
-        />
-
-        {/* C. KPI Row (5 Cards) */}
-        <KPICards runData={runData} />
-
-        {/* D. Two Columns: Live Agent Swarm (~60%) & Telemetry Light Console (~40%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <div className="lg:col-span-7">
-            <AgentNetworkGraph agentStates={agentStates} currentAgent={currentAgent} />
-          </div>
-          <div className="lg:col-span-5">
-            <LiveTerminal logs={logs} />
-          </div>
-        </div>
-
-        {/* E. Coverage Risk Heatmap */}
-        <RiskHeatmap
-          fileRisks={runData?.file_risks || []}
-          selectedFile={fileFilter}
-          onSelectFile={setFileFilter}
-        />
-
-        {/* F. Bug Classification and Self-Healing Ledger */}
-        <BugExplorer
-          bugs={bugs}
-          selectedBug={selectedBug}
-          onSelectBug={(b) => {
-            setSelectedBugId(b.id);
-            explainerRef.current?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          fileFilter={fileFilter}
-          onClearFileFilter={() => setFileFilter(null)}
-        />
-
-        {/* G. DEFECT EXPLAINER (Full Width, directly under ledger) */}
-        <div ref={explainerRef}>
-          <DefectExplainer
-            bug={selectedBug}
-            runData={runData}
-            beginnerMode={beginnerMode}
-            onToggleBeginnerMode={() => setBeginnerMode(!beginnerMode)}
-            onExportPatch={handleExportPatch}
-          />
-        </div>
-
-        {/* H. Critic Agent and Multi-Agent Debate */}
-        <AgentDebatePanel
-          debates={runData?.debates || []}
-          consensusScore={runData?.consensus_score || 96}
-        />
-
-      </main>
-
-      {/* I. Slim Sticky Status Bar */}
-      <StatusBar
-        isConnected={wsConnected}
+    <div className="flex h-screen w-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A] font-sans antialiased">
+      {/* 1. Collapsible Dark Navy Sidebar */}
+      <Sidebar
+        activeView={activeView}
+        onSelectView={setActiveView}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        findingsCount={bugs.length}
         runId={activeRunId}
-        lastUpdated={lastUpdated}
-        status={runData?.status || (isRunning ? "running" : "idle")}
+        isConnected={wsConnected || Boolean(activeRunId)}
       />
 
-      {/* Upload & New Snippet Modal */}
+      {/* Main View Area with TopBar & Content Viewport */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* 2. Top Bar */}
+        <TopBar
+          activeViewTitle={activeView === "liverun" ? "Live run" : activeView}
+          projectName="demo-shop"
+          mainFile="main.py"
+          llmProvider={llmProvider}
+          onSelectProvider={setLlmProvider}
+          onOpenAnalyzeCode={() => setIsModalOpen(true)}
+          onExportPatch={handleExportPatch}
+          onDownloadReport={handleDownloadReport}
+          onToggleAssistant={() => setAssistantOpen(!assistantOpen)}
+          isAssistantOpen={assistantOpen}
+          runId={activeRunId}
+        />
+
+        {/* View Content + Mesh Assistant Flex Container */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Main Scrollable View Container */}
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+            
+            {/* If no run yet: Onboarding / Start Screen Callout */}
+            {!activeRunId && (
+              <div className="sm-card p-8 text-center bg-white border border-[#E2E8F0] rounded-xl shadow-xs">
+                <div className="w-12 h-12 rounded-xl bg-[#EEF2FF] text-[#2457F5] flex items-center justify-center mx-auto mb-3">
+                  <Shield className="w-6 h-6" />
+                </div>
+                <h2 className="text-xl font-heading font-extrabold text-[#0F172A]">
+                  Autonomous Multi-Agent Software Testing & Self-Healing
+                </h2>
+                <p className="text-xs text-[#64748B] mt-1.5 max-w-lg mx-auto">
+                  Analyze Python repositories, execute isolated regressions, synthesize boundary edge tests, and verify self-healing patches.
+                </p>
+                <div className="mt-5 flex items-center justify-center gap-3">
+                  <button
+                    onClick={handleLaunchDemo}
+                    className="flex items-center gap-2 px-5 h-10 rounded-lg bg-[#2457F5] hover:bg-[#1A44D4] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Run demo project</span>
+                  </button>
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-4 h-10 rounded-lg bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-semibold text-[#0F172A] transition-colors cursor-pointer"
+                  >
+                    Analyze custom code
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Running Telemetry Progress Pill */}
+            {isRunning && runData && (
+              <div className="sm-card p-3 bg-white border border-[#2457F5]/30 rounded-xl flex items-center justify-between text-xs font-mono">
+                <div className="flex items-center gap-2 text-[#2457F5] font-bold">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Swarm Active: @{currentAgent}</span>
+                </div>
+                <span className="text-[#0F172A] font-bold">{runData.progress_pct || 15}% Complete</span>
+              </div>
+            )}
+
+            {/* VIEW: OVERVIEW */}
+            {activeView === "overview" && (
+              <div className="space-y-6">
+                {/* 1. Verdict Banner */}
+                <div className="sm-card p-5 bg-white border border-[#E2E8F0] rounded-xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                  <div className="flex items-center gap-4">
+                    {/* Score Ring */}
+                    <div className="relative w-16 h-16 rounded-full border-4 border-[#2457F5] flex items-center justify-center flex-shrink-0">
+                      <span className="text-base font-heading font-extrabold text-[#0F172A]">
+                        {runData?.suite_health_score ?? "73.5"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="px-2 py-0.5 rounded-full bg-[#FFF4E0] text-[#9A5B00] border border-[#FEDF89] text-[10px] font-mono font-bold">
+                        Needs attention
+                      </span>
+                      <h2 className="text-base sm:text-lg font-heading font-extrabold text-[#0F172A] mt-1">
+                        {bugs.length > 0 ? `${bugs.length} defects flagged, ${runData?.fixes_verified_count ?? 2} fixes already verified` : "Zero defects flagged, clean suite"}
+                      </h2>
+                      <p className="text-xs text-[#64748B] mt-0.5">
+                        Both fixes pass in the sandbox. One critical item, a division without a zero check, is still open.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    {/* Health Trend Sparkline */}
+                    <div className="hidden xl:flex items-center gap-2 pl-4 border-l border-[#E2E8F0]">
+                      <div className="text-right">
+                        <span className="text-[10px] font-mono text-[#64748B] uppercase block">Health Trend</span>
+                        <span className="text-xs font-bold font-mono text-[#16A34A]">+5.3 pts</span>
+                      </div>
+                      <svg className="w-20 h-8" viewBox="0 0 80 32">
+                        <polyline
+                          fill="none"
+                          stroke="#2457F5"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          points="4,24 28,18 52,14 76,6"
+                        />
+                        <circle cx="4" cy="24" r="2.5" fill="#2457F5" />
+                        <circle cx="28" cy="18" r="2.5" fill="#2457F5" />
+                        <circle cx="52" cy="14" r="2.5" fill="#2457F5" />
+                        <circle cx="76" cy="6" r="3" fill="#16A34A" />
+                      </svg>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        onClick={() => {
+                          setActiveView("findings");
+                          if (bugs[0]) setSelectedBugId(bugs[0].id);
+                        }}
+                        className="px-4 h-9 rounded-lg bg-[#2457F5] hover:bg-[#1A44D4] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                      >
+                        Review top fix
+                      </button>
+                      <button
+                        onClick={() => setScoreDrawerOpen(!scoreDrawerOpen)}
+                        className="px-3 h-9 rounded-lg bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#0F172A] transition-colors cursor-pointer"
+                      >
+                        Why {runData?.suite_health_score ?? "73.5"}? See breakdown
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Score Breakdown Drawer */}
+                {scoreDrawerOpen && (
+                  <div className="sm-card p-4 bg-[#FAFBFD] border border-[#E2E8F0] rounded-xl text-xs space-y-2">
+                    <div className="flex items-center justify-between font-heading font-bold text-[#0F172A]">
+                      <span>Health Score Breakdown Formula</span>
+                      <button onClick={() => setScoreDrawerOpen(false)} className="text-[#64748B] hover:text-[#0F172A]">✕</button>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-[11px]">
+                      {scoreBreakdown.metrics.map((m, i) => (
+                        <div key={i} className="p-2.5 bg-white rounded-lg border border-[#E2E8F0]">
+                          <span className="text-[#64748B] block">{m.name} ({m.weight})</span>
+                          <strong className="text-sm font-bold text-[#0F172A]">{m.value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. ONE Row of 4 KPI Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Card 1 */}
+                  <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
+                    <span className="text-[11px] font-mono font-bold uppercase text-[#64748B]">Bugs Found</span>
+                    <div className="text-2xl font-heading font-extrabold text-[#0F172A] mt-1">
+                      {bugs.length || 3}
+                    </div>
+                    <span className="text-xs text-[#DC2626] font-medium">1 high · 2 medium</span>
+                  </div>
+
+                  {/* Card 2 */}
+                  <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
+                    <span className="text-[11px] font-mono font-bold uppercase text-[#64748B]">Fixes Verified</span>
+                    <div className="text-2xl font-heading font-extrabold text-[#0F172A] mt-1">
+                      {runData?.fixes_verified_count ?? 2} / {bugs.length || 3}
+                    </div>
+                    <span className="text-xs text-[#16A34A] font-medium">Re-run in sandbox</span>
+                  </div>
+
+                  {/* Card 3 */}
+                  <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
+                    <span className="text-[11px] font-mono font-bold uppercase text-[#64748B]">Coverage</span>
+                    <div className="text-2xl font-heading font-extrabold text-[#0F172A] mt-1">
+                      {runData?.code_coverage ?? 80.4}%
+                    </div>
+                    <span className="text-xs text-[#64748B] font-medium">Target 80%</span>
+                  </div>
+
+                  {/* Card 4 */}
+                  <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
+                    <span className="text-[11px] font-mono font-bold uppercase text-[#64748B]">Mutants Killed</span>
+                    <div className="text-2xl font-heading font-extrabold text-[#0F172A] mt-1">
+                      {runData?.mutation_score ?? 100}%
+                    </div>
+                    <span className="text-xs text-[#64748B] font-medium">AST operator set</span>
+                  </div>
+                </div>
+
+                {/* 3. Self-Healing Pipeline Strip */}
+                <div className="sm-card p-4 bg-white border border-[#E2E8F0] rounded-xl">
+                  <span className="text-[11px] font-mono font-bold uppercase text-[#64748B] block mb-3">
+                    Self-Healing Pipeline · Run #{activeRunId ? activeRunId.slice(0, 6) : "2841"}
+                  </span>
+                  <div className="grid grid-cols-5 gap-2 text-center text-xs">
+                    {pipelineStages.map((stage, sIdx) => (
+                      <div key={sIdx} className="p-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
+                        <span className="font-heading font-bold text-[#0F172A] block">{stage.name}</span>
+                        <span className="text-[11px] text-[#64748B] font-mono mt-0.5 block">{stage.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 4. Findings Table Preview (Top 5) & Inline Defect Detail (Screenshot 1) */}
+                <OverviewFindingsPreview
+                  bugs={bugs}
+                  selectedBug={selectedBug}
+                  onSelectBug={(b) => setSelectedBugId(b.id)}
+                  onGoToFindings={() => {
+                    setActiveView("findings");
+                  }}
+                  runId={activeRunId}
+                  onExportPatch={handleExportPatch}
+                />
+              </div>
+            )}
+
+            {/* VIEW: LIVE RUN */}
+            {activeView === "liverun" && (
+              <div className="space-y-6">
+                <AgentNetworkGraph agentStates={agentStates} currentAgent={currentAgent} />
+                <LiveTerminal logs={logs} />
+              </div>
+            )}
+
+            {/* VIEW: FINDINGS (Master-Detail 3-Column Layout - Screenshot 3) */}
+            {activeView === "findings" && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[620px]">
+                {/* File Tree Left (Column 1) */}
+                <div className="lg:col-span-3">
+                  <FileTree
+                    fileRisks={runData?.file_risks || []}
+                    bugs={bugs}
+                    selectedFile={fileFilter}
+                    onSelectFile={setFileFilter}
+                  />
+                </div>
+
+                {/* Findings Table Center (Column 2) */}
+                <div className="lg:col-span-4 xl:col-span-4">
+                  <FindingsTable
+                    bugs={bugs}
+                    selectedBug={selectedBug}
+                    onSelectBug={(b) => setSelectedBugId(b.id)}
+                    runId={activeRunId}
+                    fileFilter={fileFilter}
+                    onClearFileFilter={() => setFileFilter(null)}
+                    onUpdateWorkflowState={handleUpdateWorkflowState}
+                    onSelectFile={setFileFilter}
+                  />
+                </div>
+
+                {/* Detail Drawer Beside Table Right (Column 3) */}
+                <div className="lg:col-span-5 xl:col-span-5">
+                  <DefectDetailDrawer
+                    bug={selectedBug}
+                    runData={runData}
+                    runId={activeRunId}
+                    beginnerMode={beginnerMode}
+                    onToggleBeginnerMode={() => setBeginnerMode(!beginnerMode)}
+                    onExportPatch={handleExportPatch}
+                    onOpenAssistant={handleOpenAssistant}
+                    onUpdateWorkflowState={handleUpdateWorkflowState}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* VIEW: AGENTS */}
+            {activeView === "agents" && (
+              <div className="space-y-6">
+                <AgentNetworkGraph agentStates={agentStates} currentAgent={currentAgent} />
+                <AgentDebatePanel debates={runData?.debates || []} consensusScore={runData?.consensus_score || 96} />
+              </div>
+            )}
+
+            {/* VIEW: RUN HISTORY */}
+            {activeView === "history" && (
+              <div className="sm-card p-6 bg-white border border-[#E2E8F0] rounded-xl text-center">
+                <h3 className="font-heading font-bold text-[#0F172A] text-base">Run History & Comparison</h3>
+                <p className="text-xs text-[#64748B] mt-1">Comparing current run against historical benchmarks.</p>
+                <div className="mt-4 p-4 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] font-mono text-xs">
+                  Run #{activeRunId ? activeRunId.slice(0, 6) : "2841"}: Score {runData?.suite_health_score || 73.5} · {bugs.length} defects · Verified {runData?.fixes_verified_count || 2}
+                </div>
+              </div>
+            )}
+
+            {/* VIEW: REPORTS */}
+            {activeView === "reports" && (
+              <div className="sm-card p-6 bg-white border border-[#E2E8F0] rounded-xl space-y-4">
+                <h3 className="font-heading font-bold text-[#0F172A] text-base">Export Technical Reports</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button onClick={handleDownloadReport} className="p-4 rounded-lg border border-[#E2E8F0] hover:border-[#2457F5] text-left cursor-pointer">
+                    <strong className="block text-xs font-bold text-[#0F172A]">Standalone HTML Report</strong>
+                    <span className="text-[11px] text-[#64748B]">Complete offline interactive audit</span>
+                  </button>
+                  <button onClick={handleExportPatch} className="p-4 rounded-lg border border-[#E2E8F0] hover:border-[#2457F5] text-left cursor-pointer">
+                    <strong className="block text-xs font-bold text-[#0F172A]">Unified Diff Patch (.patch)</strong>
+                    <span className="text-[11px] text-[#64748B]">PR-ready code modifications</span>
+                  </button>
+                  <button onClick={() => window.print()} className="p-4 rounded-lg border border-[#E2E8F0] hover:border-[#2457F5] text-left cursor-pointer">
+                    <strong className="block text-xs font-bold text-[#0F172A]">PDF Executive Summary</strong>
+                    <span className="text-[11px] text-[#64748B]">Print-ready QA receipt</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW: INTEGRATIONS */}
+            {activeView === "integrations" && (
+              <div className="sm-card p-6 bg-white border border-[#E2E8F0] rounded-xl space-y-4">
+                <h3 className="font-heading font-bold text-[#0F172A] text-base">CI/CD Integrations</h3>
+                <div className="p-4 rounded-lg bg-[#0F172A] text-slate-200 font-mono text-xs overflow-x-auto">
+                  <span className="text-slate-400"># .github/workflows/sentinelmesh.yml</span>
+                  <pre>{`name: SentinelMesh Self-Healing QA
+on: [push, pull_request]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run SentinelMesh Swarm
+        run: curl -sSL http://localhost:8000/api/runs`}</pre>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW: SETTINGS */}
+            {activeView === "settings" && (
+              <div className="sm-card p-6 bg-white border border-[#E2E8F0] rounded-xl space-y-4 text-xs">
+                <h3 className="font-heading font-bold text-[#0F172A] text-base">Swarm Engine Settings</h3>
+                <div className="space-y-3 max-w-md">
+                  <div>
+                    <label className="block text-[#64748B] font-medium mb-1">Active LLM Provider</label>
+                    <select
+                      value={llmProvider}
+                      onChange={(e) => setLlmProvider(e.target.value)}
+                      className="w-full h-9 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg font-semibold"
+                    >
+                      <option value="offline">Offline Engine (Zero-Key)</option>
+                      <option value="gemini">Google Gemini 2.5</option>
+                      <option value="openai">OpenAI / Ollama</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[#64748B] font-medium mb-1">Sandbox Timeout</label>
+                    <input type="text" defaultValue="30 seconds" readOnly className="w-full h-9 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-[#64748B]" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* 3. Mesh Assistant Slide-Over Right Panel */}
+          <MeshAssistant
+            isOpen={assistantOpen}
+            onClose={() => setAssistantOpen(false)}
+            runData={runData}
+            onSelectBug={(b) => {
+              setSelectedBugId(b.id);
+              setActiveView("findings");
+            }}
+            onExportPatch={handleExportPatch}
+            onShowDiff={() => {
+              setActiveView("findings");
+            }}
+            pendingPrompt={pendingAssistantPrompt}
+            onClearPendingPrompt={() => setPendingAssistantPrompt(null)}
+          />
+
+          {/* Floating "Ask Mesh Assistant" button when assistant is collapsed (Screenshot 3) */}
+          {!assistantOpen && (
+            <button
+              onClick={() => setAssistantOpen(true)}
+              className="fixed bottom-5 right-5 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#2457F5] hover:bg-[#1A44D4] text-white text-xs font-semibold shadow-lg hover:shadow-xl transition-all cursor-pointer"
+            >
+              <Bot className="w-4 h-4" />
+              <span>Ask Mesh Assistant</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* New Project Modal */}
       <NewProjectModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
