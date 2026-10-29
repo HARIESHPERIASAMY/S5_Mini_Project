@@ -14,20 +14,33 @@ import ReportsView from './components/reports/ReportsView';
 import IntegrationsView from './components/integrations/IntegrationsView';
 import SettingsView from './components/settings/SettingsView';
 import AgentNetworkGraph from './components/AgentNetworkGraph';
-import LiveTerminal from './components/LiveTerminal';
-import RiskHeatmap from './components/RiskHeatmap';
-import BugExplorer from './components/BugExplorer';
-import DefectExplainer from './components/DefectExplainer';
 import AgentDebatePanel from './components/AgentDebatePanel';
 import NewProjectModal from './components/NewProjectModal';
 import { derivePipelineStages, deriveScoreBreakdown, setBugWorkflowState } from './api/adapters';
 import { generateSarifReport, generateJUnitXml, createZipBundle } from './utils/exporters';
-import { Sparkles, Shield, RefreshCw, Bot, AlertCircle } from 'lucide-react';
+import { RefreshCw, Bot, AlertCircle } from 'lucide-react';
 
 const API_BASE = "http://localhost:8000";
 
 export default function App() {
-  const [activeView, setActiveView] = useState("overview"); // overview | liverun | findings | agents | history | reports | integrations | settings
+  const getInitialView = () => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search);
+      const v = p.get("view");
+      if (v) return v;
+    }
+    return "overview";
+  };
+
+  const [activeView, setActiveViewState] = useState(getInitialView);
+  const setActiveView = (view) => {
+    setActiveViewState(view);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location);
+      url.searchParams.set("view", view);
+      window.history.replaceState({}, "", url);
+    }
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(true);
 

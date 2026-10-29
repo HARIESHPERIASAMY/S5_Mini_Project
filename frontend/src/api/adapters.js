@@ -234,8 +234,8 @@ export function queryMeshAssistant(userPrompt, runData) {
   const mutation = runData.mutation_score ?? 100;
   const runId = (runData.id || "2841").slice(0, 6);
 
-  // 1. Why did the test fail / discount fail / specific defect fail?
-  if (p.includes("why") && (p.includes("fail") || p.includes("discount") || p.includes("mistake") || p.includes("zero"))) {
+  // 1. Why did the test fail / discount fail / boundary fix proposed?
+  if (p.includes("why") && (p.includes("fail") || p.includes("discount") || p.includes("mistake") || p.includes("zero") || p.includes("boundary") || p.includes("fix") || p.includes("propos"))) {
     // Find matching bug by keyword
     let targetBug = bugs.find(b => p.includes(b.title.toLowerCase()) || (b.category && p.includes(b.category.toLowerCase())));
     if (!targetBug && p.includes("discount")) targetBug = bugs.find(b => b.title?.toLowerCase().includes("discount"));
@@ -257,7 +257,6 @@ export function queryMeshAssistant(userPrompt, runData) {
 
   // 2. Is the fix safe to merge?
   if (p.includes("safe") || p.includes("merge")) {
-    const verifiedBugs = bugs.filter((b) => b.fix_verified);
     const unverifiedBugs = bugs.filter((b) => !b.fix_verified);
     const testCount = runData.test_results?.length || 14;
 
@@ -333,9 +332,9 @@ export function queryMeshAssistant(userPrompt, runData) {
 
   // 7. Search run findings and tests
   const matchingBug = bugs.find(b => 
-    b.title.toLowerCase().includes(p) || 
-    b.file_path.toLowerCase().includes(p) ||
-    b.category.toLowerCase().includes(p)
+    (b.title && b.title.toLowerCase().includes(p)) || 
+    (b.file_path && b.file_path.toLowerCase().includes(p)) ||
+    (b.category && b.category.toLowerCase().includes(p))
   );
 
   if (matchingBug) {

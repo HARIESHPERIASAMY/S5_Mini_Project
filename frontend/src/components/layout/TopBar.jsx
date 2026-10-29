@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Download, FileCode, Sliders, ChevronDown, Sparkles, 
-  Bot, GitPullRequest, FileText, Check, Shield
+  Download, FileCode, Sliders, ChevronDown, 
+  Bot, GitPullRequest, FileText, Shield
 } from 'lucide-react';
 
 export default function TopBar({
@@ -19,8 +19,8 @@ export default function TopBar({
   onOpenCompare,
   onToggleAssistant,
   isAssistantOpen = false,
-  runId,
-  runsList = []
+  _runId,
+  _runsList = []
 }) {
   const [exportOpen, setExportOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -145,7 +145,7 @@ export default function TopBar({
               <div className="py-1">
                 <button
                   onClick={() => {
-                    onExportPatch && onExportPatch();
+                    onExportPatch?.();
                     setExportOpen(false);
                   }}
                   className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
@@ -155,7 +155,7 @@ export default function TopBar({
                 </button>
                 <button
                   onClick={() => {
-                    onDownloadReport && onDownloadReport();
+                    onDownloadReport?.();
                     setExportOpen(false);
                   }}
                   className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
@@ -178,7 +178,7 @@ export default function TopBar({
               <div className="py-1">
                 <button
                   onClick={() => {
-                    onExportSarif && onExportSarif();
+                    onExportSarif?.();
                     setExportOpen(false);
                   }}
                   className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
@@ -188,7 +188,7 @@ export default function TopBar({
                 </button>
                 <button
                   onClick={() => {
-                    onExportJUnit && onExportJUnit();
+                    onExportJUnit?.();
                     setExportOpen(false);
                   }}
                   className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"
@@ -198,7 +198,7 @@ export default function TopBar({
                 </button>
                 <button
                   onClick={() => {
-                    onExportPatchZip && onExportPatchZip();
+                    onExportPatchZip?.();
                     setExportOpen(false);
                   }}
                   className="w-full text-left px-3.5 py-2 hover:bg-[#F8FAFC] text-[#0F172A] flex items-center gap-2 cursor-pointer"

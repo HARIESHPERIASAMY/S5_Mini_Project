@@ -10,7 +10,6 @@ export function generateSarifReport(runData) {
   if (!runData) return null;
 
   const bugs = runData.bugs || [];
-  const runId = runData.id || "unknown";
 
   const rules = [];
   const ruleMap = new Map();

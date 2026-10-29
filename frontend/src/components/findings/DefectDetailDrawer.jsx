@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { 
   CheckCircle2, Copy, Check, Download, Share2, 
-  Play, MessageSquare, Sparkles, AlertCircle, 
-  GitPullRequest, ArrowRight, ShieldCheck, XCircle
+  Play, MessageSquare, AlertCircle, 
+  GitPullRequest, ArrowRight, XCircle
 } from 'lucide-react';
 import { deriveMergeReadiness, getBugWorkflowState } from '../../api/adapters';
 
