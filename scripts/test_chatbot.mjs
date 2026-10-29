@@ -75,3 +75,4 @@ if (passed === tests.length) {
 } else {
   process.exit(1);
 }
+

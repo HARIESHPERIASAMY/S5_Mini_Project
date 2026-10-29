@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bot, Send, X, ExternalLink, GitPullRequest, Copy, Check, Sparkles } from 'lucide-react';
 import { queryMeshAssistant } from '../../api/adapters';
 

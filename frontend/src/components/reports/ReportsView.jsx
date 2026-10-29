@@ -250,3 +250,4 @@ export default function ReportsView({ runData, runId, onExportPatch }) {
     </div>
   );
 }
+
