@@ -61,3 +61,29 @@ def test_trace_id_propagation():
     assert res.status_code == 200
     assert res.headers.get("X-Trace-ID") == custom_trace
 
+
+def test_healthz_and_readyz_probes():
+    hz = client.get("/healthz")
+    assert hz.status_code == 200
+    assert hz.json()["status"] == "healthy"
+    assert "uptime_seconds" in hz.json()
+
+    rz = client.get("/readyz")
+    assert rz.status_code == 200
+    assert rz.json()["status"] == "ready"
+    assert rz.json()["database"] == "connected"
+
+
+def test_spa_client_fallback_and_security_headers():
+    res = client.get("/overview")
+    assert res.status_code == 200
+    assert "text/html" in res.headers.get("content-type", "")
+    assert res.headers.get("X-Content-Type-Options") == "nosniff"
+    assert res.headers.get("X-Frame-Options") == "SAMEORIGIN"
+
+    # API 404s must still return JSON 404, not HTML
+    api_404 = client.get("/api/non_existent_route")
+    assert api_404.status_code == 404
+    assert api_404.json()["error"] == "NotFoundError"
+
+

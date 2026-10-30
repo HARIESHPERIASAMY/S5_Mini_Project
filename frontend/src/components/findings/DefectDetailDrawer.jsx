@@ -49,9 +49,9 @@ export default function DefectDetailDrawer({
     else if (l.startsWith('+') && !l.startsWith('+++')) addedLines.push(l.substring(1));
   });
 
-  const defectLine = bug.line_number || 41;
-  const originalLine = removedLines[0] || (bug.code_snippet ? bug.code_snippet.split('\n')[0] : "if total > THRESHOLD:");
-  const fixedLine = addedLines[0] || "if total >= THRESHOLD:";
+  const defectLine = bug.line_number || 1;
+  const originalLine = removedLines[0] || (bug.code_snippet ? bug.code_snippet.split('\n')[0] : `// Original line at ${defectLine}`);
+  const fixedLine = addedLines[0] || `// Proposed fix patch for ${bug.title || 'defect'}`;
 
   const handleCopyPatch = () => {
     navigator.clipboard.writeText(diffText || `${originalLine}\n-->\n${fixedLine}`);
@@ -332,7 +332,7 @@ export default function DefectDetailDrawer({
                     Proof of Fix receipt
                   </span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#2457F5] border border-[#B2CCFF]">
-                    PF-{(runId || "2841").slice(0, 4)}-03
+                    #{runId ? runId.slice(0, 8) : "demo"}-{(bug.id || "01").slice(0, 4)}
                   </span>
                 </div>
 

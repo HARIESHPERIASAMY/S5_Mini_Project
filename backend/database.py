@@ -14,16 +14,23 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
+DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 DB_PATH = DATA_DIR / "sentinelmesh.db"
-DATABASE_URL = os.getenv("SENTINEL_DATABASE_URL", f"sqlite:///{DB_PATH}")
+_raw_db_url = os.getenv("SENTINEL_DATABASE_URL") or os.getenv("DATABASE_URL") or f"sqlite:///{DB_PATH}"
+
+# Normalise Postgres dialect prefix if injected by hosting provider (Render, Railway, Heroku)
+if _raw_db_url.startswith("postgres://"):
+    _raw_db_url = _raw_db_url.replace("postgres://", "postgresql://", 1)
+
+DATABASE_URL = _raw_db_url
+IS_SQLITE = DATABASE_URL.startswith("sqlite")
 
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
-    """Enforces WAL mode, foreign keys, and 5000ms busy timeout."""
+    """Enforces WAL mode, foreign keys, and 5000ms busy timeout on SQLite connections."""
     if isinstance(dbapi_connection, sqlite3.Connection):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA journal_mode = WAL")
@@ -35,9 +42,11 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 from sqlalchemy.pool import QueuePool
 
+_connect_args = {"check_same_thread": False} if IS_SQLITE else {}
+
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    connect_args=_connect_args,
     poolclass=QueuePool,
     pool_size=20,
     max_overflow=30,
@@ -74,6 +83,8 @@ def db_session_scope():
 
 def auto_migrate():
     """Applies schema migrations dynamically for SQLite tables."""
+    if not IS_SQLITE:
+        return
     from sqlalchemy import text
     try:
         with engine.begin() as conn:
@@ -148,6 +159,8 @@ def recover_interrupted_runs():
 
 def backup_database(destination_path: Path) -> Path:
     """Performs a safe SQLite online backup."""
+    if not IS_SQLITE:
+        return destination_path
     destination_path.parent.mkdir(parents=True, exist_ok=True)
     src_conn = sqlite3.connect(str(DB_PATH))
     dst_conn = sqlite3.connect(str(destination_path))

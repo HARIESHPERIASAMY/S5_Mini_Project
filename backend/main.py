@@ -7,6 +7,7 @@ idempotency, cancellation, metrics, database backup, and event-sourced WebSocket
 import asyncio
 from datetime import datetime, timezone
 import io
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -14,7 +15,7 @@ import time
 import uuid
 import zipfile
 from contextlib import asynccontextmanager
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Set
 
 from fastapi import (
     FastAPI, Depends, HTTPException, UploadFile, File, WebSocket,
@@ -23,7 +24,7 @@ from fastapi import (
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse, FileResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -50,7 +51,8 @@ from sandbox.runner import default_runner
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEMO_DIR = BASE_DIR / "demo" / "ecommerce"
-PROJECTS_DIR = BASE_DIR / "data" / "projects"
+DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
+PROJECTS_DIR = DATA_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Performance & Metric Counters
@@ -84,10 +86,13 @@ app = FastAPI(
 # Enable GZip compression
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Enable CORS
+# Enable CORS with support for wildcard credentials and custom domain whitelisting
+cors_origins_env = os.getenv("CORS_ORIGINS", "*")
+allowed_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"] if "*" in allowed_origins else allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -136,6 +141,9 @@ async def telemetry_middleware(request: Request, call_next):
         METRICS["latencies"] = METRICS["latencies"][-1000:]
 
     response.headers["X-Trace-ID"] = trace_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     logger.info(f"[{trace_id}] {request.method} {request.url.path} -> {response.status_code} ({latency_ms:.2f}ms)")
 
     # If an /api/ route returned 404 (e.g. from static handler), format as standard JSON
@@ -187,6 +195,31 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ---------------------------------------------------------------------------
 # Health & Metrics Endpoints
 # ---------------------------------------------------------------------------
+
+@app.get("/healthz", tags=["System"])
+def healthz():
+    """Liveness probe for cloud platform healthcheck."""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "1.0.0",
+        "active_runs": len(METRICS["active_runs"]),
+        "uptime_seconds": round(time.time() - SERVER_START_TIME, 1)
+    }
+
+
+@app.get("/readyz", tags=["System"])
+def readyz(db: Session = Depends(get_db)):
+    """Readiness probe checking database connectivity."""
+    try:
+        db.execute(text("SELECT 1")).scalar()
+        return {"status": "ready", "database": "connected", "timestamp": datetime.now(timezone.utc).isoformat()}
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"status": "not_ready", "database": "disconnected", "error": str(e), "timestamp": datetime.now(timezone.utc).isoformat()}
+        )
+
 
 @app.get("/api/health")
 def health_check(db: Session = Depends(get_db)):
@@ -920,10 +953,31 @@ async def _execute_run_pipeline(run_id: str, workspace_dir: str, llm_provider_na
 
 
 # ---------------------------------------------------------------------------
-# Mount Built Frontend Static Assets
+# Mount Built Frontend Static Assets with SPA Client Routing Fallback
 # ---------------------------------------------------------------------------
 
 FRONTEND_DIST = BASE_DIR / "frontend" / "dist"
 if FRONTEND_DIST.exists():
     from fastapi.staticfiles import StaticFiles
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="frontend")
+    
+    # Mount hashed static assets directory directly for maximum caching & performance
+    assets_dir = FRONTEND_DIST / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir), html=False), name="static_assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa_frontend(request: Request, full_path: str):
+        # Do not catch unhandled API, WebSocket, or docs routes
+        if full_path.startswith("api/") or full_path.startswith("ws/") or full_path in ("docs", "openapi.json", "redoc"):
+            trace_id = getattr(request.state, "trace_id", str(uuid.uuid4()))
+            return create_error_response("NotFoundError", f"API endpoint '/{full_path}' does not exist.", 404, trace_id)
+        
+        target_file = FRONTEND_DIST / full_path
+        if full_path and target_file.is_file():
+            return FileResponse(target_file)
+        
+        index_file = FRONTEND_DIST / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+            
+        return create_error_response("NotFoundError", "Frontend distribution build missing.", 404, getattr(request.state, "trace_id", str(uuid.uuid4())))

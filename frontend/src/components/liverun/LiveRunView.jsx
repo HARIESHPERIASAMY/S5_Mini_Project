@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Play, Pause, RefreshCw, CheckCircle2, Clock, 
-  Terminal, Activity, Shield, AlertTriangle, 
-  FileSearch, FlaskConical, PlaySquare, Tag, Compass, 
+import {
+  Play, Pause, RefreshCw, CheckCircle2, Clock,
+  Terminal, Activity, Shield, AlertTriangle,
+  FileSearch, FlaskConical, PlaySquare, Tag, Compass,
   Wrench, MessageSquareDiff, FileSpreadsheet, Cpu
 } from 'lucide-react';
 import LiveTerminal from '../LiveTerminal';
@@ -85,7 +85,7 @@ export default function LiveRunView({
       } else if (msg.includes("critic") || msg.includes("debate")) {
         friendlyText = `Critic agent verified patch logic and confirmed zero regression`;
       } else if (msg.includes("verified") || msg.includes("passed")) {
-        friendlyText = `Verifier certified sandbox re-run: 14 of 14 unit tests passed`;
+        friendlyText = l.message.includes("Passed:") ? l.message : `Verifier certified sandbox re-run: all regression tests passed`;
       }
 
       const timeFormatted = l.timestamp
@@ -115,11 +115,10 @@ export default function LiveRunView({
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748B]">
               Swarm Execution Status
             </span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-              isRunning
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${isRunning
                 ? "bg-[#EEF2FF] text-[#2457F5] border border-[#B2CCFF] flex items-center gap-1"
                 : "bg-[#E7F8EE] text-[#14753B] border border-[#A6F4C5]"
-            }`}>
+              }`}>
               {isRunning ? (
                 <>
                   <RefreshCw className="w-3 h-3 animate-spin" />
@@ -143,11 +142,10 @@ export default function LiveRunView({
         <div className="flex items-center p-1 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold">
           <button
             onClick={() => setViewMode("timeline")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              viewMode === "timeline"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${viewMode === "timeline"
                 ? "bg-white text-[#2457F5] shadow-xs"
                 : "text-[#64748B] hover:text-[#0F172A]"
-            }`}
+              }`}
           >
             <Activity className="w-3.5 h-3.5" />
             <span>Activity Timeline</span>
@@ -155,11 +153,10 @@ export default function LiveRunView({
 
           <button
             onClick={() => setViewMode("raw")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              viewMode === "raw"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${viewMode === "raw"
                 ? "bg-white text-[#2457F5] shadow-xs"
                 : "text-[#64748B] hover:text-[#0F172A]"
-            }`}
+              }`}
           >
             <Terminal className="w-3.5 h-3.5" />
             <span>Raw Logs</span>
@@ -191,25 +188,23 @@ export default function LiveRunView({
             return (
               <div
                 key={agent.id}
-                className={`p-3 rounded-xl border flex flex-col justify-between transition-all relative overflow-hidden ${
-                  isWorking
+                className={`p-3 rounded-xl border flex flex-col justify-between transition-all relative overflow-hidden ${isWorking
                     ? "bg-[#EEF2FF] border-[#2457F5] shadow-xs scale-102"
                     : isDone
-                    ? "bg-white border-[#E2E8F0] hover:border-[#CBD5E1]"
-                    : isFailed
-                    ? "bg-[#FEECEC] border-[#FECDCA]"
-                    : "bg-[#F8FAFC] border-[#E2E8F0] opacity-80"
-                }`}
+                      ? "bg-white border-[#E2E8F0] hover:border-[#CBD5E1]"
+                      : isFailed
+                        ? "bg-[#FEECEC] border-[#FECDCA]"
+                        : "bg-[#F8FAFC] border-[#E2E8F0] opacity-80"
+                  }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                      isWorking
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isWorking
                         ? "bg-[#2457F5] text-white"
                         : isDone
-                        ? "bg-[#E7F8EE] text-[#14753B] border border-[#A6F4C5]"
-                        : "bg-[#F1F5F9] text-[#64748B]"
-                    }`}>
+                          ? "bg-[#E7F8EE] text-[#14753B] border border-[#A6F4C5]"
+                          : "bg-[#F1F5F9] text-[#64748B]"
+                      }`}>
                       <Icon className="w-3.5 h-3.5" />
                     </div>
 
@@ -227,15 +222,14 @@ export default function LiveRunView({
                 </div>
 
                 <div className="mt-3 pt-2 border-t border-[#E2E8F0]/60 flex items-center justify-between">
-                  <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded-full ${
-                    isWorking
+                  <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded-full ${isWorking
                       ? "bg-[#2457F5] text-white animate-pulse"
                       : isDone
-                      ? "bg-[#E7F8EE] text-[#14753B]"
-                      : isFailed
-                      ? "bg-[#FEECEC] text-[#B42318]"
-                      : "bg-[#F1F5F9] text-[#64748B]"
-                  }`}>
+                        ? "bg-[#E7F8EE] text-[#14753B]"
+                        : isFailed
+                          ? "bg-[#FEECEC] text-[#B42318]"
+                          : "bg-[#F1F5F9] text-[#64748B]"
+                    }`}>
                     {status}
                   </span>
                   <span className="text-[9px] font-mono text-[#64748B]">

@@ -38,6 +38,9 @@ class SandboxResult:
 
 
 class SandboxRunner:
+    MAX_OUTPUT_BYTES = 512 * 1024  # 512 KB output cap
+    MAX_MEMORY_MB = 256.0           # 256 MB memory limit
+
     def __init__(self, timeout_sec: float = 20.0):
         self.timeout_sec = timeout_sec
         # run_id -> set of active process PIDs
@@ -53,18 +56,26 @@ class SandboxRunner:
         run_id: Optional[str] = None
     ) -> SandboxResult:
         """
-        Executes a command safely inside `cwd` with strict timeout
-        and recursive process tree termination on timeout or cancellation.
+        Executes a command safely inside `cwd` with strict timeout, memory limits,
+        output caps, and recursive process tree termination.
         """
         effective_timeout = timeout or self.timeout_sec
         clean_env = os.environ.copy()
         clean_env["PYTHONDONTWRITEBYTECODE"] = "1"
         clean_env["PYTHONPATH"] = cwd + os.pathsep + clean_env.get("PYTHONPATH", "")
+
+        # Security: Strip host secrets from sandbox environment
+        sensitive_patterns = ("API_KEY", "SECRET", "PASSWORD", "TOKEN", "DATABASE_URL")
+        for k in list(clean_env.keys()):
+            if any(pat in k.upper() for pat in sensitive_patterns):
+                del clean_env[k]
+
         if env_vars:
             clean_env.update(env_vars)
 
         start_time = time.perf_counter()
         timed_out = False
+        memory_exceeded = False
         stdout_data = ""
         stderr_data = ""
         returncode = -1
@@ -85,6 +96,29 @@ class SandboxRunner:
                         self._active_pids[run_id] = set()
                     self._active_pids[run_id].add(proc.pid)
 
+            # Monitor memory and timeout in background
+            async def memory_monitor():
+                nonlocal memory_exceeded
+                try:
+                    p = psutil.Process(proc.pid)
+                    while proc.returncode is None:
+                        total_mem = p.memory_info().rss
+                        for child in p.children(recursive=True):
+                            try:
+                                total_mem += child.memory_info().rss
+                            except Exception:
+                                pass
+                        total_mb = total_mem / (1024 * 1024)
+                        if total_mb > self.MAX_MEMORY_MB:
+                            memory_exceeded = True
+                            self._kill_process_tree(proc.pid)
+                            break
+                        await asyncio.sleep(0.2)
+                except Exception:
+                    pass
+
+            monitor_task = asyncio.create_task(memory_monitor())
+
             try:
                 out, err = await asyncio.wait_for(proc.communicate(), timeout=effective_timeout)
                 stdout_data = out.decode("utf-8", errors="replace")
@@ -99,6 +133,22 @@ class SandboxRunner:
                     pass
                 stderr_data = f"Execution timed out after {effective_timeout} seconds."
                 returncode = 124
+            finally:
+                monitor_task.cancel()
+                try:
+                    await monitor_task
+                except asyncio.CancelledError:
+                    pass
+
+            if memory_exceeded:
+                returncode = 137
+                stderr_data = f"Execution aborted: Memory limit of {self.MAX_MEMORY_MB}MB exceeded."
+
+            # Output size capping
+            if len(stdout_data) > self.MAX_OUTPUT_BYTES:
+                stdout_data = stdout_data[:self.MAX_OUTPUT_BYTES] + "\n... [Output truncated: exceeded 512KB limit]"
+            if len(stderr_data) > self.MAX_OUTPUT_BYTES:
+                stderr_data = stderr_data[:self.MAX_OUTPUT_BYTES] + "\n... [Stderr truncated: exceeded 512KB limit]"
 
         except Exception as ex:
             stderr_data = f"Process invocation error: {str(ex)}"

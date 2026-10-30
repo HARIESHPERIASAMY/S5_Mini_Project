@@ -4,7 +4,7 @@ import {
   ArrowRight, ShieldCheck, RefreshCw, Plus, Minus, Equal
 } from 'lucide-react';
 
-const API_BASE = "http://localhost:8000";
+import { API_BASE } from '../../api/config';
 
 export default function CompareRunsModal({
   isOpen,

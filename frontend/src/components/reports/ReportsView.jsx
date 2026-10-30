@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { generateSarifReport, generateJUnitXml, createZipBundle } from '../../utils/exporters';
 
-const API_BASE = "http://localhost:8000";
+import { API_BASE } from '../../api/config';
 
 export default function ReportsView({ runData, runId, onExportPatch }) {
   const [downloadSuccess, setDownloadSuccess] = useState(null);
@@ -238,7 +238,7 @@ export default function ReportsView({ runData, runId, onExportPatch }) {
                 </span>
               </div>
               <div className="text-[11px] text-[#64748B]">
-                Receipt ID: PF-{(runId || "2841").slice(0, 4)}-0{idx + 1}
+                Receipt ID: #{runId ? runId.slice(0, 8) : "demo"}-{(b.id || `0${idx + 1}`).slice(0, 4)}
               </div>
               <div className="text-[10px] text-[#475569] truncate">
                 Patch hash (SHA-256): {b.proposed_fix_diff ? Math.abs(Array.from(b.proposed_fix_diff).reduce((h, c) => (h = ((h << 5) - h + c.charCodeAt(0)) | 0), 0)).toString(16).padStart(8, '0') + '…c21e' : 'None'}

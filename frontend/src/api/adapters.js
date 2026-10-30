@@ -5,6 +5,8 @@
  * Derives pipeline metrics, tracks triage workflow states in localStorage, and grounds Mesh Assistant responses.
  */
 
+import { API_BASE } from './config';
+
 export const USE_MOCKS = false;
 
 // ---------------------------------------------------------------------------
@@ -63,7 +65,7 @@ export function setBugWorkflowState(runId, bugId, status, meta = {}) {
     "Dismissed": "dismissed"
   };
   const backendState = stateBackendMap[status] || status.toLowerCase().replace(/\s+/g, '_');
-  fetch(`http://localhost:8000/api/runs/${runId}/bugs/${bugId}/workflow`, {
+  fetch(`${API_BASE}/api/runs/${runId}/bugs/${bugId}/workflow`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

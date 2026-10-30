@@ -97,3 +97,4 @@
 3. **Merge Gate Telemetry**: `after_fix_test_results`, `regression_count`, and `callers_count` are partially inferred by the Verifier; backend will expose them directly on `Bug` and `Run`.
 4. **Run Comparison**: Backend endpoint `GET /api/runs/compare?base_id=...&target_id=...` will provide server-side matching of Fixed / New / Unchanged defects.
 5. **Data Consistency**: Bug counts and reproduced counts must strictly align (`failed_tests` count vs `bugs` count).
+

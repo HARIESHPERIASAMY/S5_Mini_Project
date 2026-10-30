@@ -19,8 +19,7 @@ import NewProjectModal from './components/NewProjectModal';
 import { derivePipelineStages, deriveScoreBreakdown, setBugWorkflowState } from './api/adapters';
 import { generateSarifReport, generateJUnitXml, createZipBundle } from './utils/exporters';
 import { RefreshCw, Bot, AlertCircle } from 'lucide-react';
-
-const API_BASE = "http://localhost:8000";
+import { API_BASE, WS_BASE } from './api/config';
 
 export default function App() {
   const getInitialView = () => {
@@ -142,7 +141,7 @@ export default function App() {
   useEffect(() => {
     if (!activeRunId) return;
 
-    const wsUrl = `ws://localhost:8000/ws/runs/${activeRunId}`;
+    const wsUrl = `${WS_BASE}/ws/runs/${activeRunId}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -418,7 +417,7 @@ export default function App() {
           <div className="bg-[#FEF2F2] border-b border-[#FCA5A5] text-[#991B1B] px-4 py-2.5 text-xs flex items-center justify-between z-10">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-[#DC2626] flex-shrink-0" />
-              <span className="font-semibold">Backend disconnected. Retrying connection to port 8000...</span>
+              <span className="font-semibold">Backend disconnected. Retrying connection to backend...</span>
             </div>
             <button
               onClick={() => {

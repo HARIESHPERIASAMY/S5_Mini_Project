@@ -8,3 +8,4 @@ test:
 
 build:
 	npm run build --prefix frontend
+

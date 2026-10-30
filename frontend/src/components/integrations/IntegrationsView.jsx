@@ -40,7 +40,7 @@ jobs:
       - name: Execute Autonomous QA Swarm
         run: |
           # Fails the pipeline check if merge gate fails
-          curl -sSL -X POST http://localhost:8000/api/runs \\
+          curl -sSL -X POST "\${SENTINEL_API_URL:-https://sentinelmesh.onrender.com}/api/runs" \\
             -H "Content-Type: application/json" \\
             -d '{"project_id": "current", "llm_provider": "offline"}'
 `;

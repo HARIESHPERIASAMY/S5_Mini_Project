@@ -66,9 +66,9 @@ export default function OverviewFindingsPreview({
     else if (l.startsWith('+') && !l.startsWith('+++')) addedLines.push(l.substring(1));
   });
 
-  const defectLine = activeBug?.line_number || 41;
-  const originalLine = removedLines[0] || (activeBug?.code_snippet ? activeBug.code_snippet.split('\n')[0] : "if total > THRESHOLD:");
-  const fixedLine = addedLines[0] || "if total >= THRESHOLD:";
+  const defectLine = activeBug?.line_number || 1;
+  const originalLine = removedLines[0] || (activeBug?.code_snippet ? activeBug.code_snippet.split('\n')[0] : `// Original line at ${defectLine}`);
+  const fixedLine = addedLines[0] || `// Proposed fix patch for ${activeBug?.title || 'defect'}`;
 
   const handleCopyPatch = () => {
     navigator.clipboard.writeText(diffText || `${originalLine}\n-->\n${fixedLine}`);
@@ -247,9 +247,8 @@ export default function OverviewFindingsPreview({
                   Before · test FAILED
                 </span>
                 <div className="space-y-0.5 text-[11px]">
-                  <div className="text-[#991B1B]">
-                    <span className="text-[#991B1B]/70 mr-2">{defectLine - 1}</span>
-                    <span>def apply_discount(total):</span>
+                  <div className="text-[#991B1B]/70 truncate text-[10px] mb-1">
+                    {activeBug.file_path || 'source.py'}
                   </div>
                   <div className="text-[#991B1B] font-bold">
                     <span className="text-[#991B1B]/70 mr-2">{defectLine}</span>
@@ -261,12 +260,11 @@ export default function OverviewFindingsPreview({
               {/* AFTER Box */}
               <div className="rounded-lg border border-[#A6F4C5] bg-[#E7F8EE] p-3 text-[#14753B]">
                 <span className="text-[10px] font-bold block mb-1.5 uppercase tracking-wider">
-                  After · 14 of 14 tests PASSED
+                  After · {activeBug.fix_verified ? "Sandbox Verified" : "Proposed Fix"}
                 </span>
                 <div className="space-y-0.5 text-[11px]">
-                  <div className="text-[#166534]">
-                    <span className="text-[#166534]/70 mr-2">{defectLine - 1}</span>
-                    <span>def apply_discount(total):</span>
+                  <div className="text-[#166534]/70 truncate text-[10px] mb-1">
+                    {activeBug.file_path || 'source.py'}
                   </div>
                   <div className="text-[#166534] font-bold">
                     <span className="text-[#166534]/70 mr-2">{defectLine}</span>

@@ -71,7 +71,7 @@ export function generateSarifReport(runData) {
           driver: {
             name: "SentinelMesh Autonomous Testing Swarm",
             semanticVersion: "2.0.0",
-            informationUri: "http://localhost:8000",
+            informationUri: typeof window !== "undefined" ? window.location.origin : "https://github.com/HARIESHPERIASAMY/S5_Mini_Project",
             rules
           }
         },
