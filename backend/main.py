@@ -196,7 +196,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Health & Metrics Endpoints
 # ---------------------------------------------------------------------------
 
-@app.get("/healthz", tags=["System"])
+@app.api_route("/healthz", methods=["GET", "HEAD"], tags=["System"])
 def healthz():
     """Liveness probe for cloud platform healthcheck."""
     return {
@@ -208,7 +208,7 @@ def healthz():
     }
 
 
-@app.get("/readyz", tags=["System"])
+@app.api_route("/readyz", methods=["GET", "HEAD"], tags=["System"])
 def readyz(db: Session = Depends(get_db)):
     """Readiness probe checking database connectivity."""
     try:
@@ -965,7 +965,7 @@ if FRONTEND_DIST.exists():
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(assets_dir), html=False), name="static_assets")
 
-    @app.get("/{full_path:path}", include_in_schema=False)
+    @app.api_route("/{full_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
     async def serve_spa_frontend(request: Request, full_path: str):
         # Do not catch unhandled API, WebSocket, or docs routes
         if full_path.startswith("api/") or full_path.startswith("ws/") or full_path in ("docs", "openapi.json", "redoc"):
