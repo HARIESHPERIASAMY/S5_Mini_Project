@@ -125,6 +125,27 @@ npm run verify-all # Runs complete automated validation suite (D1 - D7)
 
 ---
 
+## 🚀 Production Deployment
+
+SentinelMesh is production-ready with multi-stage Docker builds, persistent volume storage, and native WebSocket support. Detailed deployment guides are in [`DEPLOYMENT.md`](DEPLOYMENT.md).
+
+### 1-Command Local or VPS Production Run (Docker Compose)
+```bash
+docker compose up -d --build
+# Access live dashboard at http://localhost:8000
+# Health check: http://localhost:8000/healthz
+```
+
+### Supported Production Cloud Platforms
+| Hosting Option | Architecture | Persistent Disk | WebSocket Support | Configuration File |
+| :--- | :--- | :---: | :---: | :--- |
+| **Render** | Web Service (Docker) | Yes (`/app/data`) | Native | [`render.yaml`](render.yaml) |
+| **Railway** | Docker Container | Yes (`/app/data`) | Native | [`railway.json`](railway.json) |
+| **Vercel + Backend** | Decoupled SPA + API | Backend only | Handled by backend | [`vercel.json`](vercel.json) |
+| **Self-Hosted VPS** | Docker Compose | Yes (`sentinelmesh_data`) | Native | [`docker-compose.yml`](docker-compose.yml) |
+
+---
+
 ## 🧪 Testing & Verification
 
 SentinelMesh includes a comprehensive test suite for the platform itself (testing all 9 agents, AST mutation engine, sandbox execution, database models, and FastAPI endpoints):
